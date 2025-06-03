@@ -1,7 +1,7 @@
 {
-  "name": "{plugin-name}",
+  "name": "wordpress-search",
   "version": "1.0.0",
-  "description": "{Plugin Name} Plugin",
+  "description": "Wordpress Search Plugin",
   "author": "govwordpress@gov.bc.ca",
   "license": "GPL-2.0-or-later",
   "keywords": [
@@ -11,26 +11,28 @@
     "Plugin",
     "Gutenberg"
   ],
-  "homepage": "{plugin-url}#readme",
+  "homepage": "https://github.com/bcgov/wordpress-search#readme",
   "repository": {
     "type": "git",
-    "url": "git+{plugin-url}.git"
+    "url": "git+https://github.com/bcgov/wordpress-search.git"
   },
   "bugs": {
-    "url": "{plugin-url}#readme",
+    "url": "https://github.com/bcgov/wordpress-search#readme",
     "email": "govwordpress@gov.bc.ca"
   },
   "engines": {
-    "npm": ">= 10.7.0",
-    "node": ">=20.15.1"
+    "npm": ">= 10.9.2",
+    "node": ">=22.16.0"
   },
   "main": "index.js",
   "devDependencies": {
     "@bcgov/wordpress-eslint": "git+https://github.com/bcgov/wordpress-eslint.git#semver:1.x",
     "@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",
-    "@wordpress/scripts": "^28.6.0"
+    "@wordpress/scripts": "^30.17.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "npm": "^11.4.1"
+  },
   "scripts": {
     "start": "wp-scripts start",
     "build": "wp-scripts build",

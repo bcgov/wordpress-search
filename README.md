@@ -27,9 +27,9 @@ This repository provides a modern, well-structured template for developing WordP
 
 2. **Update plugin information**
    - Edit `plugin.php` and replace the placeholder values:
-     - `{Plugin Name}` with your plugin name
-     - `{plugin-name}` with your plugin slug
-     - `{PluginName}` with your plugin's namespace
+     - `Wordpress Search` with your plugin name
+     - `wordpress-search` with your plugin slug
+     - `WordPressSearch` with your plugin's namespace
      - Update the description and other metadata
 
 3. **Install dependencies**
@@ -40,7 +40,7 @@ This repository provides a modern, well-structured template for developing WordP
 4. **Development**
    - Place your PHP classes in the `src` directory
    - Create new blocks in the `Blocks` directory
-   - Use the provided namespace structure: `Bcgov\{PluginName}\{ClassName}`
+   - Use the provided namespace structure: `Bcgov\WordPressSearch\{ClassName}`
 
 5. **Building blocks**
    ```bash
