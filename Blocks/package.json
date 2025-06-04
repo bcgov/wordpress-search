@@ -1,7 +1,7 @@
 {
-	"name": "{plugin-name}-blocks",
+	"name": "wordpress-search-blocks",
 	"version": "1.0.0",
-	"description": "{Plugin Name} Blocks",
+	"description": "Wordpress Search Blocks",
 	"author": "govwordpress@gov.bc.ca",
 	"license": "GPL-2.0-or-later",
 	"main": "build/index.js",

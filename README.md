@@ -1,94 +1,63 @@
-# WordPress Plugin Template
+# WordPress Search Plugin
 
-This repository provides a modern, well-structured template for developing WordPress plugins. It's designed to help developers quickly bootstrap new WordPress plugins with best practices, modern development tools, and a standardized structure.
+A powerful and customizable search plugin for WordPress that enhances the default search functionality with advanced features and improved user experience.
 
-## Features
+## Description
 
-- Modern development environment with Composer for PHP dependencies
-- Block editor (Gutenberg) support with built-in block registration
-- ESLint configuration for JavaScript/TypeScript development
-- GitHub Actions workflows for automated testing and deployment
-- Standardized plugin structure following WordPress coding standards
-- Apache 2.0 License
+The WordPress Search plugin provides an enhanced search experience for WordPress websites. It offers customizable search blocks, improved search results, and better performance compared to the default WordPress search.
 
-## Prerequisites
 
-- PHP 7.4 or higher
+## Requirements
+
 - WordPress 6.4.4 or higher
-- Composer
-- Node.js and npm (for block development)
+- PHP 7.4 or higher
 
-## Getting Started
+## Installation
 
-1. **Create a new repository from this template**
-   - Click the "Use this template" button on GitHub
-   - Name your new repository
-   - Clone the new repository to your local machine
+1. Download the plugin files
+2. Upload the `wordpress-search` folder to the `/wp-content/plugins/` directory
+3. Activate the plugin through the 'Plugins' menu in WordPress
+4. Use the search blocks in your pages or posts
 
-2. **Update plugin information**
-   - Edit `plugin.php` and replace the placeholder values:
-     - `{Plugin Name}` with your plugin name
-     - `{plugin-name}` with your plugin slug
-     - `{PluginName}` with your plugin's namespace
-     - Update the description and other metadata
+## Usage
 
-3. **Install dependencies**
+## Development
+
+### Building from Source
+
+1. Clone the repository:
    ```bash
-   composer install
+   git clone https://github.com/bcgov/wordpress-search.git
    ```
 
-4. **Development**
-   - Place your PHP classes in the `src` directory
-   - Create new blocks in the `Blocks` directory
-   - Use the provided namespace structure: `Bcgov\{PluginName}\{ClassName}`
-
-5. **Building blocks**
+2. Install dependencies:
    ```bash
    npm install
+   ```
+
+3. Build the plugin:
+   ```bash
    npm run build
    ```
 
-## Project Structure
+### Running Tests
 
+The plugin includes PHPUnit tests to ensure functionality:
+
+```bash
+composer test
 ```
-├── Blocks/           # Gutenberg blocks
-├── src/             # PHP source files
-├── vendor/          # Composer dependencies
-├── workflows/       # GitHub Actions workflows
-├── plugin.php       # Main plugin file
-├── composer.json    # PHP dependencies
-└── package.json     # Node.js dependencies
-```
-
-## Development Guidelines
-
-1. **PHP Development**
-   - Follow PSR-4 autoloading standards
-   - Use namespaces for all classes
-   - Document your code with PHPDoc comments
-
-2. **Block Development**
-   - Create new blocks in the `Blocks` directory
-   - Use block.json for block registration
-   - Follow WordPress block development best practices
-
-3. **Testing**
-   - Write unit tests for your PHP code
-   - Test blocks in the WordPress block editor
-   - Ensure compatibility with WordPress versions specified in plugin.php
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
 
 ## License
 
-This template is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License Version 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
-For questions or issues, please create an issue in the repository.
+For support, please:
+- Open an issue in the GitHub repository
+- Contact the development team at govwordpress@gov.bc.ca
+
+## Credits
+
+Developed by the BC Government WordPress Team

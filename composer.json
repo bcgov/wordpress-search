@@ -1,6 +1,6 @@
 {
     "name": "bcgov/wordpress-plugin",
-    "description": "{Plugin Name} Plugin",
+    "description": "Wordpress Search Plugin",
     "version": "1.0.0",
     "type": "wordpress-plugin",
     "license": "Apache-2.0",
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-          "Bcgov\\{PluginName}\\": "src/"
+          "Bcgov\\WordPressSearch\\": "src/"
         }
     },
     "scripts": {
