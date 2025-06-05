@@ -17,7 +17,22 @@
  * @package WordPressSearch
  */
 
-
+/**
+ * Register custom block category for search blocks
+ */
+function register_search_block_category( $categories ) {
+    return array_merge(
+        array(
+            array(
+                'slug'  => 'search',
+                'title' => __( 'Search', 'wordpress-search' ),
+                'icon'  => 'search',
+            ),
+        ),
+        $categories
+    );
+}
+add_filter( 'block_categories_all', 'register_search_block_category', 10, 1 );
 
 /**
  * The function register_plugin_blocks registers block types from metadata in block.json files
