@@ -23,7 +23,7 @@
  * @param array $categories Array of block categories.
  * @return array Modified array of block categories.
  */
-function register_search_block_category( $categories ) {
+function bcgovwp_register_search_block_category( $categories ) {
     return array_merge(
         array(
             array(
@@ -35,7 +35,7 @@ function register_search_block_category( $categories ) {
         $categories
     );
 }
-add_filter( 'block_categories_all', 'register_search_block_category', 10, 1 );
+add_filter( 'block_categories_all', 'bcgovwp_register_search_block_category', 10, 1 );
 
 /**
  * The function register_plugin_blocks registers block types from metadata in block.json files
