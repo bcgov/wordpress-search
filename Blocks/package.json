@@ -4,9 +4,14 @@
 	"description": "Wordpress Search Blocks",
 	"author": "govwordpress@gov.bc.ca",
 	"license": "GPL-2.0-or-later",
+	"engines": {
+		"npm": ">= 10.9.2",
+		"node": ">=22.16.0"
+	},
 	"main": "build/index.js",
 	"scripts": {
 		"build:production": "npm ci && npm run fix:js && npm run fix:css && npm run fix:md && npm run test:unit && npm run build",
+		"build:search": "wp-scripts build --webpack-src-dir=src/Search --output-path=build/Search",
 		"build": "wp-scripts build",
 		"format": "wp-scripts format",
 		"lint:css": "wp-scripts lint-style",
@@ -14,6 +19,7 @@
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
 		"start": "wp-scripts start",
+		"start:search": "wp-scripts start --webpack-src-dir=src/Search --output-path=build/Search",
 		"fix:css": "wp-scripts lint-style 'src/**/*.scss' --fix --allow-empty-input",
 		"fix:js": "wp-scripts lint-js --fix",
 		"fix:md": "wp-scripts lint-md-docs --fix",
@@ -21,12 +27,13 @@
 		"test:e2e": "wp-scripts test-e2e --passWithNoTests",
 		"test:unit": "wp-scripts test-unit-js --passWithNoTests",
 		"test": "npm run test:unit"
-	
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.3.0",
 		"@bcgov/wordpress-eslint": "git+https://github.com/bcgov/wordpress-eslint.git#semver:1.x",
-		"@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",	
+		"@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",
+		"@wordpress/scripts": "^30.3.0",
+		"ajv": "^8.17.1",
+		"ajv-keywords": "^5.1.0",
 		"prettier": "^2.2.0"
 	},
 	"dependencies": {

@@ -1,0 +1,15 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wordpress-search/search-bar",
+	"version": "1.0.0",
+	"title": "Search Bar",
+	"category": "search",
+	"icon": "search",
+	"description": "A modular search-bar block that connects to the search-bar page template",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"viewStyle": "file:./view.css",
+	"viewScript":"file:./view.js",
+	"render": "file:./render.php"
+}
