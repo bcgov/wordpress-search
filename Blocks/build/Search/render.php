@@ -1,6 +1,6 @@
 <?php
 /**
- * search-bar Block Render Template
+ * Search Bar Block Render Template.
  *
  * This template renders the frontend search-bar block with a form that integrates with WordPress's native search-bar functionality.
  * When submitted, the form redirects to WordPress's search-bar results page with the search-bar query.
@@ -9,14 +9,14 @@
  * @subpackage search-bar
  */
 
-namespace WordpressSearchPlugin\Searchbar;
+namespace Bcgov\WordpressSearchPlugin\Searchbar
 
 ?>
 <div class="wp-block-wordpress-search-search-bar">
     <div class="dswp-search-bar__container">
         <?php
         /**
-         * search-bar Form
+         * Search Bar Form.
          *
          * @param string role    Accessibility role attribute for screen readers
          * @param string method  GET method ensures search-bar query appears in URL
