@@ -12,7 +12,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import Edit from './edit';
 
 /**
- * Register search-bar Block
+ * Register Search Block
  *
  * Registers a custom search-bar block with WordPress's block system.
  * This block uses dynamic rendering, meaning the frontend output
@@ -25,7 +25,7 @@ import Edit from './edit';
  *
  * @see /render.php for frontend output
  */
-registerBlockType( 'design-system-wordpress-plugin/search-bar', {
+registerBlockType( 'wordpress-search/search-bar', {
 	/**
 	 * Edit Component
 	 * Provides the editor interface for the block

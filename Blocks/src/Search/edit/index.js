@@ -12,7 +12,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import '../editor.scss';
 
 /**
- * search-bar Block Edit Component
+ * Search Block Edit Component
  *
  * Renders the search-bar block interface in the WordPress block editor.
  * This is a static preview of how the search-bar block will appear on the frontend.
@@ -26,32 +26,44 @@ export default function Edit() {
 
 	return (
 		<div { ...blockProps }>
-			<div className="dswp-search-bar__container dswp-search-bar__container--editor">
-				<div className="dswp-search-bar__preview-overlay">
-					<form
-						role="search-bar"
-						method="get"
-						className="dswp-search-bar__form"
-					>
-						<div className="dswp-search-bar__input-container">
+			<div className="dswp-search-bar__container">
+				<form
+					role="search-bar"
+					method="get"
+					className="dswp-search-bar__form"
+				>
+					<div className="dswp-search-bar__input-container">
+						<div className="dswp-search-bar__input-wrapper">
+							<div className="dswp-search-bar__search-icon">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+									<circle cx="11" cy="11" r="8"></circle>
+									<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+								</svg>
+							</div>
 							<input
-								type="search-bar"
+								type="search"
 								name="s"
-								placeholder="search-bar..."
+								placeholder="Search term"
 								className="dswp-search-bar__input"
 								disabled
 								required
 							/>
-							<button
-								type="submit"
-								className="dswp-search-bar__button dswp-search-bar__button--primary dswp-search-bar__button--right"
-								disabled
-							>
-								search-bar
+							<button type="button" className="dswp-search-bar__clear-button">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+									<line x1="18" y1="6" x2="6" y2="18"></line>
+									<line x1="6" y1="6" x2="18" y2="18"></line>
+								</svg>
 							</button>
 						</div>
-					</form>
-				</div>
+						<button
+							type="submit"
+							className="dswp-search-bar__button dswp-search-bar__button--primary"
+							disabled
+						>
+							Search
+						</button>
+					</div>
+				</form>
 			</div>
 		</div>
 	);

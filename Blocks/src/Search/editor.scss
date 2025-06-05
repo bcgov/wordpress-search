@@ -1,27 +1,46 @@
 /**
- * search-bar Block Editor Styles
+ * Search Block Editor Styles
  * 
  * These styles are specifically for the block editor interface.
  * The base class follows WordPress's block naming convention.
  */
-.wp-block-design-system-wordpress-plugin-search-bar {
+.wp-block-wordpress-search-search-bar {
     /**
      * Input Container
      * Creates a flex layout for the search-bar input and button
      */
     .dswp-search-bar__input-container {
-        display: flex;
-        gap: 10px;               
-        align-items: center;     
-        margin: 1em 0;           
+        display: flex;        
+        gap: 8px;            
+        align-items: center;  
+        margin: 1em 0;
+        max-width: 800px;
+        position: relative;
     }
 
-    /**
-     * Editor Container
-     * Adds a distinct background to indicate editor preview mode
-     */
-    .dswp-search-bar__container {
-        background: #e3e3e3f5;   
+    .dswp-search-bar__input-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .dswp-search-bar__search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        pointer-events: none;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        svg {
+            width: 20px;
+            height: 20px;
+        }
     }
 
     /**
@@ -29,17 +48,70 @@
      * Styles for the search-bar input element
      */
     .dswp-search-bar__input {
-        flex: 1;                 
-        padding: 8px 12px;       
-        border: 1px solid #ddd;  
-        border-radius: 4px;      
-        font-size: 16px;         
-        min-width: 200px;        
-        transition: border-color 0.2s;
+        width: 100%;
+        padding: 12px 40px 12px 40px;
+        border: 1px solid #ddd;
+        border-radius: 4px;    
+        font-size: 16px;       
+        transition: all 0.2s ease;
+        background: #fff;
+
+        /* Hide default clear button in webkit browsers */
+        &::-webkit-search-cancel-button {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        /* Hide default clear button in IE */
+        &::-ms-clear {
+            display: none;
+        }
 
         &:focus {
             outline: none;
-            border-color: #007bff;  /* Blue highlight on focus */
+            border-color: #003366;
+            box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.1);
+        }
+
+        &::placeholder {
+            color: #666;
+        }
+
+        &:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    }
+
+    .dswp-search-bar__clear-button {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+            opacity: 1;
+        }
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
     }
 
@@ -48,20 +120,32 @@
      * Styles for the search-bar submit button
      */
     .dswp-search-bar__button {
-        padding: 8px 16px;        
-        border: none;             
-        border-radius: 4px;       
-        cursor: pointer;          
-        font-size: 16px;          
-        transition: all 0.2s;     
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        white-space: nowrap;
 
         /**
          * Primary Button Variant
          * Used for the main search-bar button
          */
         &--primary {
-            background-color: #45454559;  /* Semi-transparent gray for editor */
+            background-color: #003366;
             color: white;
+
+            &:hover:not(:disabled) {
+                background-color: #002952;
+            }
+
+            &:disabled {
+                background-color: #667b8f;
+                cursor: not-allowed;
+                opacity: 0.7;
+            }
         }
 
         /**

@@ -5,14 +5,14 @@
  * This template renders the frontend search-bar block with a form that integrates with WordPress's native search-bar functionality.
  * When submitted, the form redirects to WordPress's search-bar results page with the search-bar query.
  *
- * @package DesignSystemWordPressPlugin
+ * @package WordpressSearchWordPressPlugin
  * @subpackage search-bar
  */
 
-namespace DesignSystemWordPressPlugin\Searchbar;
+namespace WordpressSearchPlugin\Searchbar;
 
 ?>
-<div class="wp-block-design-system-wordpress-plugin-search-bar">
+<div class="wp-block-wordpress-search-search-bar">
     <div class="dswp-search-bar__container">
         <?php
         /**
@@ -23,14 +23,15 @@ namespace DesignSystemWordPressPlugin\Searchbar;
          * @param string action  Redirects to site root where WordPress handles the search-bar
          */
         ?>
-        <form role="search" method="get" class="dswp-search-bar__form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+        <form role="search-bar" method="get" class="dswp-search-bar__form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
             <div class="dswp-search-bar__input-container">
-                <div class="dswp-search-bar__search-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
                 <div class="dswp-search-bar__input-wrapper">
+                    <div class="dswp-search-bar__search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
                     <input
                         type="search"
                         name="s"
@@ -39,9 +40,10 @@ namespace DesignSystemWordPressPlugin\Searchbar;
                         value="<?php echo esc_attr( get_search_query() ); ?>"
                         required
                     />
-                    <button type="button" class="dswp-search-bar__clear-button" aria-label="Clear search">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <button type="button" class="dswp-search-bar__clear-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
                 </div>

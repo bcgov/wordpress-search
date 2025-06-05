@@ -19,6 +19,9 @@
 
 /**
  * Register custom block category for search blocks
+ *
+ * @param array $categories Array of block categories.
+ * @return array Modified array of block categories.
  */
 function register_search_block_category( $categories ) {
     return array_merge(

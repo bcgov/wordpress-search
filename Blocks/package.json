@@ -19,6 +19,7 @@
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
 		"start": "wp-scripts start",
+		"start:search": "wp-scripts start --webpack-src-dir=src/Search --output-path=build/Search",
 		"fix:css": "wp-scripts lint-style 'src/**/*.scss' --fix --allow-empty-input",
 		"fix:js": "wp-scripts lint-js --fix",
 		"fix:md": "wp-scripts lint-md-docs --fix",
