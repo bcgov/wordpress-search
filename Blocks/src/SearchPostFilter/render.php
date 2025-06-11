@@ -6,11 +6,11 @@
  * This file handles the server-side rendering of the post type filter buttons,
  * managing the active states and URL generation for filtering.
  *
- * @package DesignSystemWordPressPlugin
+ * @package SearchPlugin
  * @subpackage SearchPosTypetFilter
  */
 
-namespace DesignSystemWordPressPlugin\SearchPosTypetFilter;
+namespace Bcgov\WordpressSearch\SearchPosTypetFilter;
 
 /**
  * Fetch all available public post types from WordPress
