@@ -42,6 +42,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+// List of internal WordPress post types to exclude
+
+const EXCLUDED_POST_TYPES = ['attachment', 'wp_block', 'wp_template', 'wp_template_part', 'wp_navigation', 'wp_font_face', 'wp_font_family', 'menu_item', 'wp_global_styles', 'revision', 'customize_changeset', 'nav_menu_item', 'custom_css', 'oembed_cache'];
+
+// Special handling for document post type metadata fields
+const DOCUMENT_METADATA_FIELDS = ['document_file_id', 'document_file_name', 'document_file_size', 'document_file_type', 'document_file_url'];
 function Edit({
   attributes,
   setAttributes
@@ -52,59 +58,74 @@ function Edit({
   const [groupedOptions, setGroupedOptions] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
   const [isLoading, setIsLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(true);
 
-  // Fetch post types
+  // Fetch post types with expanded query
   const {
     postTypes
   } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_0__.useSelect)(select => {
+    const types = select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_2__.store).getPostTypes({
+      per_page: -1
+    });
+    const filteredTypes = types?.filter(type => {
+      const isExcluded = EXCLUDED_POST_TYPES.includes(type.slug);
+      const hasRestSupport = Boolean(type.rest_base) && Boolean(type.rest_namespace);
+      const hasCustomFields = type.supports?.['custom-fields'] === true;
+      return !isExcluded && hasRestSupport && hasCustomFields;
+    });
     return {
-      postTypes: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_2__.store).getPostTypes({
-        per_page: -1
-      })
+      postTypes: filteredTypes
     };
   }, []);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
     async function fetchMetadataForPostTypes() {
-      if (!postTypes) return;
+      if (!postTypes) {
+        return;
+      }
       const options = [];
 
       // For each post type, fetch its metadata
       for (const postType of postTypes) {
-        // Skip if post type is not valid or doesn't have REST API support
-        if (!postType?.slug || postType.slug === 'attachment' || postType.slug === 'wp_block' || postType.slug === 'wp_template' || postType.slug === 'wp_template_part' || postType.slug === 'wp_navigation' || postType.slug === 'wp_font_face' || postType.slug === 'menu_item' || postType.slug === 'wp_global_styles' ||
-        // Add wp_global_styles to excluded types
-        !postType.rest_base || !postType.rest_namespace) continue;
         try {
-          // Construct the correct REST API path
-          const apiPath = postType.rest_namespace === 'wp/v2' ? `/wp/v2/${postType.rest_base}` // Standard WP post types
-          : `/${postType.rest_namespace}/${postType.rest_base}`; // Custom namespaced endpoints
-
-          // Use apiFetch to handle the REST API request
-          const posts = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_7___default()({
-            path: (0,_wordpress_url__WEBPACK_IMPORTED_MODULE_6__.addQueryArgs)(apiPath, {
+          let metaKeys = [];
+          if (postType.slug === 'document') {
+            // For documents, use the predefined metadata fields
+            metaKeys = DOCUMENT_METADATA_FIELDS;
+            options.push({
+              label: postType.labels.singular_name,
+              options: metaKeys.map(metaKey => ({
+                label: metaKey,
+                value: `${postType.slug}:${metaKey}`
+              }))
+            });
+          } else {
+            // For other post types, use the standard REST API
+            const apiPath = postType.rest_namespace === 'wp/v2' ? `/wp/v2/${postType.rest_base}` : `/${postType.rest_namespace}/${postType.rest_base}`;
+            const queryParams = {
               context: 'edit',
-              per_page: 1
-            })
-          });
-          if (Array.isArray(posts) && posts.length > 0) {
-            const samplePost = posts[0];
-            const metaKeys = Object.keys(samplePost.meta || {});
-            if (metaKeys.length > 0) {
-              // Create a group for this post type
-              options.push({
-                label: postType.labels.singular_name,
-                options: metaKeys.map(metaKey => ({
-                  label: metaKey,
-                  value: `${postType.slug}:${metaKey}`
-                }))
-              });
+              per_page: 1,
+              orderby: 'date',
+              order: 'desc'
+            };
+            const fullPath = (0,_wordpress_url__WEBPACK_IMPORTED_MODULE_6__.addQueryArgs)(apiPath, queryParams);
+            const posts = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_7___default()({
+              path: fullPath,
+              parse: true
+            });
+            if (Array.isArray(posts) && posts.length > 0) {
+              const samplePost = posts[0];
+              metaKeys = Object.keys(samplePost.metadata || samplePost.meta || {});
+              if (metaKeys.length > 0) {
+                options.push({
+                  label: postType.labels.singular_name,
+                  options: metaKeys.map(metaKey => ({
+                    label: metaKey,
+                    value: `${postType.slug}:${metaKey}`
+                  }))
+                });
+              }
             }
           }
         } catch (error) {
           console.error(`Error fetching metadata for ${postType.slug}:`, error);
-          // Only log the full error in development
-          if (true) {
-            console.debug('Full error:', error);
-          }
         }
       }
       setGroupedOptions(options);
@@ -141,8 +162,18 @@ function Edit({
           onChange: value => setAttributes({
             selectedMetadata: value
           })
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("p", {
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('No metadata fields found for any post types.', 'wordpress-search')
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("p", {
+          children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('No metadata fields found. Make sure your post types:', 'wordpress-search'), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)("ul", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('Have custom fields enabled', 'wordpress-search')
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('Have REST API support', 'wordpress-search')
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('Have at least one post with meta values', 'wordpress-search')
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("li", {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('Have meta fields registered with show_in_rest enabled', 'wordpress-search')
+            })]
+          })]
         })
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
