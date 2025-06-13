@@ -28,18 +28,20 @@ const EXCLUDED_POST_TYPES = [
     'oembed_cache'
 ];
 
-// Special handling for document post type metadata fields
-const DOCUMENT_METADATA_FIELDS = [
+// List of metadata fields to exclude
+const EXCLUDED_METADATA_FIELDS = [
     'document_file_id',
     'document_file_name',
     'document_file_size',
     'document_file_type',
-    'document_file_url'
+    'document_file_url',
+    'footnotes',
+    'show_inpage_nav'
 ];
 
 export default function Edit({ attributes, setAttributes }) {
     const { selectedMetadata } = attributes;
-    const [groupedOptions, setGroupedOptions] = useState([]);
+    const [metadataOptions, setMetadataOptions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // Fetch post types with expanded query
@@ -65,65 +67,51 @@ export default function Edit({ attributes, setAttributes }) {
                 return;
             }
 
-            const options = [];
+            const options = new Set(); // Use Set to avoid duplicate metadata fields
             
             // For each post type, fetch its metadata
             for (const postType of postTypes) {
                 try {
-                    let metaKeys = [];
+                    // For other post types, use the standard REST API
+                    const apiPath = postType.rest_namespace === 'wp/v2' 
+                        ? `/wp/v2/${postType.rest_base}`
+                        : `/${postType.rest_namespace}/${postType.rest_base}`;
                     
-                    if (postType.slug === 'document') {
-                        // For documents, use the predefined metadata fields
-                        metaKeys = DOCUMENT_METADATA_FIELDS;
-                        
-                        options.push({
-                            label: postType.labels.singular_name,
-                            options: metaKeys.map(metaKey => ({
-                                label: metaKey,
-                                value: `${postType.slug}:${metaKey}`
-                            }))
-                        });
-                    } else {
-                        // For other post types, use the standard REST API
-                        const apiPath = postType.rest_namespace === 'wp/v2' 
-                            ? `/wp/v2/${postType.rest_base}`
-                            : `/${postType.rest_namespace}/${postType.rest_base}`;
-                        
-                        const queryParams = {
-                            context: 'edit',
-                            per_page: 1,
-                            orderby: 'date',
-                            order: 'desc'
-                        };
-                        
-                        const fullPath = addQueryArgs(apiPath, queryParams);
+                    const queryParams = {
+                        context: 'edit',
+                        per_page: 1,
+                        orderby: 'date',
+                        order: 'desc'
+                    };
+                    
+                    const fullPath = addQueryArgs(apiPath, queryParams);
 
-                        const posts = await apiFetch({
-                            path: fullPath,
-                            parse: true
-                        });
+                    const posts = await apiFetch({
+                        path: fullPath,
+                        parse: true
+                    });
 
-                        if (Array.isArray(posts) && posts.length > 0) {
-                            const samplePost = posts[0];
-                            metaKeys = Object.keys(samplePost.metadata || samplePost.meta || {});
+                    if (Array.isArray(posts) && posts.length > 0) {
+                        const samplePost = posts[0];
+                        const metaKeys = Object.keys(samplePost.metadata || samplePost.meta || {});
 
-                            if (metaKeys.length > 0) {
-                                options.push({
-                                    label: postType.labels.singular_name,
-                                    options: metaKeys.map(metaKey => ({
-                                        label: metaKey,
-                                        value: `${postType.slug}:${metaKey}`
-                                    }))
+                        metaKeys
+                            .filter(metaKey => !EXCLUDED_METADATA_FIELDS.includes(metaKey))
+                            .forEach(metaKey => {
+                                options.add({
+                                    label: metaKey,
+                                    value: `${postType.slug}:${metaKey}`
                                 });
-                            }
-                        }
+                            });
                     }
                 } catch (error) {
                     console.error(`Error fetching metadata for ${postType.slug}:`, error);
                 }
             }
 
-            setGroupedOptions(options);
+            // Convert Set to Array and sort alphabetically by label
+            const sortedOptions = Array.from(options).sort((a, b) => a.label.localeCompare(b.label));
+            setMetadataOptions(sortedOptions);
             setIsLoading(false);
         }
 
@@ -134,13 +122,8 @@ export default function Edit({ attributes, setAttributes }) {
     const getSelectedMetadataLabel = () => {
         if (!selectedMetadata) return '';
         
-        for (const group of groupedOptions) {
-            const found = group.options.find(option => option.value === selectedMetadata);
-            if (found) {
-                return `${group.label}: ${found.label}`;
-            }
-        }
-        return selectedMetadata;
+        const found = metadataOptions.find(option => option.value === selectedMetadata);
+        return found ? found.label : selectedMetadata;
     };
 
     return (
@@ -155,13 +138,13 @@ export default function Edit({ attributes, setAttributes }) {
                             <Spinner />
                             {__('Loading metadata fields...', 'wordpress-search')}
                         </Placeholder>
-                    ) : groupedOptions.length > 0 ? (
+                    ) : metadataOptions.length > 0 ? (
                         <SelectControl
                             label={__('Select Metadata Field', 'wordpress-search')}
                             value={selectedMetadata}
                             options={[
                                 { label: __('Select a field...', 'wordpress-search'), value: '' },
-                                ...groupedOptions
+                                ...metadataOptions
                             ]}
                             onChange={(value) => setAttributes({ selectedMetadata: value })}
                         />

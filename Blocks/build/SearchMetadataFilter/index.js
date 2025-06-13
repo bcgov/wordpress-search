@@ -46,8 +46,8 @@ __webpack_require__.r(__webpack_exports__);
 
 const EXCLUDED_POST_TYPES = ['attachment', 'wp_block', 'wp_template', 'wp_template_part', 'wp_navigation', 'wp_font_face', 'wp_font_family', 'menu_item', 'wp_global_styles', 'revision', 'customize_changeset', 'nav_menu_item', 'custom_css', 'oembed_cache'];
 
-// Special handling for document post type metadata fields
-const DOCUMENT_METADATA_FIELDS = ['document_file_id', 'document_file_name', 'document_file_size', 'document_file_type', 'document_file_url'];
+// List of metadata fields to exclude
+const EXCLUDED_METADATA_FIELDS = ['document_file_id', 'document_file_name', 'document_file_size', 'document_file_type', 'document_file_url', 'footnotes', 'show_inpage_nav'];
 function Edit({
   attributes,
   setAttributes
@@ -55,7 +55,7 @@ function Edit({
   const {
     selectedMetadata
   } = attributes;
-  const [groupedOptions, setGroupedOptions] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  const [metadataOptions, setMetadataOptions] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
   const [isLoading, setIsLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(true);
 
   // Fetch post types with expanded query
@@ -80,55 +80,42 @@ function Edit({
       if (!postTypes) {
         return;
       }
-      const options = [];
+      const options = new Set(); // Use Set to avoid duplicate metadata fields
 
       // For each post type, fetch its metadata
       for (const postType of postTypes) {
         try {
-          let metaKeys = [];
-          if (postType.slug === 'document') {
-            // For documents, use the predefined metadata fields
-            metaKeys = DOCUMENT_METADATA_FIELDS;
-            options.push({
-              label: postType.labels.singular_name,
-              options: metaKeys.map(metaKey => ({
+          // For other post types, use the standard REST API
+          const apiPath = postType.rest_namespace === 'wp/v2' ? `/wp/v2/${postType.rest_base}` : `/${postType.rest_namespace}/${postType.rest_base}`;
+          const queryParams = {
+            context: 'edit',
+            per_page: 1,
+            orderby: 'date',
+            order: 'desc'
+          };
+          const fullPath = (0,_wordpress_url__WEBPACK_IMPORTED_MODULE_6__.addQueryArgs)(apiPath, queryParams);
+          const posts = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_7___default()({
+            path: fullPath,
+            parse: true
+          });
+          if (Array.isArray(posts) && posts.length > 0) {
+            const samplePost = posts[0];
+            const metaKeys = Object.keys(samplePost.metadata || samplePost.meta || {});
+            metaKeys.filter(metaKey => !EXCLUDED_METADATA_FIELDS.includes(metaKey)).forEach(metaKey => {
+              options.add({
                 label: metaKey,
                 value: `${postType.slug}:${metaKey}`
-              }))
+              });
             });
-          } else {
-            // For other post types, use the standard REST API
-            const apiPath = postType.rest_namespace === 'wp/v2' ? `/wp/v2/${postType.rest_base}` : `/${postType.rest_namespace}/${postType.rest_base}`;
-            const queryParams = {
-              context: 'edit',
-              per_page: 1,
-              orderby: 'date',
-              order: 'desc'
-            };
-            const fullPath = (0,_wordpress_url__WEBPACK_IMPORTED_MODULE_6__.addQueryArgs)(apiPath, queryParams);
-            const posts = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_7___default()({
-              path: fullPath,
-              parse: true
-            });
-            if (Array.isArray(posts) && posts.length > 0) {
-              const samplePost = posts[0];
-              metaKeys = Object.keys(samplePost.metadata || samplePost.meta || {});
-              if (metaKeys.length > 0) {
-                options.push({
-                  label: postType.labels.singular_name,
-                  options: metaKeys.map(metaKey => ({
-                    label: metaKey,
-                    value: `${postType.slug}:${metaKey}`
-                  }))
-                });
-              }
-            }
           }
         } catch (error) {
           console.error(`Error fetching metadata for ${postType.slug}:`, error);
         }
       }
-      setGroupedOptions(options);
+
+      // Convert Set to Array and sort alphabetically by label
+      const sortedOptions = Array.from(options).sort((a, b) => a.label.localeCompare(b.label));
+      setMetadataOptions(sortedOptions);
       setIsLoading(false);
     }
     fetchMetadataForPostTypes();
@@ -137,13 +124,8 @@ function Edit({
   // Get the current selected metadata label for display
   const getSelectedMetadataLabel = () => {
     if (!selectedMetadata) return '';
-    for (const group of groupedOptions) {
-      const found = group.options.find(option => option.value === selectedMetadata);
-      if (found) {
-        return `${group.label}: ${found.label}`;
-      }
-    }
-    return selectedMetadata;
+    const found = metadataOptions.find(option => option.value === selectedMetadata);
+    return found ? found.label : selectedMetadata;
   };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_5__.InspectorControls, {
@@ -152,13 +134,13 @@ function Edit({
         initialOpen: true,
         children: isLoading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Placeholder, {
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Spinner, {}), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('Loading metadata fields...', 'wordpress-search')]
-        }) : groupedOptions.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
+        }) : metadataOptions.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('Select Metadata Field', 'wordpress-search'),
           value: selectedMetadata,
           options: [{
             label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)('Select a field...', 'wordpress-search'),
             value: ''
-          }, ...groupedOptions],
+          }, ...metadataOptions],
           onChange: value => setAttributes({
             selectedMetadata: value
           })
