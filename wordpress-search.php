@@ -93,11 +93,14 @@ function handle_metadata_filtering( $query ) {
 
     // If we have metadata filters, modify the query
     if ( ! empty( $metadata_filters ) ) {
-        // Ensure we're querying the document post type
+        // Determine the post type from the selected metadata
+        $target_post_type = get_post_type_from_metadata_filters();
+        
+        // Ensure we're querying the correct post type
         $current_post_type = $query->get( 'post_type' );
         if ( empty( $current_post_type ) || $current_post_type === 'post' ) {
-            // If no post type is set or it's set to 'post', change it to 'document'
-            $query->set( 'post_type', 'document' );
+            // If no post type is set or it's set to 'post', change it to the target post type
+            $query->set( 'post_type', $target_post_type );
         }
         $meta_query = array();
         
@@ -107,21 +110,31 @@ function handle_metadata_filtering( $query ) {
         }
         
         foreach ( $metadata_filters as $field_name => $values ) {
+            // Validate field name and values
+            if ( empty( $field_name ) || empty( $values ) ) {
+                continue;
+            }
+            
             // Try to find the actual meta key in the database
             $actual_meta_key = find_actual_meta_key( $field_name );
+            
+            // Skip if we couldn't find a valid meta key
+            if ( empty( $actual_meta_key ) ) {
+                continue;
+            }
             
             if ( count( $values ) === 1 ) {
                 // Single value - simple comparison
                 $meta_query[] = array(
                     'key'     => $actual_meta_key,
-                    'value'   => $values[0],
+                    'value'   => sanitize_text_field( $values[0] ),
                     'compare' => '='
                 );
             } else {
                 // Multiple values - use IN comparison
                 $meta_query[] = array(
                     'key'     => $actual_meta_key,
-                    'value'   => $values,
+                    'value'   => array_map( 'sanitize_text_field', $values ),
                     'compare' => 'IN'
                 );
             }
@@ -146,6 +159,81 @@ function handle_metadata_filtering( $query ) {
     }
 }
 add_action( 'pre_get_posts', 'handle_metadata_filtering' );
+
+/**
+ * Get the post type from metadata filters by checking the page for block attributes
+ * 
+ * This function looks for SearchMetadataFilter blocks on the current page
+ * and extracts the post type from their selectedMetadata attributes.
+ */
+function get_post_type_from_metadata_filters() {
+    global $post;
+    
+    // Default to 'document' for backward compatibility
+    $default_post_type = 'document';
+    
+    // If we don't have a post object, return default
+    if ( ! $post || ! has_blocks( $post->post_content ) ) {
+        return $default_post_type;
+    }
+    
+    // Parse blocks to find SearchMetadataFilter blocks
+    $blocks = parse_blocks( $post->post_content );
+    
+    foreach ( $blocks as $block ) {
+        if ( $block['blockName'] === 'wordpress-search/search-metadata-filter' ) {
+            $selected_metadata = $block['attrs']['selectedMetadata'] ?? '';
+            
+            if ( ! empty( $selected_metadata ) && strpos( $selected_metadata, ':' ) !== false ) {
+                // Extract post type from "posttype:fieldname" format
+                $parts = explode( ':', $selected_metadata );
+                if ( count( $parts ) === 2 ) {
+                    return $parts[0]; // Return the post type
+                }
+            }
+        }
+        
+        // Check nested blocks recursively
+        if ( ! empty( $block['innerBlocks'] ) ) {
+            $nested_post_type = get_post_type_from_nested_blocks( $block['innerBlocks'] );
+            if ( $nested_post_type !== $default_post_type ) {
+                return $nested_post_type;
+            }
+        }
+    }
+    
+    return $default_post_type;
+}
+
+/**
+ * Helper function to recursively check nested blocks for SearchMetadataFilter blocks
+ */
+function get_post_type_from_nested_blocks( $blocks ) {
+    $default_post_type = 'document';
+    
+    foreach ( $blocks as $block ) {
+        if ( $block['blockName'] === 'wordpress-search/search-metadata-filter' ) {
+            $selected_metadata = $block['attrs']['selectedMetadata'] ?? '';
+            
+            if ( ! empty( $selected_metadata ) && strpos( $selected_metadata, ':' ) !== false ) {
+                $parts = explode( ':', $selected_metadata );
+                if ( count( $parts ) === 2 ) {
+                    return $parts[0];
+                }
+            }
+        }
+        
+        // Check further nested blocks
+        if ( ! empty( $block['innerBlocks'] ) ) {
+            $nested_post_type = get_post_type_from_nested_blocks( $block['innerBlocks'] );
+            if ( $nested_post_type !== $default_post_type ) {
+                return $nested_post_type;
+            }
+        }
+    }
+    
+    return $default_post_type;
+}
 
 /**
  * Find the actual meta key in the database
@@ -179,6 +267,12 @@ function find_actual_meta_key( $field_name ) {
              LIMIT 1",
             $variation
         ) );
+        
+        // Check for database errors
+        if ( $wpdb->last_error ) {
+            error_log( 'Database error in find_actual_meta_key: ' . $wpdb->last_error );
+            continue; // Try next variation
+        }
         
         if ( $exists > 0 ) {
             return $variation;

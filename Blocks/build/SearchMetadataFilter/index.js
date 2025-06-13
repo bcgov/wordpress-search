@@ -82,8 +82,8 @@ function Edit({
       }
       const options = new Set(); // Use Set to avoid duplicate metadata fields
 
-      // For each post type, fetch its metadata
-      for (const postType of postTypes) {
+      // Create promises for all post type API calls
+      const apiPromises = postTypes.map(async postType => {
         try {
           // For other post types, use the standard REST API
           const apiPath = postType.rest_namespace === 'wp/v2' ? `/wp/v2/${postType.rest_base}` : `/${postType.rest_namespace}/${postType.rest_base}`;
@@ -101,16 +101,28 @@ function Edit({
           if (Array.isArray(posts) && posts.length > 0) {
             const samplePost = posts[0];
             const metaKeys = Object.keys(samplePost.metadata || samplePost.meta || {});
-            metaKeys.filter(metaKey => !EXCLUDED_METADATA_FIELDS.includes(metaKey)).forEach(metaKey => {
-              options.add({
-                label: metaKey,
-                value: `${postType.slug}:${metaKey}`
-              });
-            });
+            return metaKeys.filter(metaKey => !EXCLUDED_METADATA_FIELDS.includes(metaKey)).map(metaKey => ({
+              label: metaKey,
+              value: `${postType.slug}:${metaKey}`
+            }));
           }
+          return [];
         } catch (error) {
           console.error(`Error fetching metadata for ${postType.slug}:`, error);
+          return []; // Return empty array on error to continue processing other post types
         }
+      });
+
+      // Execute all API calls in parallel
+      try {
+        const results = await Promise.all(apiPromises);
+
+        // Flatten results and add to options set
+        results.flat().forEach(option => {
+          options.add(option);
+        });
+      } catch (error) {
+        console.error('Error fetching metadata for post types:', error);
       }
 
       // Convert Set to Array and sort alphabetically by label

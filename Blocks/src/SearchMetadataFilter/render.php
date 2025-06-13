@@ -43,24 +43,38 @@ if (isset($query_params['metadata_' . $field_name]) && is_array($query_params['m
 }
 
 // Fetch all possible values for this metadata field from the document post type
-function get_metadata_values($post_type, $field_name) {
-    global $wpdb;
-    
-    // Query to get all unique values for this meta key
-    $query = $wpdb->prepare("
-        SELECT DISTINCT pm.meta_value 
-        FROM {$wpdb->postmeta} pm 
-        INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID 
-        WHERE p.post_type = %s 
-        AND pm.meta_key = %s 
-        AND pm.meta_value != '' 
-        AND p.post_status = 'publish'
-        ORDER BY pm.meta_value ASC
-    ", $post_type, $field_name);
-    
-    $results = $wpdb->get_col($query);
-    
-    return array_filter($results); // Remove empty values
+if (!function_exists('Bcgov\WordpressSearch\SearchMetadataFilter\get_metadata_values')) {
+    function get_metadata_values($post_type, $field_name) {
+        global $wpdb;
+        
+        // Validate inputs
+        if (empty($post_type) || empty($field_name)) {
+            return array();
+        }
+        
+        // Query to get all unique values for this meta key
+        $query = $wpdb->prepare("
+            SELECT DISTINCT pm.meta_value 
+            FROM {$wpdb->postmeta} pm 
+            INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID 
+            WHERE p.post_type = %s 
+            AND pm.meta_key = %s 
+            AND pm.meta_value != '' 
+            AND p.post_status = 'publish'
+            ORDER BY pm.meta_value ASC
+        ", $post_type, $field_name);
+        
+        $results = $wpdb->get_col($query);
+        
+        // Check for database errors
+        if ($wpdb->last_error) {
+            error_log('Database error in get_metadata_values: ' . $wpdb->last_error);
+            return array();
+        }
+        
+        // Return filtered results or empty array if no results
+        return is_array($results) ? array_filter($results) : array();
+    }
 }
 
 $possible_values = get_metadata_values($post_type, $field_name);
@@ -72,6 +86,20 @@ if (empty($possible_values)) {
 
 // Get a human-readable label for the field
 $field_label = ucwords(str_replace('_', ' ', $field_name));
+
+// Helper function to generate clear filter URL
+if (!function_exists('Bcgov\WordpressSearch\SearchMetadataFilter\get_clear_filter_url')) {
+    function get_clear_filter_url($current_url, $query_params, $field_name) {
+        // Remove all parameters that start with 'metadata_' + field_name
+        $filtered_params = array_filter($query_params, function($key) use ($field_name) {
+            return strpos($key, 'metadata_' . $field_name) !== 0;
+        }, ARRAY_FILTER_USE_KEY);
+        
+        // Build the new URL
+        $base_url = strtok($current_url, '?');
+        return empty($filtered_params) ? $base_url : $base_url . '?' . http_build_query($filtered_params);
+    }
+}
 
 ?>
 
@@ -124,9 +152,7 @@ $field_label = ucwords(str_replace('_', ' ', $field_name));
                     </button>
                     
                     <?php if (!empty($current_values)): ?>
-                        <a href="<?php echo esc_url(strtok($current_url, '?') . '?' . http_build_query(array_diff_key($query_params, array_flip(array_filter(array_keys($query_params), function($key) use ($field_name) {
-                            return strpos($key, 'metadata_' . $field_name) === 0;
-                        }))))); ?>" class="metadata-filter__clear-button">
+                        <a href="<?php echo esc_url(get_clear_filter_url($current_url, $query_params, $field_name)); ?>" class="metadata-filter__clear-button">
                             <?php echo esc_html__('Clear Filters', 'wordpress-search'); ?>
                         </a>
                     <?php endif; ?>
