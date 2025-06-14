@@ -24,24 +24,24 @@ export default function Edit() {
 	 * Uses the WordPress data API to get all registered post types
 	 * and filters them to only include viewable ones.
 	 */
-	const postTypes = useSelect( ( select ) => {
-		const types = select( 'core' ).getPostTypes();
-		return types?.filter( ( type ) => type.viewable ) || [];
-	}, [] );
+	const postTypes = useSelect((select) => {
+		const types = select('core').getPostTypes();
+		return types?.filter((type) => type.viewable) || [];
+	}, []);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<div className="dswp-search-post-type-filter__container dswp-search-post-type-filter__container--editor">
-				{ postTypes.map( ( postType ) => (
+				{postTypes.map((postType) => (
 					<button
-						key={ postType.slug }
+						key={postType.slug}
 						className="dswp-search-post-type-filter__button"
-						onClick={ ( e ) => e.preventDefault() }
+						onClick={(e) => e.preventDefault()}
 						disabled
 					>
-						{ postType.name }
+						{postType.name}
 					</button>
-				) ) }
+				))}
 			</div>
 		</div>
 	);

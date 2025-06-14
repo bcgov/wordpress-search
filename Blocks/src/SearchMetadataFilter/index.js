@@ -16,7 +16,7 @@ import './style.scss';
  * It uses dynamic rendering on the PHP side, so the save function
  * returns null while the frontend is handled by render.php.
  */
-registerBlockType( 'wordpress-search/search-metadata-filter', {
+registerBlockType('wordpress-search/search-metadata-filter', {
 	edit: Edit,
 	save: () => null,
-} );
+});

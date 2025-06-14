@@ -25,7 +25,7 @@ import Edit from './edit';
  *
  * @see /render.php for frontend output
  */
-registerBlockType( 'wordpress-search/search-bar', {
+registerBlockType('wordpress-search/search-bar', {
 	/**
 	 * Edit Component
 	 * Provides the editor interface for the block
@@ -38,4 +38,4 @@ registerBlockType( 'wordpress-search/search-bar', {
 	 * @return {null} No static markup is saved
 	 */
 	save: () => null,
-} );
+});

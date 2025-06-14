@@ -16,7 +16,7 @@ import './style.scss';
  * It uses dynamic rendering on the PHP side, so the save function
  * returns null while the frontend is handled by render.php.
  */
-registerBlockType( 'wordpress-search/search-post-type-filter', {
+registerBlockType('wordpress-search/search-post-type-filter', {
 	edit: Edit,
 	save: () => null,
-} );
+});
