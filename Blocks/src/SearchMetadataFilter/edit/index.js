@@ -11,7 +11,7 @@ import {
 	PanelBody,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -48,6 +48,11 @@ export default function Edit({ attributes, setAttributes }) {
 	const { selectedMetadata } = attributes;
 	const [metadataOptions, setMetadataOptions] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
+
+	// Get block props for proper block wrapper handling
+	const blockProps = useBlockProps({
+		className: 'wp-block-wordpress-search-metadata-filter-editor',
+	});
 
 	// Fetch post types with expanded query
 	const { postTypes } = useSelect((select) => {
@@ -232,7 +237,7 @@ export default function Edit({ attributes, setAttributes }) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div className="wp-block-wordpress-search-metadata-filter">
+			<div {...blockProps}>
 				{isLoading && (
 					<div className="metadata-filter-loading">
 						<Spinner />
@@ -241,14 +246,20 @@ export default function Edit({ attributes, setAttributes }) {
 				)}
 
 				{!isLoading && selectedMetadata && (
-					<div className="metadata-filter-preview">
+					<div
+						className="metadata-filter-preview"
+						style={{ pointerEvents: 'none' }}
+					>
 						{__('Metadata Filter:', 'wordpress-search')}{' '}
 						<strong>{getSelectedMetadataLabel()}</strong>
 					</div>
 				)}
 
 				{!isLoading && !selectedMetadata && (
-					<div className="metadata-filter-placeholder">
+					<div
+						className="metadata-filter-placeholder"
+						style={{ pointerEvents: 'none' }}
+					>
 						{__(
 							'Select a metadata field in the block settings sidebar →',
 							'wordpress-search'

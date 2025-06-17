@@ -29,8 +29,8 @@ if ( count( $metadata_parts ) !== 2 ) {
 $metadata_post_type = $metadata_parts[0];
 $field_name         = $metadata_parts[1];
 
-// Get current URL parameters.
-$current_url = $_SERVER['REQUEST_URI'];
+// Get current URL parameters using WordPress functions.
+$current_url = home_url( add_query_arg( null, null ) );
 $url_parts   = wp_parse_url( $current_url );
 parse_str( $url_parts['query'] ?? '', $query_params );
 
@@ -42,8 +42,8 @@ if ( isset( $query_params[ 'metadata_' . $field_name ] ) && is_array( $query_par
     $current_values = array( $query_params[ 'metadata_' . $field_name ] );
 }
 
-// Get possible values using the cached function from main plugin.
-$possible_values = get_metadata_values_cached( $metadata_post_type, $field_name );
+// Get possible values from injected plugin instance.
+$possible_values = $plugin_instance->get_metadata_values( $metadata_post_type, $field_name );
 
 // If no values found, don't render anything.
 if ( empty( $possible_values ) ) {
