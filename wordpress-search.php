@@ -39,9 +39,12 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataFilter' ) ) {
 /**
  * Render callback for SearchMetadataFilter block
  *
+ * @param array    $attributes Block attributes.
+ * @param string   $content    Block content.
+ * @param WP_Block $block      Block instance.
  * @return string Rendered block output.
  */
-function wordpress_search_render_metadata_filter_block() {
+function wordpress_search_render_metadata_filter_block( $attributes, $content, $block ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
     // Make the metadata filter instance available to the render template.
     global $wordpress_search_metadata_filter;
     $plugin_instance = $wordpress_search_metadata_filter;
@@ -49,7 +52,8 @@ function wordpress_search_render_metadata_filter_block() {
     // Start output buffering.
     ob_start();
 
-    // Include the render template.
+    // Include the render template. The $attributes, $content, and $block variables
+    // are automatically available in the included file's scope.
     include plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchMetadataFilter/render.php';
 
     // Return the buffered output.
