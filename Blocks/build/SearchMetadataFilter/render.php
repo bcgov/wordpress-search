@@ -42,8 +42,8 @@ if ( isset( $query_params[ 'metadata_' . $field_name ] ) && is_array( $query_par
     $current_values = array( $query_params[ 'metadata_' . $field_name ] );
 }
 
-// Get possible values from injected plugin instance.
-$possible_values = $plugin_instance->get_metadata_values( $metadata_post_type, $field_name );
+// Get possible values using static method (no global dependency).
+$possible_values = \Bcgov\WordpressSearch\MetadataFilter::get_metadata_values_static( $metadata_post_type, $field_name );
 
 // If no values found, don't render anything.
 if ( empty( $possible_values ) ) {

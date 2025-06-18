@@ -7,7 +7,6 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import Edit from './edit';
-import './style.scss';
 
 /**
  * Register the Search Metadata Filter block

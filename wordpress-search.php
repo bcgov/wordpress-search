@@ -45,10 +45,6 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataFilter' ) ) {
  * @return string Rendered block output.
  */
 function wordpress_search_render_metadata_filter_block( $attributes, $content, $block ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-    // Make the metadata filter instance available to the render template.
-    global $wordpress_search_metadata_filter;
-    $plugin_instance = $wordpress_search_metadata_filter;
-
     // Start output buffering.
     ob_start();
 

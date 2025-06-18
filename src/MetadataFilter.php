@@ -21,15 +21,8 @@ class MetadataFilter {
      * Initialize the metadata filter functionality.
      */
     public function init(): void {
-        add_action( 'init', array( $this, 'register_query_vars' ) );
-        add_action( 'pre_get_posts', array( $this, 'handle_metadata_filtering' ) );
-    }
-
-    /**
-     * Register custom query variables with WordPress
-     */
-    public function register_query_vars(): void {
         add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
+        add_action( 'pre_get_posts', array( $this, 'handle_metadata_filtering' ) );
     }
 
     /**
@@ -338,6 +331,19 @@ class MetadataFilter {
         }
 
         return $this->get_metadata_values_direct( $post_type, $field_name );
+    }
+
+    /**
+     * Static method to get metadata values (for template use without globals)
+     *
+     * @param string $post_type The post type to query.
+     * @param string $field_name The meta field name to get values for.
+     * @return array Array of unique meta values.
+     */
+    public static function get_metadata_values_static( string $post_type, string $field_name ): array {
+        // Create a temporary instance to use the existing validation logic.
+        $instance = new self();
+        return $instance->get_metadata_values( $post_type, $field_name );
     }
 
     /**
