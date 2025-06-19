@@ -1,177 +1,178 @@
 /**
  * Search Block Editor Styles
- * 
+ *
  * These styles are specifically for the block editor interface.
  * The base class follows WordPress's block naming convention.
  */
 .wp-block-wordpress-search-search-bar {
-    /**
+
+	/**
      * Input Container
      * Creates a flex layout for the search-bar input and button
      */
-    .dswp-search-bar__input-container {
-        display: flex;        
-        gap: 8px;            
-        align-items: center;  
-        margin: 1em 0;
-        max-width: 800px;
-        position: relative;
-    }
+	.dswp-search-bar__input-container {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		margin: 1em 0;
+		max-width: 800px;
+		position: relative;
+	}
 
-    .dswp-search-bar__input-wrapper {
-        position: relative;
-        flex: 1;
-        display: flex;
-        align-items: center;
-    }
+	.dswp-search-bar__input-wrapper {
+		position: relative;
+		flex: 1;
+		display: flex;
+		align-items: center;
+	}
 
-    .dswp-search-bar__search-icon {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #666;
-        pointer-events: none;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        
-        svg {
-            width: 20px;
-            height: 20px;
-        }
-    }
+	.dswp-search-bar__search-icon {
+		position: absolute;
+		left: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #666;
+		pointer-events: none;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
-    /**
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+	}
+
+	/**
      * search-bar Input Field
      * Styles for the search-bar input element
      */
-    .dswp-search-bar__input {
-        width: 100%;
-        padding: 12px 40px 12px 40px;
-        border: 1px solid #ddd;
-        border-radius: 4px;    
-        font-size: 16px;       
-        transition: all 0.2s ease;
-        background: #fff;
+	.dswp-search-bar__input {
+		width: 100%;
+		padding: 12px 40px 12px 40px;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		font-size: 16px;
+		transition: all 0.2s ease;
+		background: #fff;
 
-        /* Hide default clear button in webkit browsers */
-        &::-webkit-search-cancel-button {
-            -webkit-appearance: none;
-            appearance: none;
-        }
+		/* Hide default clear button in webkit browsers */
+		&::-webkit-search-cancel-button {
+			-webkit-appearance: none;
+			appearance: none;
+		}
 
-        /* Hide default clear button in IE */
-        &::-ms-clear {
-            display: none;
-        }
+		/* Hide default clear button in IE */
+		&::-ms-clear {
+			display: none;
+		}
 
-        &:focus {
-            outline: none;
-            border-color: #003366;
-            box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.1);
-        }
+		&:focus {
+			outline: none;
+			border-color: #036;
+			box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.1);
+		}
 
-        &::placeholder {
-            color: #666;
-        }
+		&::placeholder {
+			color: #666;
+		}
 
-        &:disabled {
-            background: #f5f5f5;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-    }
+		&:disabled {
+			background: #f5f5f5;
+			cursor: not-allowed;
+			opacity: 0.7;
+		}
+	}
 
-    .dswp-search-bar__clear-button {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        padding: 4px;
-        cursor: pointer;
-        color: #666;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0.7;
-        transition: opacity 0.2s ease;
+	.dswp-search-bar__clear-button {
+		position: absolute;
+		right: 8px;
+		top: 50%;
+		transform: translateY(-50%);
+		background: none;
+		border: none;
+		padding: 4px;
+		cursor: pointer;
+		color: #666;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0.7;
+		transition: opacity 0.2s ease;
 
-        &:hover {
-            opacity: 1;
-        }
+		&:hover {
+			opacity: 1;
+		}
 
-        svg {
-            width: 16px;
-            height: 16px;
-        }
+		svg {
+			width: 16px;
+			height: 16px;
+		}
 
-        &:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-    }
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+		}
+	}
 
-    /**
+	/**
      * search-bar Button
      * Styles for the search-bar submit button
      */
-    .dswp-search-bar__button {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        white-space: nowrap;
+	.dswp-search-bar__button {
+		padding: 12px 24px;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 16px;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		white-space: nowrap;
 
-        /**
+		/**
          * Primary Button Variant
          * Used for the main search-bar button
          */
-        &--primary {
-            background-color: #003366;
-            color: white;
+		&--primary {
+			background-color: #036;
+			color: #fff;
 
-            &:hover:not(:disabled) {
-                background-color: #002952;
-            }
+			&:disabled {
+				background-color: #667b8f;
+				cursor: not-allowed;
+				opacity: 0.7;
+			}
 
-            &:disabled {
-                background-color: #667b8f;
-                cursor: not-allowed;
-                opacity: 0.7;
-            }
-        }
+			&:hover:not(:disabled) {
+				background-color: #002952;
+			}
+		}
 
-        /**
+		/**
          * Secondary Button Variant
          * Alternative button style (unused in current implementation)
          */
-        &--secondary {
-            background-color: #6c757d;
-            color: white;
-        }
+		&--secondary {
+			background-color: #6c757d;
+			color: #fff;
+		}
 
-        /**
+		/**
          * Right-aligned Button Modifier
          * Pushes button to the right of container
          */
-        &--right {
-            margin-left: auto;
-        }
+		&--right {
+			margin-left: auto;
+		}
 
-        /**
+		/**
          * Full-width Button Modifier
          * Makes button span full width below input
          */
-        &--below {
-            width: 100%;
-            margin-top: 10px;
-        }
-    }
+		&--below {
+			width: 100%;
+			margin-top: 10px;
+		}
+	}
 }

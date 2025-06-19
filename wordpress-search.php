@@ -17,13 +17,77 @@
  * @package WordPressSearch
  */
 
+// Ensure WordPress is loaded.
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+// Autoload classes using Composer.
+if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataFilter' ) ) {
+    $local_composer  = __DIR__ . '/vendor/autoload.php';
+    $server_composer = __DIR__ . '/../../../../vendor/autoload.php';
+    if ( file_exists( $local_composer ) || file_exists( $server_composer ) ) {
+        if ( file_exists( $server_composer ) ) {
+            require_once $server_composer;
+        }
+        if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataFilter' ) ) {
+            require_once $local_composer;
+        }
+    }
+}
+
 /**
- * Register custom block category for search blocks
+ * Render callback for SearchMetadataFilter block
+ *
+ * @param array    $attributes Block attributes.
+ * @param string   $content    Block content.
+ * @param WP_Block $block      Block instance.
+ * @return string Rendered block output.
+ */
+function wordpress_search_render_metadata_filter_block( $attributes, $content, $block ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+    // Start output buffering.
+    ob_start();
+
+    // Include the render template. The $attributes, $content, and $block variables
+    // are automatically available in the included file's scope.
+    include plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchMetadataFilter/render.php';
+
+    // Return the buffered output.
+    return ob_get_clean();
+}
+
+/**
+ * The function wordpress_search_register_blocks registers block types from metadata in block.json files
+ * found in subdirectories of the Blocks/build folder.
+ */
+function wordpress_search_register_blocks() {
+    // Define the path to the build directory.
+    $build_dir = plugin_dir_path( __FILE__ ) . 'Blocks/build/';
+
+    // Use glob to find all block.json files in the subdirectories of the build folder.
+    $block_files = glob( $build_dir . '*/block.json' );
+
+    // Loop through each block.json file.
+    foreach ( $block_files as $block_file ) {
+        // Register the block type from the metadata in block.json.
+        $block_type = register_block_type_from_metadata( $block_file );
+
+        // Override render callback for SearchMetadataFilter to inject dependencies.
+        if ( 'wordpress-search/search-metadata-filter' === $block_type->name ) {
+            $block_type->render_callback = 'wordpress_search_render_metadata_filter_block';
+        }
+    }
+}
+// Hook the function into the 'init' action.
+add_action( 'init', 'wordpress_search_register_blocks' );
+
+/**
+ * Register custom block category for search blocks.
  *
  * @param array $categories Array of block categories.
  * @return array Modified array of block categories.
  */
-function bcgovwp_register_search_block_category( $categories ) {
+function wordpress_search_register_block_category( $categories ) {
     return array_merge(
         array(
             array(
@@ -35,33 +99,8 @@ function bcgovwp_register_search_block_category( $categories ) {
         $categories
     );
 }
-add_filter( 'block_categories_all', 'bcgovwp_register_search_block_category', 10, 1 );
+add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );
 
-/**
- * The function register_plugin_blocks registers block types from metadata in block.json files
- * found in subdirectories of the Blocks/build folder.
- */
-function register_plugin_blocks() {
-    // Define the path to the build directory.
-    $build_dir = plugin_dir_path( __FILE__ ) . 'Blocks/build/';
-
-    // Use glob to find all block.json files in the subdirectories of the build folder.
-    $block_files = glob( $build_dir . '*/block.json' );
-    // Loop through each block.json file.
-    foreach ( $block_files as $block_file ) {
-        // Register the block type from the metadata in block.json.
-        register_block_type_from_metadata( $block_file );
-    }
-}
-// Hook the function into the 'init' action.
-add_action( 'init', 'register_plugin_blocks' );
-
-
-/**  // Example.
-* use Bcgov\WordPressSearch\{
-**     {ClassName},
-** };
-** //Initialize
-** ${feature_name} = new {ClassName}();
-** ${feature_name}->init();
-*/
+// Initialize the metadata filter functionality.
+$wordpress_search_metadata_filter = new \Bcgov\WordpressSearch\MetadataFilter();
+$wordpress_search_metadata_filter->init();
