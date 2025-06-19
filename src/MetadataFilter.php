@@ -50,14 +50,6 @@ class MetadataFilter {
     private function get_all_metadata_fields(): array {
         global $wpdb;
 
-        // Cache the results for performance.
-        $cache_key     = 'wordpress_search_metadata_fields';
-        $cached_fields = wp_cache_get( $cache_key );
-
-        if ( false !== $cached_fields ) {
-            return $cached_fields;
-        }
-
         // Query all unique meta keys for published posts.
         $results = $wpdb->get_col(
             "SELECT DISTINCT meta_key 
@@ -69,9 +61,6 @@ class MetadataFilter {
         );
 
         $fields = is_array( $results ) ? array_map( 'sanitize_key', $results ) : array();
-
-        // Cache for 1 hour.
-        wp_cache_set( $cache_key, $fields, '', HOUR_IN_SECONDS );
 
         return $fields;
     }
@@ -333,18 +322,7 @@ class MetadataFilter {
         return $this->get_metadata_values_direct( $post_type, $field_name );
     }
 
-    /**
-     * Static method to get metadata values (for template use without globals)
-     *
-     * @param string $post_type The post type to query.
-     * @param string $field_name The meta field name to get values for.
-     * @return array Array of unique meta values.
-     */
-    public static function get_metadata_values_static( string $post_type, string $field_name ): array {
-        // Create a temporary instance to use the existing validation logic.
-        $instance = new self();
-        return $instance->get_metadata_values( $post_type, $field_name );
-    }
+
 
     /**
      * Check if a metadata field exists for a given post type
