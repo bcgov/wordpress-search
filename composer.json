@@ -1,7 +1,6 @@
 {
     "name": "bcgov/wordpress-search",
     "description": "WordPress Search Plugin",
-    "version": "1.0.0",
     "type": "wordpress-plugin",
     "license": "Apache-2.0",
     "repositories": [
