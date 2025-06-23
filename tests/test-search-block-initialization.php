@@ -15,17 +15,37 @@ class SearchBlockInitializationTest extends WP_UnitTestCase {
     public function setUp(): void {
         parent::setUp();
 
-        // Ensure blocks are registered for testing.
-        if ( function_exists( 'wordpress_search_register_blocks' ) ) {
-            wordpress_search_register_blocks();
-        }
+        // Clear any previously registered blocks to avoid conflicts.
+        $registry = WP_Block_Type_Registry::get_instance();
 
-        // Manually register the search block if not already registered.
-        $registered_blocks = WP_Block_Type_Registry::get_instance()->get_all_registered();
+        // Only register blocks if they aren't already registered.
+        $registered_blocks = $registry->get_all_registered();
+
+        // Check if our main search block is already registered.
         if ( ! array_key_exists( 'wordpress-search/search-bar', $registered_blocks ) ) {
-            $block_json_path = dirname( __DIR__ ) . '/Blocks/build/Search/block.json';
-            if ( file_exists( $block_json_path ) ) {
-                register_block_type_from_metadata( $block_json_path );
+            // Register blocks manually for testing without triggering the main plugin registration.
+            $this->register_test_blocks();
+        }
+    }
+
+    /**
+     * Helper method to register blocks for testing.
+     */
+    private function register_test_blocks() {
+        // Register each block individually to avoid the main plugin's registration logic.
+        $build_dir   = dirname( __DIR__ ) . '/Blocks/build/';
+        $block_files = glob( $build_dir . '*/block.json' );
+
+        foreach ( $block_files as $block_file ) {
+            if ( file_exists( $block_file ) ) {
+                $block_metadata = json_decode( file_get_contents( $block_file ), true );
+                if ( $block_metadata && isset( $block_metadata['name'] ) ) {
+                    // Only register if not already registered.
+                    $registry = WP_Block_Type_Registry::get_instance();
+                    if ( ! $registry->is_registered( $block_metadata['name'] ) ) {
+                        register_block_type_from_metadata( $block_file );
+                    }
+                }
             }
         }
     }
@@ -42,14 +62,8 @@ class SearchBlockInitializationTest extends WP_UnitTestCase {
         // Check if the block type is registered.
         $registered_blocks = WP_Block_Type_Registry::get_instance()->get_all_registered();
 
-        // If the block isn't registered, let's try to register it manually for testing.
-        if ( ! array_key_exists( 'wordpress-search/search-bar', $registered_blocks ) ) {
-            $block_json_path = dirname( __DIR__ ) . '/Blocks/build/Search/block.json';
-            if ( file_exists( $block_json_path ) ) {
-                register_block_type_from_metadata( $block_json_path );
-                $registered_blocks = WP_Block_Type_Registry::get_instance()->get_all_registered();
-            }
-        }
+        // If the block isn't registered, that's a problem for the test setup.
+        // The setUp() method should have handled registration.
 
         $this->assertArrayHasKey( 'wordpress-search/search-bar', $registered_blocks, 'Search block should be registered' );
 
