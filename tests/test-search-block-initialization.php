@@ -36,18 +36,28 @@ class SearchBlockInitializationTest extends WP_UnitTestCase {
         $build_dir   = dirname( __DIR__ ) . '/Blocks/build/';
         $block_files = glob( $build_dir . '*/block.json' );
 
-        foreach ( $block_files as $block_file ) {
-            if ( file_exists( $block_file ) ) {
-                $block_metadata = json_decode( file_get_contents( $block_file ), true );
-                if ( $block_metadata && isset( $block_metadata['name'] ) ) {
-                    // Only register if not already registered.
-                    $registry = WP_Block_Type_Registry::get_instance();
-                    if ( ! $registry->is_registered( $block_metadata['name'] ) ) {
-                        register_block_type_from_metadata( $block_file );
-                    }
-                }
-            }
-        }
+		foreach ( $block_files as $block_file ) {
+			if ( file_exists( $block_file ) ) {
+                 // Use WordPress filesystem API instead of file_get_contents().
+                 global $wp_filesystem;
+				if ( empty( $wp_filesystem ) ) {
+					require_once ABSPATH . '/wp-admin/includes/file.php';
+					WP_Filesystem();
+				}
+
+                 $block_content = $wp_filesystem->get_contents( $block_file );
+				if ( $block_content ) {
+					$block_metadata = json_decode( $block_content, true );
+					if ( $block_metadata && isset( $block_metadata['name'] ) ) {
+						// Only register if not already registered.
+						$registry = WP_Block_Type_Registry::get_instance();
+						if ( ! $registry->is_registered( $block_metadata['name'] ) ) {
+							register_block_type_from_metadata( $block_file );
+						}
+					}
+				}
+			}
+		}
     }
 
     /**
