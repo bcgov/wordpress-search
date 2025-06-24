@@ -1,0 +1,50 @@
+.wp-block-wordpress-search-search-results-post-metadata-display {
+	margin: 16px 0;
+	padding: 16px;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	background: #f9f9f9;
+
+	.metadata-title {
+		margin: 0 0 12px 0;
+		font-size: 16px;
+		font-weight: 600;
+		color: #333;
+	}
+
+	.metadata-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.metadata-item {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		padding: 4px 0;
+		border-bottom: 1px solid #eee;
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	.metadata-key {
+		font-weight: 600;
+		color: #555;
+		min-width: 120px;
+		flex-shrink: 0;
+	}
+
+	.metadata-value {
+		color: #666;
+		word-break: break-word;
+	}
+
+	.no-metadata {
+		text-align: center;
+		color: #888;
+		font-style: italic;
+	}
+}
