@@ -72,28 +72,32 @@ if ( $fontSize ) {
 <div class="wp-block-wordpress-search-search-results-post-metadata-display" <?php echo $style_attr; ?>>
     <?php if ( ! empty( $filtered_metadata ) ) : ?>
         <div class="post-metadata">
-            <h4 class="metadata-title">Post Metadata</h4>
-            <div class="metadata-list">
-                <?php foreach ( $filtered_metadata as $key => $values ) : ?>
-                    <div class="metadata-item">
-                        <span class="metadata-key"><?php echo esc_html( ucwords( str_replace( [ '_', '-' ], ' ', $key ) ) ); ?>:</span>
-                        <span class="metadata-value">
-                            <?php
-                            // Handle multiple values.
-                            if ( is_array( $values ) ) {
-                                $display_values = array();
-                                foreach ( $values as $value ) {
-                                    if ( is_string( $value ) && ! empty( trim( $value ) ) ) {
-                                        $display_values[] = esc_html( $value );
-                                    }
-                                }
-                                                                 echo esc_html( implode( ', ', $display_values ) );
-                            }
-                            ?>
-                        </span>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+            <?php
+            $metadata_items = array();
+            foreach ( $filtered_metadata as $key => $values ) {
+                $formatted_key = ucwords( str_replace( [ '_', '-' ], ' ', $key ) );
+                
+                // Handle multiple values
+                if ( is_array( $values ) ) {
+                    $display_values = array();
+                    foreach ( $values as $value ) {
+                        if ( is_string( $value ) && ! empty( trim( $value ) ) ) {
+                            $display_values[] = esc_html( $value );
+                        }
+                    }
+                    $formatted_value = implode( ', ', $display_values );
+                } else {
+                    $formatted_value = esc_html( $values );
+                }
+                
+                if ( ! empty( $formatted_value ) ) {
+                    $metadata_items[] = esc_html( $formatted_key ) . ': ' . $formatted_value;
+                }
+            }
+            
+            // Display all metadata items inline, separated by spaces
+            echo implode( ' &nbsp;&nbsp; ', $metadata_items );
+            ?>
         </div>
     <?php else : ?>
         <div class="post-metadata no-metadata">
