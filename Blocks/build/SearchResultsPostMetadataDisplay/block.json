@@ -18,6 +18,12 @@
     "postType",
     "queryId"
   ],
+  "attributes": {
+    "fontSize": {
+      "type": "string",
+      "default": "medium"
+    }
+  },
   "supports": {
     "html": false,
     "align": [
@@ -30,6 +36,9 @@
     "spacing": {
       "margin": true,
       "padding": true
+    },
+    "typography": {
+      "fontSize": true
     }
   },
   "editorScript": "file:./index.js",
