@@ -39,6 +39,18 @@ function Edit({
     fontSize
   } = attributes;
 
+  // Get font sizes from WordPress theme settings
+  const fontSizes = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useSetting)('typography.fontSizes') || [];
+
+  // Build font size options from WordPress settings
+  const fontSizeOptions = [{
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Default', 'wordpress-search'),
+    value: ''
+  }, ...fontSizes.map(size => ({
+    label: size.name,
+    value: size.slug
+  }))];
+
   // Build font size style - handle both preset and custom values
   let fontSizeStyle;
   if (fontSize) {
@@ -62,12 +74,13 @@ function Edit({
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InspectorControls, {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Typography Settings', 'wordpress-search'),
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.FontSizePicker, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Font Size', 'wordpress-search'),
           value: fontSize,
+          options: fontSizeOptions,
           onChange: newFontSize => setAttributes({
             fontSize: newFontSize
-          }),
-          withSlider: true
+          })
         })
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
