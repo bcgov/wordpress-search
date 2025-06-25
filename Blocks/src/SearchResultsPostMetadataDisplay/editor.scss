@@ -1,7 +1,9 @@
 .wp-block-wordpress-search-search-results-post-metadata-display {
-
-	.preview {
-		opacity: 0.8;
+	.post-metadata {
+		font-size: 0.875rem; // Smaller text (14px equivalent)
+		color: #6b7280; // Greyish color - same as frontend
+		line-height: 1.4;
+		margin: 8px 0;
 	}
 
 	.editor-note {
