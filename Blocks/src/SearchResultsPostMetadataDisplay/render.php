@@ -15,7 +15,7 @@ if ( in_the_loop() ) {
     // We're not in a loop, so get the main queried object
     // Use the most reliable method from wp_the_query global
     $queried_object = $GLOBALS['wp_the_query']->get_queried_object();
-    
+
     // Ensure it's a post object (could be a term, user, etc.)
     if ( $queried_object instanceof \WP_Post ) {
         $current_post = $queried_object;
@@ -59,7 +59,7 @@ $fontSize = isset( $attributes['fontSize'] ) ? $attributes['fontSize'] : 'medium
 $style_attr = '';
 if ( $fontSize ) {
     // Check if it's a preset size (no units) or custom value (has px, em, rem, etc.)
-    if ( preg_match('/\d+(px|em|rem|%|vh|vw)/', $fontSize) ) {
+    if ( preg_match( '/\d+(px|em|rem|%|vh|vw)/', $fontSize ) ) {
         // Custom value with units - use directly
         $style_attr = sprintf( 'style="font-size: %s;"', esc_attr( $fontSize ) );
     } else {
@@ -76,7 +76,7 @@ if ( $fontSize ) {
             $metadata_items = array();
             foreach ( $filtered_metadata as $key => $values ) {
                 $formatted_key = ucwords( str_replace( [ '_', '-' ], ' ', $key ) );
-                
+
                 // Handle multiple values
                 if ( is_array( $values ) ) {
                     $display_values = array();
@@ -89,12 +89,12 @@ if ( $fontSize ) {
                 } else {
                     $formatted_value = esc_html( $values );
                 }
-                
+
                 if ( ! empty( $formatted_value ) ) {
                     $metadata_items[] = esc_html( $formatted_key ) . ': ' . $formatted_value;
                 }
             }
-            
+
             // Display all metadata items inline, separated by spaces
             echo implode( ' &nbsp;&nbsp; ', $metadata_items );
             ?>
