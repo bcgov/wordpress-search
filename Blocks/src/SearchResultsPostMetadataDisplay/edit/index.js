@@ -3,13 +3,25 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { useBlockProps, InspectorControls, FontSizePicker } from '@wordpress/block-editor';
-import { PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls, useSetting } from '@wordpress/block-editor';
+import { PanelBody, SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import '../editor.scss';
 
 export default function Edit({ attributes, setAttributes }) {
 	const { fontSize } = attributes;
+	
+	// Get font sizes from WordPress theme settings
+	const fontSizes = useSetting( 'typography.fontSizes' ) || [];
+	
+	// Build font size options from WordPress settings
+	const fontSizeOptions = [
+		{ label: __( 'Default', 'wordpress-search' ), value: '' },
+		...fontSizes.map( ( size ) => ({
+			label: size.name,
+			value: size.slug,
+		})),
+	];
 	
 	// Build font size style - handle both preset and custom values
 	let fontSizeStyle;
@@ -35,10 +47,11 @@ export default function Edit({ attributes, setAttributes }) {
 		<>
 			<InspectorControls>
 				<PanelBody title={__('Typography Settings', 'wordpress-search')}>
-					<FontSizePicker
+					<SelectControl
+						label={__( 'Font Size', 'wordpress-search' )}
 						value={fontSize}
+						options={fontSizeOptions}
 						onChange={(newFontSize) => setAttributes({ fontSize: newFontSize })}
-						withSlider
 					/>
 				</PanelBody>
 			</InspectorControls>
