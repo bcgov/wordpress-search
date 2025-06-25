@@ -1,1 +1,30 @@
-.wp-block-wordpress-search-search-results-post-metadata-display{background:#f9f9f9;border:1px solid #e0e0e0;border-radius:4px;margin:16px 0;padding:16px}.wp-block-wordpress-search-search-results-post-metadata-display .metadata-title{color:#333;font-size:16px;font-weight:600;margin:0 0 12px}.wp-block-wordpress-search-search-results-post-metadata-display .metadata-list{display:flex;flex-direction:column;gap:8px}.wp-block-wordpress-search-search-results-post-metadata-display .metadata-item{border-bottom:1px solid #eee;display:flex;flex-wrap:wrap;gap:8px;padding:4px 0}.wp-block-wordpress-search-search-results-post-metadata-display .metadata-item:last-child{border-bottom:none}.wp-block-wordpress-search-search-results-post-metadata-display .metadata-key{color:#555;flex-shrink:0;font-weight:600;min-width:120px}.wp-block-wordpress-search-search-results-post-metadata-display .metadata-value{color:#666;word-break:break-word}.wp-block-wordpress-search-search-results-post-metadata-display .no-metadata{color:#888;font-style:italic;text-align:center}
+/*!***********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/SearchResultsPostMetadataDisplay/view.scss ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-wordpress-search-search-results-post-metadata-display .metadata-title {
+  display: none;
+}
+.wp-block-wordpress-search-search-results-post-metadata-display .metadata-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wp-block-wordpress-search-search-results-post-metadata-display .metadata-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  line-height: 1.4;
+  font-size: inherit;
+  color: inherit;
+}
+.wp-block-wordpress-search-search-results-post-metadata-display .metadata-key {
+  font-weight: normal;
+  color: inherit;
+}
+.wp-block-wordpress-search-search-results-post-metadata-display .metadata-value {
+  color: inherit;
+  word-break: break-word;
+}
+.wp-block-wordpress-search-search-results-post-metadata-display .no-metadata {
+  display: none;
+}

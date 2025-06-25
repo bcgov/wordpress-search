@@ -9,12 +9,21 @@
 	"description": "Dynamically displays all metadata for the current post in search results or query loops",
 	"keywords": ["metadata", "custom fields", "search", "query loop"],
 	"usesContext": ["postId", "postType", "queryId"],
+	"attributes": {
+		"fontSize": {
+			"type": "string",
+			"default": "medium"
+		}
+	},
 	"supports": {
 		"html": false,
 		"align": ["left", "center", "right", "wide", "full"],
 		"spacing": {
 			"margin": true,
 			"padding": true
+		},
+		"typography": {
+			"fontSize": true
 		}
 	},
 	"editorScript": "file:./index.js",

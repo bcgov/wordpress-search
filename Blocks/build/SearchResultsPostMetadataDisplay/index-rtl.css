@@ -1,1 +1,14 @@
-.wp-block-wordpress-search-search-results-post-metadata-display .preview{opacity:.8}.wp-block-wordpress-search-search-results-post-metadata-display .editor-note{background:#e7f3ff;border-right:4px solid #0073aa;color:#0073aa;font-size:12px;margin-top:12px;padding:8px}
+/*!*************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/SearchResultsPostMetadataDisplay/editor.scss ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-wordpress-search-search-results-post-metadata-display .preview {
+  opacity: 0.8;
+}
+.wp-block-wordpress-search-search-results-post-metadata-display .editor-note {
+  margin-top: 12px;
+  padding: 8px;
+  background: #e7f3ff;
+  border-right: 4px solid #0073aa;
+  font-size: 12px;
+  color: #0073aa;
+}
