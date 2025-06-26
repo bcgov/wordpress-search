@@ -12,5 +12,20 @@ import './view.scss';
  *
  * Current features:
  * - Imports and applies frontend styles
+ * - Provides toggle functionality for collapsible filter sections
  *
  */
+
+// Toggle function for metadata filter
+window.toggleMetadataFilter = function(header) {
+    const content = header.nextElementSibling;
+    const toggle = header.querySelector('.metadata-filter__toggle');
+    
+    if (content.classList.contains('collapsed')) {
+        content.classList.remove('collapsed');
+        toggle.classList.remove('collapsed');
+    } else {
+        content.classList.add('collapsed');
+        toggle.classList.add('collapsed');
+    }
+};
