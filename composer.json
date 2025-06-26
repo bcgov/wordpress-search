@@ -1,5 +1,5 @@
 {
-    "name": "bcgov/wordpress-search",
+    "name": "bcgov-plugin/wordpress-search",
     "description": "WordPress Search Plugin",
     "type": "wordpress-plugin",
     "license": "Apache-2.0",
