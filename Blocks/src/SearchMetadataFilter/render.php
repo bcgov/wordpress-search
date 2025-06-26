@@ -83,11 +83,15 @@ $clear_url       = empty( $filtered_params ) ? strtok( $current_url, '?' ) : str
             <?php endforeach; ?>
 
             <fieldset class="metadata-filter">
-                <legend class="metadata-filter__label">
-                    <?php echo esc_html__( 'Filter by', 'wordpress-search' ); ?> <?php echo esc_html( $field_label ); ?>:
-                </legend>
+                <div class="metadata-filter__header" onclick="toggleMetadataFilter(this)">
+                    <legend class="metadata-filter__label">
+                        <?php echo esc_html( $field_label ); ?>
+                    </legend>
+                    <div class="metadata-filter__toggle"></div>
+                </div>
                 
-                <div class="metadata-filter__options">
+                <div class="metadata-filter__content">
+                    <div class="metadata-filter__options">
                     <?php foreach ( $possible_values as $value ) : ?>
                         <?php
                         $checkbox_id = 'metadata_' . $field_name . '_' . sanitize_title( $value );
@@ -107,9 +111,9 @@ $clear_url       = empty( $filtered_params ) ? strtok( $current_url, '?' ) : str
                             </span>
                         </label>
                     <?php endforeach; ?>
-                </div>
-                
-                <div class="metadata-filter__actions">
+                    </div>
+                    
+                    <div class="metadata-filter__actions">
                     <button type="submit" class="metadata-filter__apply-button">
                         <?php echo esc_html__( 'Apply Filters', 'wordpress-search' ); ?>
                     </button>
@@ -119,8 +123,24 @@ $clear_url       = empty( $filtered_params ) ? strtok( $current_url, '?' ) : str
                             <?php echo esc_html__( 'Clear Filters', 'wordpress-search' ); ?>
                         </a>
                     <?php endif; ?>
+                    </div>
                 </div>
             </fieldset>
         </form>
     </div>
 </div>
+
+<script>
+function toggleMetadataFilter(header) {
+    const content = header.nextElementSibling;
+    const toggle = header.querySelector('.metadata-filter__toggle');
+    
+    if (content.classList.contains('collapsed')) {
+        content.classList.remove('collapsed');
+        toggle.classList.remove('collapsed');
+    } else {
+        content.classList.add('collapsed');
+        toggle.classList.add('collapsed');
+    }
+}
+</script>
