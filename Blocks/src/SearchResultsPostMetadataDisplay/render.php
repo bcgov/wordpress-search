@@ -53,7 +53,7 @@ foreach ( $metadata as $key => $values ) {
 }
 
 // Get block attributes.
-$font_size = isset( $attributes['fontSize'] ) ? $attributes['fontSize'] : 'medium';
+$font_size = $attributes['fontSize']  ?? 'medium';
 
 // Build inline styles for font size.
 $style_attr = '';
