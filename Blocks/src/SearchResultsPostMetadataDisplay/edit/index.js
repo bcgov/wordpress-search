@@ -67,11 +67,14 @@ export default function Edit({ attributes, setAttributes }) {
 			<div {...blockProps}>
 				<div className="wp-block-wordpress-search-search-results-post-metadata-display">
 					<div className="post-metadata">
-						Date updated: April 2, 2024 &nbsp;&nbsp; Decision: Approved &nbsp;&nbsp; Area: Farm Appeals &nbsp;&nbsp; Regulated marketing appeal: Chicken
+						Date updated: April 2, 2024 &nbsp;&nbsp; Decision:
+						Approved &nbsp;&nbsp; Area: Farm Appeals &nbsp;&nbsp;
+						Regulated marketing appeal: Chicken
 					</div>
 					<p className="editor-note">
 						<em>
-							This block will dynamically display all metadata for each post in the query loop on the frontend.
+							This block will dynamically display all metadata for
+							each post in the query loop on the frontend.
 						</em>
 					</p>
 				</div>

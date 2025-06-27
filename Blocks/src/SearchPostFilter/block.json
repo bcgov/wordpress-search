@@ -7,6 +7,12 @@
 	"category": "search",
 	"icon": "filter",
 	"description": "A modular search post type filter block that connects to the search page template",
+	"attributes": {
+		"selectedPostTypes": {
+			"type": "array",
+			"default": []
+		}
+	},
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",
 	"viewStyle": "file:./view.css",
