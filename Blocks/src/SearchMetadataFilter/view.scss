@@ -45,7 +45,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		
+
 		&::after {
 			content: "";
 			width: 8px;
@@ -55,7 +55,7 @@
 			transform: rotate(45deg);
 			transition: transform 0.3s ease;
 		}
-		
+
 		&.collapsed::after {
 			transform: rotate(-135deg);
 		}
@@ -64,7 +64,7 @@
 	.metadata-filter__content {
 		padding: 1rem;
 		transition: all 0.3s ease;
-		
+
 		&.collapsed {
 			display: none;
 		}
@@ -102,7 +102,6 @@
 	}
 
 
-
 	.metadata-filter__option-label {
 		font-size: 0.875rem;
 		color: #333;
@@ -112,6 +111,7 @@
 
 	// Clean checkbox styling without WordPress component dependencies
 	.components-checkbox-control {
+
 		&.metadata-filter__option {
 			display: flex;
 			align-items: center;
