@@ -118,18 +118,3 @@ $clear_url       = empty( $filtered_params ) ? strtok( $current_url, '?' ) : str
         </form>
     </div>
 </div>
-
-<script>
-function toggleMetadataFilter(header) {
-    const content = header.nextElementSibling;
-    const toggle = header.querySelector('.metadata-filter__toggle');
-    
-    if (content.classList.contains('collapsed')) {
-        content.classList.remove('collapsed');
-        toggle.classList.remove('collapsed');
-    } else {
-        content.classList.add('collapsed');
-        toggle.classList.add('collapsed');
-    }
-}
-</script>
