@@ -97,32 +97,21 @@ $clear_url       = empty( $filtered_params ) ? strtok( $current_url, '?' ) : str
                         $checkbox_id = 'metadata_' . $field_name . '_' . sanitize_title( $value );
                         $is_checked  = in_array( $value, $current_values, true );
                         ?>
-                        <label class="metadata-filter__option" for="<?php echo esc_attr( $checkbox_id ); ?>">
+                        <div class="components-checkbox-control metadata-filter__option">
                             <input 
                                 type="checkbox" 
                                 id="<?php echo esc_attr( $checkbox_id ); ?>"
                                 name="metadata_<?php echo esc_attr( $field_name ); ?>[]" 
                                 value="<?php echo esc_attr( $value ); ?>"
                                 <?php checked( $is_checked ); ?>
-                                class="metadata-filter__checkbox"
+                                class="components-checkbox-control__input metadata-filter__checkbox"
+                                onchange="this.form.submit()"
                             >
-                            <span class="metadata-filter__option-label">
+                            <label class="components-checkbox-control__label metadata-filter__option-label" for="<?php echo esc_attr( $checkbox_id ); ?>">
                                 <?php echo esc_html( $value ); ?>
-                            </span>
-                        </label>
+                            </label>
+                        </div>
                     <?php endforeach; ?>
-                    </div>
-                    
-                    <div class="metadata-filter__actions">
-                    <button type="submit" class="metadata-filter__apply-button">
-                        <?php echo esc_html__( 'Apply Filters', 'wordpress-search' ); ?>
-                    </button>
-                    
-                    <?php if ( ! empty( $current_values ) ) : ?>
-                        <a href="<?php echo esc_url( $clear_url ); ?>" class="metadata-filter__clear-button">
-                            <?php echo esc_html__( 'Clear Filters', 'wordpress-search' ); ?>
-                        </a>
-                    <?php endif; ?>
                     </div>
                 </div>
             </fieldset>
