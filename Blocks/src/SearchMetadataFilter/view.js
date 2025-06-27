@@ -29,3 +29,31 @@ window.toggleMetadataFilter = function(header) {
         toggle.classList.add('collapsed');
     }
 };
+
+// Preserve scroll position on filter changes
+(function() {
+    // Prevent browser's default scroll restoration
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+    
+    // Restore scroll position immediately on page load (before DOM ready)
+    const scrollPos = sessionStorage.getItem('filterScrollPosition');
+    if (scrollPos) {
+        // Use requestAnimationFrame for smoother scrolling
+        requestAnimationFrame(() => {
+            window.scrollTo(0, parseInt(scrollPos));
+            sessionStorage.removeItem('filterScrollPosition');
+        });
+    }
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Store scroll position before form submission
+    const filterCheckboxes = document.querySelectorAll('.metadata-filter__checkbox');
+    filterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            sessionStorage.setItem('filterScrollPosition', window.scrollY);
+        });
+    });
+});
