@@ -10,23 +10,69 @@
 	}
 
 	.metadata-filter {
-		border: 1px solid #ddd;
+		border: none;
 		border-radius: 6px;
+		background: #fff;
+		overflow: hidden;
+	}
+
+	.metadata-filter__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		padding: 1rem;
 		background: #f9f9f9;
+		border-bottom: 1px solid #ddd;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+
+		&:hover {
+			background: #f0f0f0;
+		}
 	}
 
 	.metadata-filter__label {
 		font-weight: 600;
 		color: #333;
-		margin: 0 0 1rem 0;
+		margin: 0;
 		font-size: 1rem;
-		display: block;
+		flex: 1;
+	}
+
+	.metadata-filter__toggle {
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		
+		&::after {
+			content: "";
+			width: 8px;
+			height: 8px;
+			border-right: 2px solid #666;
+			border-bottom: 2px solid #666;
+			transform: rotate(45deg);
+			transition: transform 0.3s ease;
+		}
+		
+		&.collapsed::after {
+			transform: rotate(-135deg);
+		}
+	}
+
+	.metadata-filter__content {
+		padding: 1rem;
+		transition: all 0.3s ease;
+		
+		&.collapsed {
+			display: none;
+		}
 	}
 
 	.metadata-filter__options {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		display: flex;
+		flex-direction: column;
 		gap: 0.5rem;
 		margin-bottom: 1rem;
 	}
@@ -35,28 +81,27 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.5rem;
-		background: #fff;
-		border: 1px solid #e0e0e0;
-		border-radius: 4px;
+		padding: 0.75rem 0.5rem;
+		background: transparent;
+		border: none;
+		border-bottom: 1px solid #f0f0f0;
 		cursor: pointer;
 		transition: all 0.2s ease;
 
 		&:hover {
-			background: #f5f5f5;
-			border-color: #ccc;
+			background: #f9f9f9;
+		}
+
+		&:last-child {
+			border-bottom: none;
 		}
 
 		&:has(.metadata-filter__checkbox:checked) {
-			background: #e6f3ff;
-			border-color: #007cba;
+			background: #f0f8ff;
 		}
 	}
 
-	.metadata-filter__checkbox {
-		margin: 0;
-		accent-color: #007cba;
-	}
+
 
 	.metadata-filter__option-label {
 		font-size: 0.875rem;
@@ -65,64 +110,48 @@
 		line-height: 1.4;
 	}
 
-	.metadata-filter__actions {
-		display: flex;
-		gap: 0.75rem;
-		align-items: center;
-		flex-wrap: wrap;
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid #e0e0e0;
-	}
+	// Clean checkbox styling without WordPress component dependencies
+	.components-checkbox-control {
+		&.metadata-filter__option {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.75rem 0.5rem;
+			background: transparent;
+			border: none;
+			border-bottom: 1px solid #f0f0f0;
+			cursor: pointer;
+			transition: all 0.2s ease;
 
-	.metadata-filter__apply-button {
-		background: #007cba;
-		color: #fff;
-		border: 1px solid #005a87;
-		padding: 0.5rem 1rem;
-		border-radius: 4px;
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-
-		&:hover {
-			background: #005a87;
-			border-color: #004768;
-		}
-	}
-
-	.metadata-filter__clear-button {
-		background: #f0f0f0;
-		color: #666;
-		border: 1px solid #ccc;
-		padding: 0.5rem 1rem;
-		border-radius: 4px;
-		font-size: 0.875rem;
-		text-decoration: none;
-		transition: all 0.2s ease;
-
-		&:hover {
-			background: #e0e0e0;
-			border-color: #999;
-			text-decoration: none;
-		}
-	}
-
-	// Mobile responsive
-	@media (max-width: 768px) {
-
-		.metadata-filter__options {
-			grid-template-columns: 1fr;
-		}
-
-		.metadata-filter__actions {
-			flex-direction: column;
-			align-items: stretch;
-
-			.metadata-filter__apply-button,
-			.metadata-filter__clear-button {
-				text-align: center;
+			&:hover {
+				background: #f9f9f9;
 			}
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			&:has(input:checked) {
+				background: #f0f8ff;
+			}
+		}
+
+		.components-checkbox-control__label {
+			font-size: 0.875rem;
+			color: #333;
+			flex: 1;
+			line-height: 1.4;
+			margin: 0;
+			cursor: pointer;
+		}
+
+		// Style the checkbox input to look clean and modern
+		.components-checkbox-control__input {
+			width: 16px;
+			height: 16px;
+			margin: 0;
+			cursor: pointer;
+			accent-color: #2271b1; // WordPress blue color
 		}
 	}
 }
