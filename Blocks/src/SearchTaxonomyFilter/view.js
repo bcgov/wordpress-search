@@ -30,10 +30,18 @@ window.toggleTaxonomyFilter = function (header) {
 })();
 
 document.addEventListener('DOMContentLoaded', function () {
-    const filterCheckboxes = document.querySelectorAll('.taxonomy-filter__checkbox');
-    filterCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener('change', function () {
+    // Use event delegation for better performance with many checkboxes
+    document.addEventListener('change', function(event) {
+        // Check if the changed element is a taxonomy filter checkbox
+        if (event.target.matches('.taxonomy-filter__checkbox')) {
+            // Store scroll position before form submission
             sessionStorage.setItem('filterScrollPosition', window.scrollY);
-        });
+            
+            // Find the parent form and submit it
+            const form = event.target.closest('.taxonomy-filter-form');
+            if (form) {
+                form.submit();
+            }
+        }
     });
 }); 
