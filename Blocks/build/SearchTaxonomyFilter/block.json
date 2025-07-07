@@ -1,14 +1,14 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
-  "name": "wordpress-search/search-metadata-filter",
+  "name": "wordpress-search/search-taxonomy-filter",
   "version": "1.0.0",
-  "title": "Metadata Filter",
+  "title": "Taxonomy Filter",
   "category": "search",
   "icon": "filter",
-  "description": "A modular search metadata filter block that connects to the search page template",
+  "description": "A modular search taxonomy filter block that connects to the search page template",
   "attributes": {
-    "selectedMetadata": {
+    "selectedTaxonomy": {
       "type": "string",
       "default": ""
     }
@@ -18,7 +18,7 @@
   "viewStyle": "file:./view.css",
   "viewScript": "file:./view.js",
   "render": "file:./render.php",
-  "style": "file:./style-index.css",
+  "style": "file:./view.css",
   "dependencies": [
     "wp-api-fetch",
     "wp-url",
