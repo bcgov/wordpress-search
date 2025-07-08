@@ -3,8 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { SelectControl } from '@wordpress/components';
-import { useBlockProps } from '@wordpress/block-editor';
+import { SelectControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -63,16 +63,55 @@ export default function Edit({ attributes, setAttributes }) {
 			.filter(Boolean), // Remove any null entries from map
 	];
 
+	// Get the display name for the selected taxonomy
+	const getSelectedTaxonomyLabel = () => {
+		if (!selectedTaxonomy) {
+			return __('No taxonomy selected', 'wordpress-search');
+		}
+		
+		const selectedOption = taxonomyOptions.find(option => option.value === selectedTaxonomy);
+		return selectedOption ? selectedOption.label : __('Unknown taxonomy', 'wordpress-search');
+	};
+
 	return (
-		<div {...useBlockProps()}>
-			<SelectControl
-				label={__('Select Taxonomy', 'wordpress-search')}
-				value={selectedTaxonomy}
-				options={taxonomyOptions}
-				onChange={(value) => {
-					setAttributes({ selectedTaxonomy: value });
-				}}
-			/>
-		</div>
+		<>
+			<InspectorControls>
+				<PanelBody 
+					title={__('Taxonomy Filter Settings', 'wordpress-search')} 
+					initialOpen={true}
+				>
+					<SelectControl
+						label={__('Select Taxonomy', 'wordpress-search')}
+						value={selectedTaxonomy}
+						options={taxonomyOptions}
+						onChange={(value) => {
+							setAttributes({ selectedTaxonomy: value });
+						}}
+						help={__('Choose which taxonomy to use for filtering search results.', 'wordpress-search')}
+					/>
+				</PanelBody>
+			</InspectorControls>
+			
+			<div {...useBlockProps()}>
+				<div className="taxonomy-filter-preview">
+					<div className="taxonomy-filter-preview__header">
+						<h4>{__('Taxonomy Filter', 'wordpress-search')}</h4>
+						<p className="taxonomy-filter-preview__description">
+							{selectedTaxonomy 
+								? __('Selected: ', 'wordpress-search') + getSelectedTaxonomyLabel()
+								: __('Configure taxonomy in the block settings →', 'wordpress-search')
+							}
+						</p>
+					</div>
+					{selectedTaxonomy && (
+						<div className="taxonomy-filter-preview__content">
+							<div className="taxonomy-filter-preview__placeholder">
+								<p>{__('Filter options will appear here on the frontend', 'wordpress-search')}</p>
+							</div>
+						</div>
+					)}
+				</div>
+			</div>
+		</>
 	);
 }

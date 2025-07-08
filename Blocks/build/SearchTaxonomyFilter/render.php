@@ -51,6 +51,12 @@ $current_url = home_url( add_query_arg( null, null ) );
 $url_parts   = wp_parse_url( $current_url );
 parse_str( $url_parts['query'] ?? '', $all_query_params );
 
+// Fallback to $_GET if URL parsing doesn't work (e.g., in test environments).
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
+if ( empty( $all_query_params ) && ! empty( $_GET ) ) {
+    $all_query_params = $_GET;
+}
+
 // Filter to get only non-taxonomy parameters for hidden inputs.
 $taxonomy_param_key = 'taxonomy_' . $actual_taxonomy;
 $hidden_params      = array_filter(
