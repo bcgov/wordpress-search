@@ -77,7 +77,7 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
     }
 
     /**
-     * Test get_terms returns correct taxonomy terms
+     * Test get_terms returns correct taxonomy terms.
      *
      * What this tests:
      * - Basic functionality of getting taxonomy terms
@@ -159,7 +159,7 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
      */
     public function test_terms_associated_with_posts() {
         // Create test post and assign terms.
-        $post_id = wp_insert_post(
+        $post_id            = wp_insert_post(
             array(
                 'post_title'   => 'Test Document with Terms',
                 'post_content' => 'Test content',
@@ -170,8 +170,8 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
         $this->test_posts[] = $post_id;
 
         // Get our test terms.
-        $policies_term    = get_term_by( 'name', 'Policies', 'document_category' );
-        $procedures_term  = get_term_by( 'name', 'Procedures', 'document_category' );
+        $policies_term   = get_term_by( 'name', 'Policies', 'document_category' );
+        $procedures_term = get_term_by( 'name', 'Procedures', 'document_category' );
 
         // Assign terms to post.
         wp_set_object_terms( $post_id, array( $policies_term->term_id, $procedures_term->term_id ), 'document_category' );
@@ -198,16 +198,16 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
         // Create a unique term name to avoid conflicts with existing terms.
         $unique_secret_name = 'TestSecret_' . uniqid() . '_' . wp_rand( 10000, 99999 );
 
-        // Create a secret term that will only be assigned to a draft post
+        // Create a secret term that will only be assigned to a draft post.
         $secret_term = wp_insert_term( $unique_secret_name, 'document_category' );
         $this->assertFalse( is_wp_error( $secret_term ), 'Secret term should be created successfully' );
-        
+
         if ( ! is_wp_error( $secret_term ) ) {
             $this->test_terms[] = $secret_term['term_id'];
         }
 
         // Create a draft document and assign only the secret term.
-        $draft_id = wp_insert_post(
+        $draft_id           = wp_insert_post(
             array(
                 'post_title'   => 'Draft Document with Secret Term',
                 'post_content' => 'Draft content',
@@ -217,56 +217,58 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
         );
         $this->test_posts[] = $draft_id;
 
-        // Assign the secret term ONLY to the draft post
+        // Assign the secret term ONLY to the draft post.
         wp_set_object_terms( $draft_id, array( $secret_term['term_id'] ), 'document_category' );
 
-        // Verify term assignment worked for draft post
+        // Verify term assignment worked for draft post.
         $draft_terms = get_the_terms( $draft_id, 'document_category' );
         $this->assertNotEmpty( $draft_terms, 'Draft post should have secret term assigned' );
         $draft_term_names = wp_list_pluck( $draft_terms, 'name' );
         $this->assertContains( $unique_secret_name, $draft_term_names, 'Draft post should have the secret term' );
 
-        // Test the core functionality: check if this term would show up in taxonomy filter
-        // by simulating what the SearchTaxonomyFilter block does
+        // Test the core functionality: check if this term would show up in taxonomy filter.
+        // by simulating what the SearchTaxonomyFilter block does.
         $terms_for_filter = get_terms(
             array(
                 'taxonomy'   => 'document_category',
-                'hide_empty' => false, // Get all terms first
+                'hide_empty' => false, // Get all terms first.
             )
         );
 
-        // Find our secret term in the full list
+        // Find our secret term in the full list.
         $secret_term_found = false;
         foreach ( $terms_for_filter as $term ) {
             if ( $term->name === $unique_secret_name ) {
                 $secret_term_found = true;
-                
-                // Check if this term has any published posts associated
-                $published_posts = get_posts( array(
-                    'post_type'      => 'document',
-                    'post_status'    => 'publish',
-                    'posts_per_page' => 1,
-                    'fields'         => 'ids',
-                    'tax_query'      => array(
-                        array(
-                            'taxonomy' => 'document_category',
-                            'field'    => 'term_id',
-                            'terms'    => $term->term_id,
-                        ),
-                    ),
-                ) );
-                
-                // The secret term should have NO published posts
+
+                // Check if this term has any published posts associated.
+                $published_posts = get_posts(
+                    array(
+						'post_type'      => 'document',
+						'post_status'    => 'publish',
+						'posts_per_page' => 1,
+						'fields'         => 'ids',
+						'tax_query'      => array(
+							array(
+								'taxonomy' => 'document_category',
+								'field'    => 'term_id',
+								'terms'    => $term->term_id,
+							),
+						),
+                    )
+                );
+
+                // The secret term should have NO published posts.
                 $this->assertEmpty( $published_posts, 'Secret term should have no published posts' );
                 break;
             }
         }
 
-        // Verify our secret term exists (so the test is actually testing something)
+        // Verify our secret term exists (so the test is actually testing something).
         $this->assertTrue( $secret_term_found, 'Secret term should exist in the full terms list' );
 
-        // Additional verification: ensure existing published terms still work
-        $published_post_id = wp_insert_post(
+        // Additional verification: ensure existing published terms still work.
+        $published_post_id  = wp_insert_post(
             array(
                 'post_title'   => 'Published Document for Test',
                 'post_content' => 'Published content',
@@ -276,36 +278,38 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
         );
         $this->test_posts[] = $published_post_id;
 
-        // Get or create a regular term
+        // Get or create a regular term.
         $regular_term = get_term_by( 'name', 'Policies', 'document_category' );
         if ( ! $regular_term ) {
-            $regular_term_data = wp_insert_term( 'Policies', 'document_category' );
-            $regular_term = get_term( $regular_term_data['term_id'] );
+            $regular_term_data  = wp_insert_term( 'Policies', 'document_category' );
+            $regular_term       = get_term( $regular_term_data['term_id'] );
             $this->test_terms[] = $regular_term_data['term_id'];
         }
 
         wp_set_object_terms( $published_post_id, array( $regular_term->term_id ), 'document_category' );
 
-        // This term should have published posts
-        $published_posts_for_regular = get_posts( array(
-            'post_type'      => 'document',
-            'post_status'    => 'publish',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-            'tax_query'      => array(
-                array(
-                    'taxonomy' => 'document_category',
-                    'field'    => 'term_id',
-                    'terms'    => $regular_term->term_id,
-                ),
-            ),
-        ) );
+        // This term should have published posts.
+        $published_posts_for_regular = get_posts(
+            array(
+				'post_type'      => 'document',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'tax_query'      => array(
+					array(
+						'taxonomy' => 'document_category',
+						'field'    => 'term_id',
+						'terms'    => $regular_term->term_id,
+					),
+				),
+            )
+        );
 
         $this->assertNotEmpty( $published_posts_for_regular, 'Regular term should have published posts' );
     }
 
     /**
-     * Test taxonomy object retrieval and properties
+     * Test taxonomy object retrieval and properties.
      *
      * What this tests:
      * - get_taxonomy() returns proper taxonomy objects
@@ -333,7 +337,7 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
     }
 
     /**
-     * Helper method to create test taxonomies and terms
+     * Helper method to create test taxonomies and terms.
      */
     private function create_test_taxonomies_and_terms() {
         // Register custom taxonomy for documents.
@@ -366,4 +370,4 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
             }
         }
     }
-} 
+}

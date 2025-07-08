@@ -235,7 +235,7 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
      */
     public function test_block_security_features() {
         // Create a term with potentially dangerous content.
-        // Note: WordPress itself sanitizes term names, so we test with content that survives insertion
+        // Note: WordPress itself sanitizes term names, so we test with content that survives insertion.
         $dangerous_name = 'Test <b>Bold</b> & "Quotes" Term';
         $dangerous_term = wp_insert_term( $dangerous_name, 'document_category' );
         if ( ! is_wp_error( $dangerous_term ) ) {
@@ -251,22 +251,22 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
 
         $output = $this->render_block( $attributes );
 
-        // Check what the term name actually became after WordPress processing
-        $stored_term = get_term( $dangerous_term['term_id'] );
+        // Check what the term name actually became after WordPress processing.
+        $stored_term        = get_term( $dangerous_term['term_id'] );
         $actual_stored_name = $stored_term->name;
 
         // Should not contain unescaped HTML tags.
         $this->assertStringNotContainsString( '<b>', $output, 'Should not contain unescaped HTML tags' );
-        
-        // If the stored name contains HTML entities, they should be properly escaped in output
+
+        // If the stored name contains HTML entities, they should be properly escaped in output.
         if ( strpos( $actual_stored_name, '<' ) !== false || strpos( $actual_stored_name, '&' ) !== false ) {
-            // Should contain escaped HTML entities when they exist in the term name
+            // Should contain escaped HTML entities when they exist in the term name.
             $this->assertStringContainsString( esc_html( $actual_stored_name ), $output, 'Should contain properly escaped term name' );
         }
 
         // Should escape attributes properly - test with term ID which should be numeric.
         $this->assertStringContainsString( 'value="' . $dangerous_term['term_id'] . '"', $output, 'Should escape attribute values' );
-        
+
         // Term name should be properly escaped in labels.
         $this->assertStringContainsString( esc_html( $actual_stored_name ), $output, 'Term name should be escaped in labels' );
     }
@@ -285,7 +285,7 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
 
         // Simulate URL parameter for selected term.
         $_GET['taxonomy_document_category'] = array( $policies_term->term_id );
-        $_GET['s'] = 'test search'; // Add search parameter to preserve.
+        $_GET['s']                          = 'test search'; // Add search parameter to preserve.
 
         $attributes = array(
             'selectedTaxonomy' => 'document:document_category',
@@ -299,7 +299,7 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
 
         // Should mark the selected term as checked.
         $checkbox_id = 'taxonomy_document_category_' . $policies_term->term_id;
-        $this->assertTrue( 
+        $this->assertTrue(
             strpos( $output, 'checked="checked"' ) !== false || strpos( $output, "checked='checked'" ) !== false,
             'Should mark selected terms as checked (either single or double quotes)'
         );
@@ -395,4 +395,4 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
             }
         }
     }
-} 
+}

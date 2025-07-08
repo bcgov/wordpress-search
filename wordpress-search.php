@@ -39,10 +39,9 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
 /**
  * Render callback for SearchTaxonomyFilter block
  *
- * @param array $attributes Block attributes.
  * @return string The rendered block content.
  */
-function wordpress_search_render_taxonomy_filter_block($attributes) {
+function wordpress_search_render_taxonomy_filter_block() {
     ob_start();
     $render_file = plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter/render.php';
 

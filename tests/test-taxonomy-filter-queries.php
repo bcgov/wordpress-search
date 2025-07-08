@@ -179,26 +179,26 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
         // Set up $_GET parameter to simulate URL parameter.
         $_GET['taxonomy_document_category'] = $term_id;
 
-        // Create a search query and manually set the required properties
-        // We need to simulate the main query properly for the test environment
+        // Create a search query and manually set the required properties.
+        // We need to simulate the main query properly for the test environment.
         global $wp_query;
         $original_wp_query = $wp_query;
-        
+
         $query = new WP_Query();
         $query->init();
-        
-        // Set this as the main query temporarily for the test
+
+        // Set this as the main query temporarily for the test.
         $wp_query = $query;
-        
-        // Manually set query properties
+
+        // Manually set query properties.
         $query->is_admin      = false;
         $query->is_main_query = true;
         $query->is_search     = true;
-        
-        // Manually add to query_vars array to ensure it's there
+
+        // Manually add to query_vars array to ensure it's there.
         $query->query_vars['taxonomy_document_category'] = $term_id;
 
-        // Verify that the taxonomy filter can find the parameter before calling the method
+        // Verify that the taxonomy filter can find the parameter before calling the method.
         $this->assertTrue( taxonomy_exists( 'document_category' ), 'document_category taxonomy should exist' );
         $this->assertArrayHasKey( 'taxonomy_document_category', $query->query_vars, 'Query vars should contain taxonomy parameter' );
         $this->assertEquals( $term_id, $query->query_vars['taxonomy_document_category'], 'Query vars should have correct term ID' );
@@ -208,7 +208,7 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
 
         // Check that tax_query was created.
         $tax_query = $query->get( 'tax_query' );
-        
+
         $this->assertNotEmpty( $tax_query, 'Tax query should be created for taxonomy filters' );
         $this->assertIsArray( $tax_query, 'Tax query should be an array' );
 
@@ -230,8 +230,8 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
 
         // Clean up.
         unset( $_GET['taxonomy_document_category'] );
-        
-        // Restore original wp_query
+
+        // Restore original wp_query.
         $wp_query = $original_wp_query;
     }
 
@@ -250,18 +250,18 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
 
         // Set up $_GET parameters to simulate URL parameters.
         $_GET['taxonomy_document_category'] = $policies_term->term_id;
-        $_GET['taxonomy_document_type'] = $form_term->term_id;
+        $_GET['taxonomy_document_type']     = $form_term->term_id;
 
-        // Simulate main query properly
+        // Simulate main query properly.
         global $wp_query;
         $original_wp_query = $wp_query;
 
         // Create a search query.
         $query = new WP_Query();
         $query->init();
-        
-        // Set as main query
-        $wp_query = $query;
+
+        // Set as main query.
+        $wp_query             = $query;
         $query->is_admin      = false;
         $query->is_main_query = true;
         $query->is_search     = true;
@@ -303,8 +303,8 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
         // Clean up.
         unset( $_GET['taxonomy_document_category'] );
         unset( $_GET['taxonomy_document_type'] );
-        
-        // Restore original wp_query
+
+        // Restore original wp_query.
         $wp_query = $original_wp_query;
     }
 
@@ -324,16 +324,16 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
         // Set up $_GET parameter with array of term IDs.
         $_GET['taxonomy_document_category'] = array( $policies_term->term_id, $procedures_term->term_id );
 
-        // Simulate main query properly
+        // Simulate main query properly.
         global $wp_query;
         $original_wp_query = $wp_query;
 
         // Create a search query.
         $query = new WP_Query();
         $query->init();
-        
-        // Set as main query
-        $wp_query = $query;
+
+        // Set as main query.
+        $wp_query             = $query;
         $query->is_admin      = false;
         $query->is_main_query = true;
         $query->is_search     = true;
@@ -365,8 +365,8 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
 
         // Clean up.
         unset( $_GET['taxonomy_document_category'] );
-        
-        // Restore original wp_query
+
+        // Restore original wp_query.
         $wp_query = $original_wp_query;
     }
 
@@ -385,16 +385,16 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
         // Set up $_GET parameter to simulate URL parameter.
         $_GET['taxonomy_document_category'] = $policies_term->term_id;
 
-        // Simulate main query properly
+        // Simulate main query properly.
         global $wp_query;
         $original_wp_query = $wp_query;
 
         // Create a search query.
         $query = new WP_Query();
         $query->init();
-        
-        // Set as main query
-        $wp_query = $query;
+
+        // Set as main query.
+        $wp_query             = $query;
         $query->is_admin      = false;
         $query->is_main_query = true;
         $query->is_search     = true;
@@ -411,8 +411,8 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
 
         // Clean up.
         unset( $_GET['taxonomy_document_category'] );
-        
-        // Restore original wp_query
+
+        // Restore original wp_query.
         $wp_query = $original_wp_query;
     }
 
@@ -451,11 +451,26 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
 
         // Create test terms.
         $terms_data = array(
-            array( 'name' => 'Policies', 'taxonomy' => 'document_category' ),
-            array( 'name' => 'Procedures', 'taxonomy' => 'document_category' ),
-            array( 'name' => 'Guidelines', 'taxonomy' => 'document_category' ),
-            array( 'name' => 'Form', 'taxonomy' => 'document_type' ),
-            array( 'name' => 'Report', 'taxonomy' => 'document_type' ),
+            array(
+				'name'     => 'Policies',
+				'taxonomy' => 'document_category',
+			),
+            array(
+				'name'     => 'Procedures',
+				'taxonomy' => 'document_category',
+			),
+            array(
+				'name'     => 'Guidelines',
+				'taxonomy' => 'document_category',
+			),
+            array(
+				'name'     => 'Form',
+				'taxonomy' => 'document_type',
+			),
+            array(
+				'name'     => 'Report',
+				'taxonomy' => 'document_type',
+			),
         );
 
         foreach ( $terms_data as $term_data ) {
@@ -504,4 +519,4 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
             }
         }
     }
-} 
+}

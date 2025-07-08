@@ -54,6 +54,7 @@ parse_str( $url_parts['query'] ?? '', $all_query_params );
 // Fallback to $_GET if URL parsing doesn't work (e.g., in test environments).
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
 if ( empty( $all_query_params ) && ! empty( $_GET ) ) {
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
     $all_query_params = $_GET;
 }
 

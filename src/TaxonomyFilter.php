@@ -22,7 +22,7 @@ class TaxonomyFilter {
     }
 
     /**
-     * Add taxonomy filter query variables to WordPress
+     * Add taxonomy filter query variables to WordPress.
      *
      * @param array $vars Array of query variables.
      * @return array Modified array of query variables.
@@ -40,20 +40,20 @@ class TaxonomyFilter {
     }
 
     /**
-     * Handle taxonomy filtering in the main query
+     * Handle taxonomy filtering in the main query.
      *
      * @param \WP_Query $query The WordPress query object.
      */
     public function handle_taxonomy_filtering( $query ) {
         // Only modify the main query on the frontend.
-        // In test environments, allow queries that have the right properties even if not technically the "main" query
+        // In test environments, allow queries that have the right properties even if not technically the "main" query.
         $is_test_environment = defined( 'PHPUNIT_COMPOSER_INSTALL' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' );
-        
+
         if ( is_admin() || ! $query->is_search() ) {
             return;
         }
-        
-        // For non-test environments, also check is_main_query
+
+        // For non-test environments, also check is_main_query.
         if ( ! $is_test_environment && ! $query->is_main_query() ) {
             return;
         }
@@ -76,7 +76,7 @@ class TaxonomyFilter {
                 // Handle both array and string values.
                 $term_ids = is_array( $value ) ? $value : array( $value );
                 $term_ids = array_map( 'sanitize_text_field', $term_ids );
-                $term_ids = array_map( 'intval', $term_ids ); // Convert to integers
+                $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
 
                 // Add to tax query.
                 $tax_query[] = array(
@@ -103,7 +103,7 @@ class TaxonomyFilter {
                 // Handle both array and string values.
                 $term_ids = is_array( $value ) ? $value : array( $value );
                 $term_ids = array_map( 'sanitize_text_field', $term_ids );
-                $term_ids = array_map( 'intval', $term_ids ); // Convert to integers
+                $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
 
                 // Add to tax query.
                 $tax_query[] = array(
@@ -141,12 +141,10 @@ class TaxonomyFilter {
                 }
             }
         }
-
-
     }
 
     /**
-     * Determine the post type based on the taxonomies being filtered
+     * Determine the post type based on the taxonomies being filtered.
      *
      * @param array $tax_query The taxonomy query array.
      * @return string|null The determined post type or null if not found.

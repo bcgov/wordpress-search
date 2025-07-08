@@ -87,10 +87,10 @@ class BasicTaxonomyFilterTest extends WP_UnitTestCase {
         );
 
         $invalid_cases = array(
-            ''                              => false,
-            'document'                      => false,
-            'document:'                     => false,
-            ':document_category'            => false,
+            ''                                 => false,
+            'document'                         => false,
+            'document:'                        => false,
+            ':document_category'               => false,
             'document:document_category:extra' => false,
         );
 
@@ -187,4 +187,4 @@ class BasicTaxonomyFilterTest extends WP_UnitTestCase {
         unregister_taxonomy( 'test_custom_taxonomy' );
         $this->assertFalse( taxonomy_exists( 'test_custom_taxonomy' ), 'Custom taxonomy should not exist after unregistration' );
     }
-} 
+}
