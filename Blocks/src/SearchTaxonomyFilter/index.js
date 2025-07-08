@@ -13,6 +13,6 @@ import metadata from './block.json';
  * Register block type
  */
 registerBlockType(metadata.name, {
-    ...metadata,
-    edit: Edit,
-}); 
+	...metadata,
+	edit: Edit,
+});

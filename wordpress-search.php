@@ -44,12 +44,12 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
  */
 function wordpress_search_render_taxonomy_filter_block($attributes) {
     ob_start();
-    $render_file = plugin_dir_path(__FILE__) . 'Blocks/build/SearchTaxonomyFilter/render.php';
-    
-    if (file_exists($render_file)) {
+    $render_file = plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter/render.php';
+
+    if ( file_exists( $render_file ) ) {
         include $render_file;
     }
-    
+
     return ob_get_clean();
 }
 
@@ -65,9 +65,9 @@ function wordpress_search_init() {
     register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchPostFilter' );
     register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsPostMetadataDisplay' );
 
-    // Register taxonomy filter block
+    // Register taxonomy filter block.
     $block_path = plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter';
-    
+
     register_block_type(
         $block_path,
         array(
