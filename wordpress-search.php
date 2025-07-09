@@ -32,21 +32,7 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
     return;
 }
 
-/**
- * Render callback for SearchTaxonomyFilter block
- *
- * @return string The rendered block content.
- */
-function wordpress_search_render_taxonomy_filter_block() {
-    ob_start();
-    $render_file = plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter/render.php';
 
-    if ( file_exists( $render_file ) ) {
-        include $render_file;
-    }
-
-    return ob_get_clean();
-}
 
 /**
  * Initialize the plugin
@@ -59,16 +45,7 @@ function wordpress_search_init() {
     register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/Search' );
     register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchPostFilter' );
     register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsPostMetadataDisplay' );
-
-    // Register taxonomy filter block.
-    $block_path = plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter';
-
-    register_block_type(
-        $block_path,
-        array(
-            'render_callback' => 'wordpress_search_render_taxonomy_filter_block',
-        )
-    );
+    register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter' );
 
     // Initialize filter functionality.
     $wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
