@@ -8,6 +8,18 @@
  *
  * @package WordPress_Search
  */
+
+use Bcgov\WordpressSearch\TaxonomyFilter;
+
+/**
+ * Class BasicTaxonomyFilterTest
+ *
+ * This test class contains basic tests to verify that the TaxonomyFilter
+ * class can be properly instantiated and initialized. This is our starting point
+ * for testing the SearchTaxonomyFilter block PHP functionality.
+ *
+ * @package WordPress_Search
+ */
 class BasicTaxonomyFilterTest extends WP_UnitTestCase {
 
     /**
@@ -25,8 +37,8 @@ class BasicTaxonomyFilterTest extends WP_UnitTestCase {
      */
     public function test_taxonomy_filter_initialization() {
         // Create and initialize the TaxonomyFilter.
-        $taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
-        $this->assertInstanceOf( '\Bcgov\WordpressSearch\TaxonomyFilter', $taxonomy_filter );
+        $taxonomy_filter = new TaxonomyFilter();
+        $this->assertInstanceOf( TaxonomyFilter::class, $taxonomy_filter );
 
         $taxonomy_filter->init();
 
@@ -116,7 +128,7 @@ class BasicTaxonomyFilterTest extends WP_UnitTestCase {
      * - WordPress query var system integration
      */
     public function test_add_query_vars() {
-        $taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
+        $taxonomy_filter = new TaxonomyFilter();
 
         // Create a custom taxonomy for testing.
         register_taxonomy(

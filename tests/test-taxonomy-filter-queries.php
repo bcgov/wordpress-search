@@ -7,12 +7,23 @@
  *
  * @package WordPress_Search
  */
+
+use Bcgov\WordpressSearch\TaxonomyFilter;
+
+/**
+ * Class TaxonomyQueryFilteringTest
+ *
+ * Tests the query filtering functionality of the TaxonomyFilter class.
+ * Focuses on testing how URL parameters are converted into WordPress tax queries.
+ *
+ * @package WordPress_Search
+ */
 class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
 
     /**
      * The taxonomy filter instance for testing.
      *
-     * @var \Bcgov\WordpressSearch\TaxonomyFilter
+     * @var TaxonomyFilter
      */
     private $taxonomy_filter;
 
@@ -44,7 +55,7 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
         parent::setUp();
 
         // Create our TaxonomyFilter instance.
-        $this->taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
+        $this->taxonomy_filter = new TaxonomyFilter();
         $this->taxonomy_filter->init();
 
         // Create test taxonomies, terms, and posts.

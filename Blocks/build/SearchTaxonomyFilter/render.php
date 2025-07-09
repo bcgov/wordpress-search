@@ -1,4 +1,10 @@
 <?php
+
+namespace Bcgov\WordpressSearch\SearchTaxonomyFilter;
+
+// Used to import TAXONOMY_PREFIX variable
+use Bcgov\WordpressSearch\TaxonomyFilter;
+
 /**
  * Search Taxonomy Filter Block - Frontend Render
  *
@@ -49,18 +55,19 @@ if ( ! $actual_taxonomy || ! taxonomy_exists( $actual_taxonomy ) ) {
 // Get current URL parameters and filter relevant ones upfront.
 $current_url = home_url( add_query_arg( null, null ) );
 $url_parts   = wp_parse_url( $current_url );
-parse_str( $url_parts['query'] ?? '', $all_query_params );
+parse_str( $url_parts['query'] ?? '', $all_query_params_raw );
 
 // Fallback to $_GET if URL parsing doesn't work (e.g., in test environments).
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
-if ( empty( $all_query_params ) && ! empty( $_GET ) ) {
-    $all_query_params = $_GET;
+if ( empty( $all_query_params_raw ) && ! empty( $_GET ) ) {
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
+    $all_query_params_raw = $_GET;
 }
 
 // Filter to get only non-taxonomy parameters for hidden inputs.
-$taxonomy_param_key = 'taxonomy_' . $actual_taxonomy;
+$taxonomy_param_key = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy;
 $hidden_params      = array_filter(
-    $all_query_params,
+    $all_query_params_raw,
     function ( $key ) use ( $taxonomy_param_key ) {
 		return strpos( $key, $taxonomy_param_key ) !== 0;
 	},
@@ -69,10 +76,10 @@ $hidden_params      = array_filter(
 
 // Get currently selected terms (expecting term IDs).
 $current_terms = array();
-if ( isset( $all_query_params[ $taxonomy_param_key ] ) ) {
-    $current_terms = is_array( $all_query_params[ $taxonomy_param_key ] )
-        ? $all_query_params[ $taxonomy_param_key ]
-        : array( $all_query_params[ $taxonomy_param_key ] );
+if ( isset( $all_query_params_raw[ $taxonomy_param_key ] ) ) {
+    $current_terms = is_array( $all_query_params_raw[ $taxonomy_param_key ] )
+        ? $all_query_params_raw[ $taxonomy_param_key ]
+        : array( $all_query_params_raw[ $taxonomy_param_key ] );
 }
 
 // Convert to strings for comparison.
@@ -124,14 +131,14 @@ $taxonomy_label  = $taxonomy_object ? $taxonomy_object->labels->singular_name : 
                         <div class="taxonomy-filter__options">
                             <?php foreach ( $terms as $taxonomy_term ) : ?>
                                 <?php
-                                $checkbox_id = 'taxonomy_' . $actual_taxonomy . '_' . $taxonomy_term->term_id;
+                                $checkbox_id = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy . '_' . $taxonomy_term->term_id;
                                 $is_checked  = in_array( strval( $taxonomy_term->term_id ), $current_terms, true );
                                 ?>
                                 <div class="components-checkbox-control taxonomy-filter__option">
                                     <input 
                                         type="checkbox" 
                                         id="<?php echo esc_attr( $checkbox_id ); ?>"
-                                        name="taxonomy_<?php echo esc_attr( $actual_taxonomy ); ?>[]" 
+                                        name="<?php echo esc_attr( TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy ); ?>[]" 
                                         value="<?php echo esc_attr( $taxonomy_term->term_id ); ?>"
                                         <?php checked( $is_checked ); ?>
                                         class="components-checkbox-control__input taxonomy-filter__checkbox"

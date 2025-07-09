@@ -14,6 +14,11 @@ namespace Bcgov\WordpressSearch;
  */
 class TaxonomyFilter {
     /**
+     * Prefix used for taxonomy filter parameters
+     */
+    const TAXONOMY_PREFIX = 'taxonomy_';
+
+    /**
      * Initialize the taxonomy filter functionality
      */
     public function init() {
@@ -33,7 +38,7 @@ class TaxonomyFilter {
 
         // Add query var for each taxonomy.
         foreach ( $taxonomies as $taxonomy ) {
-            $vars[] = 'taxonomy_' . $taxonomy;
+            $vars[] = self::TAXONOMY_PREFIX . $taxonomy;
         }
 
         return $vars;
@@ -63,58 +68,22 @@ class TaxonomyFilter {
 
         $tax_query = array();
 
-        // Look for taxonomy filters in the query variables.
-        foreach ( $query_vars as $key => $value ) {
-            if ( 0 === strpos( $key, 'taxonomy_' ) && ! empty( $value ) ) {
-                $taxonomy = substr( $key, 9 ); // Remove 'taxonomy_' prefix.
-
-                // Skip if taxonomy doesn't exist.
-                if ( ! taxonomy_exists( $taxonomy ) ) {
-                    continue;
-                }
-
-                // Handle both array and string values.
-                $term_ids = is_array( $value ) ? $value : array( $value );
-                $term_ids = array_map( 'sanitize_text_field', $term_ids );
-                $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
-
-                // Add to tax query.
-                $tax_query[] = array(
-                    'taxonomy'         => $taxonomy,
-                    'field'            => 'term_id',
-                    'terms'            => $term_ids,
-                    'operator'         => 'IN',
-                    'include_children' => true,
-                );
-            }
-        }
+                // Process taxonomy filters from query variables.
+        $tax_query = $this->process_taxonomy_parameters( $query_vars, $tax_query );
 
         // Also check $_GET directly for any taxonomy parameters that might not be in query_vars.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for filtering.
-        foreach ( $_GET as $key => $value ) {
-            if ( 0 === strpos( $key, 'taxonomy_' ) && ! empty( $value ) && ! isset( $query_vars[ $key ] ) ) {
-                $taxonomy = substr( $key, 9 ); // Remove 'taxonomy_' prefix.
+        // Note: Nonce verification not required here as this is read-only filtering of public search results.
+        // Users can share/bookmark these URLs, and nonces would break this functionality.
+        $get_params = array_filter(
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search filtering.
+            $_GET,
+            function ( $key ) use ( $query_vars ) {
+				return ! isset( $query_vars[ $key ] );
+			},
+            ARRAY_FILTER_USE_KEY
+        );
 
-                // Skip if taxonomy doesn't exist.
-                if ( ! taxonomy_exists( $taxonomy ) ) {
-                    continue;
-                }
-
-                // Handle both array and string values.
-                $term_ids = is_array( $value ) ? $value : array( $value );
-                $term_ids = array_map( 'sanitize_text_field', $term_ids );
-                $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
-
-                // Add to tax query.
-                $tax_query[] = array(
-                    'taxonomy'         => $taxonomy,
-                    'field'            => 'term_id',
-                    'terms'            => $term_ids,
-                    'operator'         => 'IN',
-                    'include_children' => true,
-                );
-            }
-        }
+        $tax_query = $this->process_taxonomy_parameters( $get_params, $tax_query );
 
         // If we have taxonomy filters, add them to the query.
         if ( ! empty( $tax_query ) ) {
@@ -141,6 +110,57 @@ class TaxonomyFilter {
                 }
             }
         }
+    }
+
+    /**
+     * Process taxonomy parameters from query data and add to tax query.
+     *
+     * @param array $params The parameters to process (from $_GET or query_vars).
+     * @param array $tax_query The existing tax query array to add to.
+     * @return array The updated tax query array.
+     */
+    private function process_taxonomy_parameters( $params, $tax_query ) {
+        foreach ( $params as $key => $value ) {
+            // Sanitize the key to prevent security issues.
+            $sanitized_key = sanitize_key( $key );
+
+            if ( 0 === strpos( $sanitized_key, self::TAXONOMY_PREFIX ) && ! empty( $value ) ) {
+                $taxonomy = substr( $sanitized_key, strlen( self::TAXONOMY_PREFIX ) ); // Remove taxonomy prefix.
+
+                // Additional validation: ensure taxonomy name contains only allowed characters.
+                if ( ! preg_match( '/^[a-zA-Z0-9_-]+$/', $taxonomy ) ) {
+                    continue;
+                }
+
+                // Skip if taxonomy doesn't exist.
+                if ( ! taxonomy_exists( $taxonomy ) ) {
+                    continue;
+                }
+
+                // Handle both array and string values.
+                $term_ids = is_array( $value ) ? $value : array( $value );
+                $term_ids = array_map( 'sanitize_text_field', $term_ids );
+                $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
+
+                // Remove any zero/invalid term IDs.
+                $term_ids = array_filter( $term_ids );
+
+                if ( empty( $term_ids ) ) {
+                    continue;
+                }
+
+                // Add to tax query.
+                $tax_query[] = array(
+                    'taxonomy'         => $taxonomy,
+                    'field'            => 'term_id',
+                    'terms'            => $term_ids,
+                    'operator'         => 'IN',
+                    'include_children' => true,
+                );
+            }
+        }
+
+        return $tax_query;
     }
 
     /**

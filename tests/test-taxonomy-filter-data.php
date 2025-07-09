@@ -7,12 +7,23 @@
  *
  * @package WordPress_Search
  */
+
+use Bcgov\WordpressSearch\TaxonomyFilter;
+
+/**
+ * Class TaxonomyDataRetrievalTest
+ *
+ * Tests the data retrieval functionality related to taxonomies.
+ * Focuses on testing how the system gets taxonomy terms for filter dropdowns.
+ *
+ * @package WordPress_Search
+ */
 class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
 
     /**
      * The taxonomy filter instance for testing.
      *
-     * @var \Bcgov\WordpressSearch\TaxonomyFilter
+     * @var TaxonomyFilter
      */
     private $taxonomy_filter;
 
@@ -44,7 +55,7 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
         parent::setUp();
 
         // Create our TaxonomyFilter instance.
-        $this->taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
+        $this->taxonomy_filter = new TaxonomyFilter();
         $this->taxonomy_filter->init();
 
         // Create test taxonomies and terms.

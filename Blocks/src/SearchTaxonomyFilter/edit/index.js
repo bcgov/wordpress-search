@@ -47,16 +47,23 @@ export default function Edit({ attributes, setAttributes }) {
 				}
 
 				// Get a nice label from the taxonomy object
-				const label =
+				const taxonomyLabel =
 					taxonomy.labels?.singular_name ||
 					taxonomy.name ||
 					__('Unknown', 'wordpress-search');
+
+				// Get the post type label for clarity
+				const postType = taxonomy.types[0];
+				const postTypeLabel = postType.charAt(0).toUpperCase() + postType.slice(1);
+
+				// Combine post type and taxonomy name for clarity
+				const label = `${postTypeLabel}: ${taxonomyLabel.charAt(0).toUpperCase() + taxonomyLabel.slice(1)}`;
 
 				// Use the actual taxonomy name without any prefix manipulation
 				const value = `${taxonomy.types[0]}:${taxonomy.name}`;
 
 				return {
-					label: label.charAt(0).toUpperCase() + label.slice(1), // Capitalize first letter
+					label,
 					value,
 				};
 			})

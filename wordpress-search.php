@@ -23,17 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Autoload classes using Composer.
+$local_composer = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $local_composer ) ) {
+    require_once $local_composer;
+}
+
 if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
-    $local_composer  = __DIR__ . '/vendor/autoload.php';
-    $server_composer = __DIR__ . '/../../../../vendor/autoload.php';
-    if ( file_exists( $local_composer ) || file_exists( $server_composer ) ) {
-        if ( file_exists( $server_composer ) ) {
-            require_once $server_composer;
-        }
-        if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
-            require_once $local_composer;
-        }
-    }
+    return;
 }
 
 /**
