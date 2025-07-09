@@ -66,24 +66,11 @@ class TaxonomyFilter {
         // Get all query variables.
         $query_vars = $query->query_vars;
 
-        $tax_query = array();
-
-                // Process taxonomy filters from query variables.
-        $tax_query = $this->process_taxonomy_parameters( $query_vars, $tax_query );
-
-        // Also check $_GET directly for any taxonomy parameters that might not be in query_vars.
+        // Build taxonomy query from URL parameters.
         // Note: Nonce verification not required here as this is read-only filtering of public search results.
         // Users can share/bookmark these URLs, and nonces would break this functionality.
-        $get_params = array_filter(
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search filtering.
-            $_GET,
-            function ( $key ) use ( $query_vars ) {
-				return ! isset( $query_vars[ $key ] );
-			},
-            ARRAY_FILTER_USE_KEY
-        );
-
-        $tax_query = $this->process_taxonomy_parameters( $get_params, $tax_query );
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search filtering.
+        $tax_query = $this->process_taxonomy_parameters( $_GET, array() );
 
         // If we have taxonomy filters, add them to the query.
         if ( ! empty( $tax_query ) ) {
@@ -113,11 +100,14 @@ class TaxonomyFilter {
     }
 
     /**
-     * Process taxonomy parameters from query data and add to tax query.
+     * Process taxonomy parameters from query data and append to existing tax query.
+     *
+     * This method takes an existing tax_query array, processes the provided parameters
+     * for any taxonomy filters, and appends new filter conditions to the array.
      *
      * @param array $params The parameters to process (from $_GET or query_vars).
-     * @param array $tax_query The existing tax query array to add to.
-     * @return array The updated tax query array.
+     * @param array $tax_query The existing tax query array to append to.
+     * @return array The tax query array with new conditions appended.
      */
     private function process_taxonomy_parameters( $params, $tax_query ) {
         foreach ( $params as $key => $value ) {
