@@ -1,22 +1,22 @@
-.wp-block-wordpress-search-metadata-filter {
+.wp-block-wordpress-search-taxonomy-filter {
 	margin: 1rem 0;
 
-	.search-metadata-filter__container {
+	.search-taxonomy-filter__container {
 		display: block;
 	}
 
-	.metadata-filter-form {
+	.taxonomy-filter-form {
 		width: 100%;
 	}
 
-	.metadata-filter {
+	.taxonomy-filter {
 		border: none;
 		border-radius: 6px;
 		background: #fff;
 		overflow: hidden;
 	}
 
-	.metadata-filter__header {
+	.taxonomy-filter__header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -31,7 +31,7 @@
 		}
 	}
 
-	.metadata-filter__label {
+	.taxonomy-filter__label {
 		font-weight: 600;
 		color: #333;
 		margin: 0;
@@ -39,7 +39,7 @@
 		flex: 1;
 	}
 
-	.metadata-filter__toggle {
+	.taxonomy-filter__toggle {
 		width: 32px;
 		height: 32px;
 		display: flex;
@@ -61,7 +61,7 @@
 		}
 	}
 
-	.metadata-filter__content {
+	.taxonomy-filter__content {
 		padding: 1rem;
 		transition: all 0.3s ease;
 
@@ -70,14 +70,14 @@
 		}
 	}
 
-	.metadata-filter__options {
+	.taxonomy-filter__options {
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
 		margin-bottom: 1rem;
 	}
 
-	.metadata-filter__option {
+	.taxonomy-filter__option {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -96,23 +96,21 @@
 			border-bottom: none;
 		}
 
-		&:has(.metadata-filter__checkbox:checked) {
+		&:has(.taxonomy-filter__checkbox:checked) {
 			background: #f0f8ff;
 		}
 	}
 
-
-	.metadata-filter__option-label {
+	.taxonomy-filter__option-label {
 		font-size: 0.875rem;
 		color: #333;
 		flex: 1;
 		line-height: 1.4;
 	}
 
-	// Clean checkbox styling without WordPress component dependencies
 	.components-checkbox-control {
 
-		&.metadata-filter__option {
+		&.taxonomy-filter__option {
 			display: flex;
 			align-items: center;
 			gap: 0.5rem;
@@ -145,13 +143,12 @@
 			cursor: pointer;
 		}
 
-		// Style the checkbox input to look clean and modern
 		.components-checkbox-control__input {
 			width: 16px;
 			height: 16px;
 			margin: 0;
 			cursor: pointer;
-			accent-color: #2271b1; // WordPress blue color
+			accent-color: #2271b1;
 		}
 	}
 }
