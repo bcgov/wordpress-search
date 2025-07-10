@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/bcgov/wordpress-search
  * Author: govwordpress@gov.bc.ca
  * Author URI: https://citz-gdx.atlassian.net/browse/DSWP-114
- * Description: WordPress wordpress-search plugin is a plugin that adds custom functionality to your WordPress site.
+ * Description: WordPress wordpress-search plugin is a plugin that adds custom functionality to your WordPress site dev1.0.1.
  * Requires at least: 6.4.4
  * Tested up to: 6.5
  * Requires PHP: 7.4
