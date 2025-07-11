@@ -30,6 +30,20 @@ $selected_taxonomy_name = $taxonomy_parts[1];
 // Optimized taxonomy name resolution.
 $registered_taxonomies = get_object_taxonomies( $document_post_type, 'names' );
 
+// If no taxonomies found for the exact post type, try case-insensitive post type matching.
+if ( empty( $registered_taxonomies ) ) {
+    $all_post_types = get_post_types( array(), 'names' );
+    foreach ( $all_post_types as $matched_post_type ) {
+        if ( strcasecmp( $matched_post_type, $document_post_type ) === 0 ) {
+            $registered_taxonomies = get_object_taxonomies( $matched_post_type, 'names' );
+            if ( ! empty( $registered_taxonomies ) ) {
+                $document_post_type = $matched_post_type; // Use the correctly cased post type.
+                break;
+            }
+        }
+    }
+}
+
 // Create a mapping for efficient lookup.
 $taxonomy_map = array_flip( $registered_taxonomies );
 
@@ -37,12 +51,22 @@ $taxonomy_map = array_flip( $registered_taxonomies );
 if ( isset( $taxonomy_map[ $selected_taxonomy_name ] ) ) {
     $actual_taxonomy = $selected_taxonomy_name;
 } else {
-    // If no exact match, check for partial matches (for backward compatibility).
+    // If no exact match, check for case-insensitive match first.
     $actual_taxonomy = null;
     foreach ( $registered_taxonomies as $tax_name ) {
-        if ( strpos( $tax_name, $selected_taxonomy_name ) !== false ) {
+        if ( strcasecmp( $tax_name, $selected_taxonomy_name ) === 0 ) {
             $actual_taxonomy = $tax_name;
             break;
+        }
+    }
+
+    // If still no match, check for partial matches (for backward compatibility).
+    if ( ! $actual_taxonomy ) {
+        foreach ( $registered_taxonomies as $tax_name ) {
+            if ( stripos( $tax_name, $selected_taxonomy_name ) !== false ) {
+                $actual_taxonomy = $tax_name;
+                break;
+            }
         }
     }
 }

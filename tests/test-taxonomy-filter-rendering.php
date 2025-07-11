@@ -237,6 +237,61 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
     }
 
     /**
+     * Test block handles case-insensitive taxonomy and post type matching.
+     *
+     * What this tests:
+     * - Block renders when taxonomy names have case differences
+     * - Block renders when post type names have case differences
+     * - Fixes the bug where blocks don't render when metadata titles start with capitals
+     * - Case-insensitive matching works for both post type and taxonomy name resolution
+     */
+    public function test_block_handles_case_insensitive_matching() {
+        // Test case 1: Capitalized taxonomy name.
+        $attributes_cap_taxonomy = array(
+            'selectedTaxonomy' => 'document:Document_Category', // Capital D in taxonomy.
+        );
+
+        $output = $this->render_block( $attributes_cap_taxonomy );
+        $this->assertStringContainsString( 'wp-block-wordpress-search-taxonomy-filter', $output, 'Should render with capitalized taxonomy name' );
+        $this->assertStringContainsString( 'Document Category', $output, 'Should display correct taxonomy label' );
+        $this->assertStringContainsString( 'Policies', $output, 'Should contain Policies term' );
+
+        // Test case 2: All caps taxonomy name.
+        $attributes_all_caps = array(
+            'selectedTaxonomy' => 'document:DOCUMENT_CATEGORY', // All caps taxonomy.
+        );
+
+        $output = $this->render_block( $attributes_all_caps );
+        $this->assertStringContainsString( 'wp-block-wordpress-search-taxonomy-filter', $output, 'Should render with all caps taxonomy name' );
+        $this->assertStringContainsString( 'Document Category', $output, 'Should display correct taxonomy label for all caps' );
+
+        // Test case 3: Capitalized post type (this is likely the main issue).
+        $attributes_cap_post_type = array(
+            'selectedTaxonomy' => 'Document:document_category', // Capital D in post type.
+        );
+
+        $output = $this->render_block( $attributes_cap_post_type );
+        $this->assertStringContainsString( 'wp-block-wordpress-search-taxonomy-filter', $output, 'Should render with capitalized post type' );
+        $this->assertStringContainsString( 'Document Category', $output, 'Should display correct taxonomy label with cap post type' );
+
+        // Test case 4: Both post type and taxonomy capitalized.
+        $attributes_both_caps = array(
+            'selectedTaxonomy' => 'Document:Document_Category', // Both capitalized.
+        );
+
+        $output = $this->render_block( $attributes_both_caps );
+        $this->assertStringContainsString( 'wp-block-wordpress-search-taxonomy-filter', $output, 'Should render with both capitalized' );
+        $this->assertStringContainsString( 'Document Category', $output, 'Should display correct taxonomy label with both caps' );
+
+        // All outputs should use the correct lowercase taxonomy name in form elements.
+        $outputs = array( $output );
+        foreach ( $outputs as $test_output ) {
+            $this->assertStringContainsString( 'name="taxonomy_document_category[]"', $test_output, 'Should normalize to lowercase in form names' );
+            $this->assertStringContainsString( 'data-taxonomy="document_category"', $test_output, 'Should normalize to lowercase in data attributes' );
+        }
+    }
+
+    /**
      * Test block security features
      *
      * What this tests:

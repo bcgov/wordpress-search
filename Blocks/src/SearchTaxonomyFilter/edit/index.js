@@ -26,6 +26,7 @@ export default function Edit({ attributes, setAttributes }) {
 		const { getTaxonomies } = select('core');
 		const allTaxonomies =
 			getTaxonomies({ per_page: -1, context: 'view' }) || [];
+		
 		return {
 			taxonomies: allTaxonomies,
 		};
@@ -39,11 +40,24 @@ export default function Edit({ attributes, setAttributes }) {
 				if (!tax) {
 					return false;
 				}
+				
+				// Be more permissive - only require the taxonomy to have a name
+				if (!tax.name) {
+					return false;
+				}
+				
 				return true;
 			})
 			.map((taxonomy) => {
-				if (!taxonomy.types || !taxonomy.types[0]) {
-					return null;
+				// Handle taxonomies that might not have types properly set
+				if (!taxonomy.types || taxonomy.types.length === 0) {
+					// Try to get object_type as fallback
+					const objectTypes = taxonomy.object_type || [];
+					if (objectTypes.length === 0) {
+						return null;
+					}
+					// Use the first object type as fallback
+					taxonomy.types = objectTypes;
 				}
 
 				// Get a nice label from the taxonomy object
