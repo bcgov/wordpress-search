@@ -351,6 +351,16 @@ class TaxonomyDataRetrievalTest extends WP_UnitTestCase {
      * Helper method to create test taxonomies and terms.
      */
     private function create_test_taxonomies_and_terms() {
+        // Register custom post type for documents first.
+        register_post_type(
+            'document',
+            array(
+                'public'   => true,
+                'label'    => 'Documents',
+                'supports' => array( 'title', 'editor' ),
+            )
+        );
+
         // Register custom taxonomy for documents.
         register_taxonomy(
             'document_category',
