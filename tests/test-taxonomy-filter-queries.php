@@ -431,6 +431,16 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
      * Helper method to create test environment
      */
     private function create_test_environment() {
+        // Register custom post type for documents first.
+        register_post_type(
+            'document',
+            array(
+                'public'   => true,
+                'label'    => 'Documents',
+                'supports' => array( 'title', 'editor' ),
+            )
+        );
+
         // Register custom taxonomies.
         register_taxonomy(
             'document_category',
