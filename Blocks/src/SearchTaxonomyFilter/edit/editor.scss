@@ -7,10 +7,10 @@
 
 .taxonomy-filter-preview {
 	min-height: 120px;
-	
+
 	&__header {
 		margin-bottom: 1rem;
-		
+
 		h4 {
 			margin: 0 0 0.5rem 0;
 			font-size: 16px;
@@ -18,14 +18,14 @@
 			color: #1e1e1e;
 		}
 	}
-	
+
 	&__description {
 		margin: 0;
 		font-size: 14px;
 		color: #757575;
 		font-style: italic;
 	}
-	
+
 	&__content {
 		margin-top: 1rem;
 		padding: 1rem;
@@ -33,10 +33,10 @@
 		border: 1px dashed #c3c4c7;
 		border-radius: 4px;
 	}
-	
+
 	&__placeholder {
 		text-align: center;
-		
+
 		p {
 			margin: 0;
 			color: #757575;
@@ -47,10 +47,11 @@
 
 // Style the InspectorControls panel
 .block-editor-block-inspector {
+
 	.components-panel__body-title {
 		font-weight: 600;
 	}
-	
+
 	.components-select-control__help {
 		margin-top: 8px;
 		font-size: 12px;
