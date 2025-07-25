@@ -15,4 +15,4 @@ import metadata from './block.json';
 registerBlockType(metadata.name, {
 	...metadata,
 	edit: Edit,
-}); 
+});

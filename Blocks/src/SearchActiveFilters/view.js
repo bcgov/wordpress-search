@@ -23,10 +23,10 @@ document.addEventListener('DOMContentLoaded', function () {
 		// Check if the clicked element is a filter chip remove button
 		if (event.target.matches('.search-active-filters__chip-remove')) {
 			event.preventDefault();
-			
+
 			// Store scroll position before navigation
 			sessionStorage.setItem('filterScrollPosition', window.scrollY);
-			
+
 			// Get the remove URL from the data attribute
 			const removeUrl = event.target.getAttribute('data-remove-url');
 			if (removeUrl) {
@@ -43,4 +43,4 @@ document.addEventListener('DOMContentLoaded', function () {
 			sessionStorage.setItem('filterScrollPosition', window.scrollY);
 		}
 	});
-}); 
+});
