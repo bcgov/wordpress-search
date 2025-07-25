@@ -9,23 +9,20 @@ namespace Bcgov\WordpressSearch\SearchActiveFilters;
 
 $current_url = add_query_arg( null, null );
 
-// Verify nonce for security.
-if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'search_filters' ) ) {
-    // Nonce verification failed - stop execution for security.
-    wp_die( esc_html__( 'Security check failed.', 'wordpress-search' ) );
-}
+global $wp_query;
+$query_params = $wp_query->query;
 
-$query_params = wp_unslash( $_GET );
 $search_param = sanitize_text_field( $query_params['s'] ?? '' );
+
 unset( $query_params['s'] );
 
 $applied_filters = [];
 $filter_count    = 0;
 
-// Inline helper functions (used only once).
-$get_term_name       = function ( $term ) {
+$get_term_name = function ( $term ) {
     return ( $term && ! is_wp_error( $term ) ) ? $term->name : '';
 };
+
 $get_post_type_label = function ( $pt ) {
     $obj = get_post_type_object( $pt );
     return $obj ? $obj->labels->singular_name : '';
