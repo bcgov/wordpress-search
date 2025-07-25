@@ -159,8 +159,8 @@ class SearchBlockFunctionalityTest extends WP_UnitTestCase {
         // Should use semantic HTML5 search input.
         $this->assertStringContainsString( 'type="search"', $output, 'Should use search input type for better accessibility' );
 
-        // Should have required attribute for form validation.
-        $this->assertStringContainsString( 'required', $output, 'Should have required attribute for form validation' );
+        // Should allow empty searches (no required attribute) for better UX.
+        $this->assertStringNotContainsString( 'required', $output, 'Should not have required attribute to allow empty searches' );
 
         // Should have meaningful placeholder text.
         $this->assertStringContainsString( 'placeholder="Search term"', $output, 'Should have descriptive placeholder text' );
