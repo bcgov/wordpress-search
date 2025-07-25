@@ -1,0 +1,46 @@
+.search-result-count {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 0.5rem 0;
+	margin: 1rem 0;
+	text-align: left;
+
+	&__content {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		justify-content: flex-start;
+	}
+
+	&__number {
+		font-size: 1rem;
+		font-weight: 500;
+		color: #666;
+		line-height: 1;
+	}
+
+	&__message {
+		font-size: 1rem;
+		color: #666;
+		font-weight: 400;
+		line-height: 1.4;
+	}
+
+	// Responsive design
+	@media (max-width: 768px) {
+
+		&__content {
+			flex-direction: column;
+			gap: 0.25rem;
+		}
+
+		&__number {
+			font-size: 0.875rem;
+		}
+
+		&__message {
+			font-size: 0.875rem;
+		}
+	}
+}

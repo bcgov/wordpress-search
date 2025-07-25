@@ -73,10 +73,10 @@ function get_tag_name_safe( $tag_id ) {
 
 // Custom filters and their resolvers.
 $custom_filters = [
-    'category'  => 'get_category_name_safe',
-    'tag'       => 'get_tag_name_safe',
-    'post_type' => 'get_post_type_label_safe',
-    'author'    => 'get_user_name_safe',
+    'category'  => __NAMESPACE__ . '\\get_category_name_safe',
+    'tag'       => __NAMESPACE__ . '\\get_tag_name_safe',
+    'post_type' => __NAMESPACE__ . '\\get_post_type_label_safe',
+    'author'    => __NAMESPACE__ . '\\get_user_name_safe',
 ];
 
 // Taxonomy filters.
