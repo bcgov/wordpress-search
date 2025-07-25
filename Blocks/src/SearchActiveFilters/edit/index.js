@@ -2,8 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ToggleControl, PanelBody } from '@wordpress/components';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { useBlockProps } from '@wordpress/block-editor'
 
 /**
  * Internal dependencies
@@ -19,29 +18,9 @@ import './editor.scss';
  * @return {JSX.Element} Element to render.
  */
 export default function Edit({ attributes, setAttributes }) {
-	const { showCount, showClearAll } = attributes;
 
 	return (
 		<>
-			<InspectorControls>
-				<PanelBody 
-					title={__('Search Active Filters Settings', 'wordpress-search')} 
-					initialOpen={true}
-				>
-					<ToggleControl
-						label={__('Show filter count', 'wordpress-search')}
-						checked={showCount}
-						onChange={(value) => setAttributes({ showCount: value })}
-						help={__('Display the number of applied filters.', 'wordpress-search')}
-					/>
-					<ToggleControl
-						label={__('Show clear all button', 'wordpress-search')}
-						checked={showClearAll}
-						onChange={(value) => setAttributes({ showClearAll: value })}
-						help={__('Display a "Clear all" button to remove all filters.', 'wordpress-search')}
-					/>
-				</PanelBody>
-			</InspectorControls>
 			
 			<div {...useBlockProps()}>
 									<div className="search-active-filters-preview">
@@ -52,16 +31,12 @@ export default function Edit({ attributes, setAttributes }) {
 							</p>
 						</div>
 					<div className="search-active-filters-preview__content">
-						{showCount && (
-							<div className="search-active-filters-preview__count">
-								<span>{__('2 filters applied', 'wordpress-search')}</span>
-								{showClearAll && (
-									<button className="search-active-filters-preview__clear-all">
-										{__('Clear all', 'wordpress-search')}
-									</button>
-								)}
-							</div>
-						)}
+						<div className="search-active-filters-preview__count">
+							<span>{__('2 filters applied', 'wordpress-search')}</span>
+							<button className="search-active-filters-preview__clear-all">
+								{__('Clear all', 'wordpress-search')}
+							</button>
+						</div>
 						<div className="search-active-filters-preview__chips">
 							<div className="search-active-filters-preview__chip">
 								<span>{__('Noise', 'wordpress-search')}</span>
