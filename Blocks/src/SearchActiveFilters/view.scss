@@ -1,5 +1,7 @@
 .wp-block-wordpress-search-search-active-filters {
+
 	.search-active-filters {
+
 		&__header {
 			display: flex;
 			justify-content: space-between;
@@ -91,8 +93,11 @@
 
 // Responsive adjustments
 @media (max-width: 768px) {
+
 	.wp-block-wordpress-search-search-active-filters {
+
 		.search-active-filters {
+
 			&__header {
 				flex-direction: column;
 				align-items: flex-start;
@@ -109,4 +114,4 @@
 			}
 		}
 	}
-} 
+}
