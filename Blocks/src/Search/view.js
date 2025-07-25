@@ -47,10 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Handle clear button click - clear text and search with empty string
 			clearButton.addEventListener('click', clearAndSearch);
-
-
-
-
 		}
 	});
 });

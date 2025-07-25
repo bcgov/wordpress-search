@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "wordpress-search/search-result-count",
+  "version": "1.0.0",
+  "title": "Search Result Count",
+  "category": "search",
+  "icon": "chart-bar",
+  "description": "A block that displays the number of search results in real time",
+  "attributes": {
+    "align": {
+      "type": "string"
+    },
+    "alignWide": {
+      "type": "boolean"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "viewStyle": "file:./view.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php",
+  "style": "file:./view.css",
+  "dependencies": [
+    "wp-api-fetch",
+    "wp-url",
+    "wp-components",
+    "wp-element",
+    "wp-i18n"
+  ]
+}
