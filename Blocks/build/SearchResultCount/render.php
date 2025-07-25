@@ -38,24 +38,9 @@ if ( 0 === $total_results ) {
 		);
 }
 
-// Data attributes.
-$block_attributes = array(
-	'data-total-results'   => $total_results,
-	'data-current-results' => $current_results,
-	'data-search-query'    => esc_attr( $search_query ),
-);
-
-$attributes_string = implode(
-	' ',
-	array_map(
-		fn( $k, $v ) => sprintf( '%s="%s"', $k, esc_attr( $v ) ),
-		array_keys( $block_attributes ),
-		$block_attributes
-	)
-);
 ?>
 
-<div class="search-result-count" <?php echo esc_attr( $attributes_string ); ?>>
+<div class="search-result-count">
 	<div class="search-result-count__content">
 		<span class="search-result-count__number"><?php echo esc_html( $total_results ); ?></span>
 		<span class="search-result-count__message"><?php echo esc_html( $message ); ?></span>
