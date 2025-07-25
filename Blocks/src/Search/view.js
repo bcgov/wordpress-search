@@ -11,7 +11,8 @@ import './view.scss';
  *
  * Current features:
  * - Imports and applies frontend styles
- *
+ * - Clear button that clears text and searches with empty string
+ * - Responsive clear button visibility
  */
 
 // Wait for the DOM to be fully loaded
@@ -31,18 +32,25 @@ document.addEventListener('DOMContentLoaded', function () {
 				clearButton.style.display = input.value ? 'flex' : 'none';
 			};
 
+			// Function to clear input and search with empty string
+			const clearAndSearch = () => {
+				input.value = '';
+				toggleClearButton();
+				form.submit();
+			};
+
 			// Initial state
 			toggleClearButton();
 
 			// Handle input changes
 			input.addEventListener('input', toggleClearButton);
 
-			// Handle clear button click
-			clearButton.addEventListener('click', () => {
-				input.value = '';
-				input.focus();
-				toggleClearButton();
-			});
+			// Handle clear button click - clear text and search with empty string
+			clearButton.addEventListener('click', clearAndSearch);
+
+
+
+
 		}
 	});
 });

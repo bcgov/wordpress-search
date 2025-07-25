@@ -61,7 +61,6 @@ export default function Edit() {
 								placeholder="Search term"
 								className="dswp-search-bar__input"
 								disabled
-								required
 							/>
 							<button
 								type="button"
