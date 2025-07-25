@@ -19,25 +19,64 @@ unset( $query_params['s'] );
 $applied_filters = [];
 $filter_count    = 0;
 
-$get_term_name = function ( $term ) {
+/**
+ * Get term name safely.
+ *
+ * @param object|WP_Error|null $term Term object or error.
+ * @return string Term name or empty string.
+ */
+function get_term_name_safe( $term ) {
     return ( $term && ! is_wp_error( $term ) ) ? $term->name : '';
-};
+}
 
-$get_post_type_label = function ( $pt ) {
-    $obj = get_post_type_object( $pt );
+/**
+ * Get post type label.
+ *
+ * @param string $post_type Post type slug.
+ * @return string Post type label or empty string.
+ */
+function get_post_type_label_safe( $post_type ) {
+    $obj = get_post_type_object( $post_type );
     return $obj ? $obj->labels->singular_name : '';
-};
-$get_user_name       = function ( $id ) {
-    $user = get_user_by( 'ID', $id );
+}
+
+/**
+ * Get user display name.
+ *
+ * @param int $user_id User ID.
+ * @return string User display name or empty string.
+ */
+function get_user_name_safe( $user_id ) {
+    $user = get_user_by( 'ID', $user_id );
     return $user ? $user->display_name : '';
-};
+}
+
+/**
+ * Get category name safely.
+ *
+ * @param int $category_id Category ID.
+ * @return string Category name or empty string.
+ */
+function get_category_name_safe( $category_id ) {
+    return get_term_name_safe( get_category( $category_id ) );
+}
+
+/**
+ * Get tag name safely.
+ *
+ * @param int $tag_id Tag ID.
+ * @return string Tag name or empty string.
+ */
+function get_tag_name_safe( $tag_id ) {
+    return get_term_name_safe( get_tag( $tag_id ) );
+}
 
 // Custom filters and their resolvers.
 $custom_filters = [
-    'category'  => fn( $v ) => $get_term_name( get_category( $v ) ),
-    'tag'       => fn( $v ) => $get_term_name( get_tag( $v ) ),
-    'post_type' => $get_post_type_label,
-    'author'    => $get_user_name,
+    'category'  => 'get_category_name_safe',
+    'tag'       => 'get_tag_name_safe',
+    'post_type' => 'get_post_type_label_safe',
+    'author'    => 'get_user_name_safe',
 ];
 
 // Taxonomy filters.
