@@ -12,59 +12,59 @@ import { PanelBody, SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import '../editor.scss';
 
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit( { attributes, setAttributes } ) {
 	const { fontSize } = attributes;
 
 	// Get font sizes from WordPress theme settings
-	const fontSizes = useSetting('typography.fontSizes') || [];
+	const fontSizes = useSetting( 'typography.fontSizes' ) || [];
 
 	// Build font size options from WordPress settings
 	const fontSizeOptions = [
-		{ label: __('Default', 'wordpress-search'), value: '' },
-		...fontSizes.map((size) => ({
+		{ label: __( 'Default', 'wordpress-search' ), value: '' },
+		...fontSizes.map( ( size ) => ( {
 			label: size.name,
 			value: size.slug,
-		})),
+		} ) ),
 	];
 
 	// Build font size style - handle both preset and custom values
 	let fontSizeStyle;
-	if (fontSize) {
+	if ( fontSize ) {
 		// Check if it's a custom value with units (px, em, rem, etc.)
-		if (/\d+(px|em|rem|%|vh|vw)/.test(fontSize)) {
+		if ( /\d+(px|em|rem|%|vh|vw)/.test( fontSize ) ) {
 			// Custom value - use directly
 			fontSizeStyle = fontSize;
 		} else {
 			// Preset size - use CSS custom property
-			fontSizeStyle = `var(--wp--preset--font-size--${fontSize})`;
+			fontSizeStyle = `var(--wp--preset--font-size--${ fontSize })`;
 		}
 	}
 
 	// Get the block props which include the necessary editor attributes and classes
-	const blockProps = useBlockProps({
+	const blockProps = useBlockProps( {
 		style: {
 			fontSize: fontSizeStyle,
 		},
-	});
+	} );
 
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={__('Typography Settings', 'wordpress-search')}
+					title={ __( 'Typography Settings', 'wordpress-search' ) }
 				>
 					<SelectControl
-						label={__('Font Size', 'wordpress-search')}
-						value={fontSize}
-						options={fontSizeOptions}
-						onChange={(newFontSize) =>
-							setAttributes({ fontSize: newFontSize })
+						label={ __( 'Font Size', 'wordpress-search' ) }
+						value={ fontSize }
+						options={ fontSizeOptions }
+						onChange={ ( newFontSize ) =>
+							setAttributes( { fontSize: newFontSize } )
 						}
 					/>
 				</PanelBody>
 			</InspectorControls>
 
-			<div {...blockProps}>
+			<div { ...blockProps }>
 				<div className="wp-block-wordpress-search-search-results-post-metadata-display">
 					<div className="post-metadata">
 						Date updated: April 2, 2024 &nbsp;&nbsp; Decision:
