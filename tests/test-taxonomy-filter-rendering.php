@@ -359,15 +359,15 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
         // Should contain proper form structure.
         $this->assertStringContainsString( 'class="taxonomy-filter-form"', $output, 'Should have proper form class' );
         $this->assertStringContainsString( 'method="get"', $output, 'Should use GET method' );
-        
+
         // Should contain checkboxes for each term.
         $checkbox_id = 'taxonomy_document_category_' . $policies_term->term_id;
-        $this->assertStringContainsString( 
-            'id="' . $checkbox_id . '"', 
-            $output, 
-            'Should generate proper checkbox ID' 
+        $this->assertStringContainsString(
+            'id="' . $checkbox_id . '"',
+            $output,
+            'Should generate proper checkbox ID'
         );
-        
+
         // Should contain nonce field for security.
         $this->assertStringContainsString( 'name="_wpnonce"', $output, 'Should contain nonce field' );
     }
