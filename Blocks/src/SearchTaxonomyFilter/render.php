@@ -81,10 +81,11 @@ $url_parts   = wp_parse_url( $current_url );
 parse_str( $url_parts['query'] ?? '', $all_query_params_raw );
 
 // Fallback to $_GET if URL parsing doesn't work (e.g., in test environments).
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
-if ( empty( $all_query_params_raw ) && ! empty( $_GET ) ) {
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
-    // Sanitize $_GET parameters before using them
+// Verify nonce for form data processing.
+$nonce_verified = wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'search_taxonomy_filter' );
+
+if ( empty( $all_query_params_raw ) && ! empty( $_GET ) && $nonce_verified ) {
+    // Sanitize $_GET parameters before using them.
     $all_query_params_raw = array();
     foreach ( $_GET as $key => $value ) {
         $sanitized_key                          = sanitize_key( $key );
@@ -142,6 +143,7 @@ $taxonomy_label  = $taxonomy_object ? $taxonomy_object->labels->singular_name : 
             </div>
         <?php else : ?>
             <form class="taxonomy-filter-form" method="get" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
+                <?php wp_nonce_field( 'search_taxonomy_filter', '_wpnonce' ); ?>
                 <?php foreach ( $hidden_params as $key => $value ) : ?>
                     <?php if ( is_array( $value ) ) : ?>
                         <?php foreach ( $value as $val ) : ?>
