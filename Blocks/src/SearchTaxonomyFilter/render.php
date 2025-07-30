@@ -87,8 +87,8 @@ if ( empty( $all_query_params_raw ) && ! empty( $_GET ) ) {
     // Sanitize $_GET parameters before using them
     $all_query_params_raw = array();
     foreach ( $_GET as $key => $value ) {
-        $sanitized_key = sanitize_key( $key );
-        $sanitized_value = is_array( $value ) 
+        $sanitized_key                          = sanitize_key( $key );
+        $sanitized_value                        = is_array( $value )
             ? array_map( 'sanitize_text_field', $value )
             : sanitize_text_field( $value );
         $all_query_params_raw[ $sanitized_key ] = $sanitized_value;
