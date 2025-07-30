@@ -11,6 +11,10 @@
     "selectedPostTypes": {
       "type": "array",
       "default": []
+    },
+    "underlineColor": {
+      "type": "string",
+      "default": "var(--wp--preset--color--bar-color)"
     }
   },
   "editorScript": "file:./index.js",
