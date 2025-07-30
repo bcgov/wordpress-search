@@ -154,7 +154,7 @@ if ( isset( $_GET['post_type'] ) && $nonce_verified ) {
             // Preserve other query parameters with proper sanitization.
             foreach ( $_GET as $key => $value ) {
                 if ( 'post_type' !== $key ) {
-                    // Sanitize the key and value
+                    // Sanitize the key and value.
                     $sanitized_key   = sanitize_key( $key );
                     $sanitized_value = is_array( $value )
                         ? array_map( 'sanitize_text_field', $value )
