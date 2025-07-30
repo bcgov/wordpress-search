@@ -107,12 +107,12 @@ if ( empty( $post_types ) ) {
 $current_post_type = 'any';
 
 // Verify nonce for form data processing.
-$nonce_verified = wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'search_post_type_filter' );
+$nonce_verified = wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'search_post_type_filter' );
 
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification handled above
 if ( isset( $_GET['post_type'] ) && $nonce_verified ) {
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce already verified
-    $current_post_type = sanitize_key( $_GET['post_type'] );
+    $current_post_type = sanitize_key( sanitize_text_field( $_GET['post_type'] ) );
 }
 ?>
 
@@ -151,10 +151,16 @@ if ( isset( $_GET['post_type'] ) && $nonce_verified ) {
                 $current_url = add_query_arg( 'post_type', $post_type_item->name, $current_url );
             }
 
-            // Preserve other query parameters.
+            // Preserve other query parameters with proper sanitization.
             foreach ( $_GET as $key => $value ) {
                 if ( 'post_type' !== $key ) {
-                    $current_url = add_query_arg( $key, $value, $current_url );
+                    // Sanitize the key and value
+                    $sanitized_key = sanitize_key( $key );
+                    $sanitized_value = is_array( $value ) 
+                        ? array_map( 'sanitize_text_field', $value )
+                        : sanitize_text_field( $value );
+                    
+                    $current_url = add_query_arg( $sanitized_key, $sanitized_value, $current_url );
                 }
             }
 
