@@ -30,14 +30,14 @@ $selected_taxonomy_name = $taxonomy_parts[1];
 // Optimized taxonomy name resolution.
 $registered_taxonomies = get_object_taxonomies( $document_post_type, 'names' );
 
-// If no taxonomies found for the exact post type, try case-insensitive post type matching
+// If no taxonomies found for the exact post type, try case-insensitive post type matching.
 if ( empty( $registered_taxonomies ) ) {
     $all_post_types = get_post_types( array(), 'names' );
     foreach ( $all_post_types as $matched_post_type ) {
         if ( strcasecmp( $matched_post_type, $document_post_type ) === 0 ) {
             $registered_taxonomies = get_object_taxonomies( $matched_post_type, 'names' );
             if ( ! empty( $registered_taxonomies ) ) {
-                $document_post_type = $matched_post_type; // Use the correctly cased post type
+                $document_post_type = $matched_post_type; // Use the correctly cased post type.
                 break;
             }
         }
@@ -59,7 +59,7 @@ if ( isset( $taxonomy_map[ $selected_taxonomy_name ] ) ) {
             break;
         }
     }
-    
+
     // If still no match, check for partial matches (for backward compatibility).
     if ( ! $actual_taxonomy ) {
         foreach ( $registered_taxonomies as $tax_name ) {
@@ -81,10 +81,19 @@ $url_parts   = wp_parse_url( $current_url );
 parse_str( $url_parts['query'] ?? '', $all_query_params_raw );
 
 // Fallback to $_GET if URL parsing doesn't work (e.g., in test environments).
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
-if ( empty( $all_query_params_raw ) && ! empty( $_GET ) ) {
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for parameter preservation.
-    $all_query_params_raw = $_GET;
+// Verify nonce for form data processing.
+$nonce_verified = wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'search_taxonomy_filter' );
+
+if ( empty( $all_query_params_raw ) && ! empty( $_GET ) && $nonce_verified ) {
+    // Sanitize $_GET parameters before using them.
+    $all_query_params_raw = array();
+    foreach ( $_GET as $key => $value ) {
+        $sanitized_key                          = sanitize_key( $key );
+        $sanitized_value                        = is_array( $value )
+            ? array_map( 'sanitize_text_field', $value )
+            : sanitize_text_field( $value );
+        $all_query_params_raw[ $sanitized_key ] = $sanitized_value;
+    }
 }
 
 // Filter to get only non-taxonomy parameters for hidden inputs.
@@ -134,6 +143,7 @@ $taxonomy_label  = $taxonomy_object ? $taxonomy_object->labels->singular_name : 
             </div>
         <?php else : ?>
             <form class="taxonomy-filter-form" method="get" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
+                <?php wp_nonce_field( 'search_taxonomy_filter', '_wpnonce' ); ?>
                 <?php foreach ( $hidden_params as $key => $value ) : ?>
                     <?php if ( is_array( $value ) ) : ?>
                         <?php foreach ( $value as $val ) : ?>

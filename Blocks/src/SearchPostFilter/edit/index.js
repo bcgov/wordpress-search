@@ -1,7 +1,11 @@
 /**
  * WordPress dependencies
  */
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	InspectorControls,
+	PanelColorSettings,
+} from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 import { PanelBody, CheckboxControl, Placeholder } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -20,7 +24,7 @@ import '../editor.scss';
  * @return {JSX.Element} The editor interface for the block.
  */
 export default function Edit({ attributes, setAttributes }) {
-	const { selectedPostTypes } = attributes;
+	const { selectedPostTypes, underlineColor } = attributes;
 
 	// Get the block props which include the necessary editor attributes and classes
 	const blockProps = useBlockProps();
@@ -155,19 +159,43 @@ export default function Edit({ attributes, setAttributes }) {
 						</p>
 					)}
 				</PanelBody>
+
+				<PanelColorSettings
+					title={__('Styling Options', 'wordpress-search')}
+					colorSettings={[
+						{
+							value: underlineColor,
+							onChange: (color) =>
+								setAttributes({ underlineColor: color }),
+							label: __(
+								'Active Filter Underline Color',
+								'wordpress-search'
+							),
+						},
+					]}
+				/>
 			</InspectorControls>
 
 			<div {...blockProps}>
 				<div className="dswp-search-post-type-filter__container dswp-search-post-type-filter__container--editor">
 					{displayedPostTypes.length > 0 ? (
-						displayedPostTypes.map((postType) => (
+						displayedPostTypes.map((postType, index) => (
 							<button
 								key={postType.slug}
-								className="dswp-search-post-type-filter__button"
+								className={`dswp-search-post-type-filter__button ${
+									index === 0
+										? 'dswp-search-post-type-filter__button--active'
+										: ''
+								}`}
 								onClick={(e) => e.preventDefault()}
 								disabled
+								style={{
+									'--underline-color': underlineColor,
+								}}
 							>
-								{postType.name}
+								<span className="dswp-search-post-type-filter__text">
+									{postType.name}
+								</span>
 							</button>
 						))
 					) : (

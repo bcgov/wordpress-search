@@ -6,18 +6,23 @@
 
 		/* Hover state for default button */
 		&:hover {
-			background: #f0f0f0;
+			color: #333;
 		}
 
 		/* Active/selected button state */
 		&--active {
-			background: #0073aa; /* WordPress blue */
-			color: #fff;
-			border-color: #0073aa;
+			color: #333; /* Dark charcoal gray */
+			font-weight: 700;
 
-			/* Darker blue on hover for active state */
-			&:hover {
-				background: #005d8c;
+			/* Orange underline for active state - only as wide as text */
+			.dswp-search-post-type-filter__text::after {
+				content: "";
+				position: absolute;
+				bottom: -0.25rem;
+				left: 0;
+				width: 100%;
+				height: 0.125rem;
+				background-color: var(--underline-color, var(--wp--preset--color--bar-color)); /* Use CSS custom property with WordPress fallback */
 			}
 		}
 	}
