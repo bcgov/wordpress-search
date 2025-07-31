@@ -17,6 +17,8 @@
  * @package WordPressSearch
  */
 
+use Bcgov\WordpressSearch\TaxonomyFilter;
+
 // Ensure WordPress is loaded.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -49,7 +51,7 @@ function wordpress_search_init() {
     register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultCount' );
 
     // Initialize filter functionality.
-    $wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
+    $wordpress_search_taxonomy_filter = new TaxonomyFilter();
     $wordpress_search_taxonomy_filter->init();
 }
 add_action( 'init', 'wordpress_search_init' );
