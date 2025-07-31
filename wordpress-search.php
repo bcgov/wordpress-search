@@ -28,11 +28,10 @@ if ( file_exists( $local_composer ) ) {
     require_once $local_composer;
 }
 
+// Check if the required class exists.
 if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
-    return;
+    wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\TaxonomyFilter could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
 }
-
-
 
 /**
  * Initialize the plugin
