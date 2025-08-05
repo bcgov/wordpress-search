@@ -2,7 +2,7 @@
 /**
  * TaxonomyFilter Class
  *
- * Handles taxonomy filtering functionality for the search system.
+ * Handles taxonomy filtering functionality and auto-discovery search for metadata and taxonomies.
  *
  * @package SearchPlugin
  */
