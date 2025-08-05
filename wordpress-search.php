@@ -17,8 +17,6 @@
  * @package WordPressSearch
  */
 
-use Bcgov\WordpressSearch\TaxonomyFilter;
-
 // Ensure WordPress is loaded.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -30,9 +28,13 @@ if ( file_exists( $local_composer ) ) {
     require_once $local_composer;
 }
 
-// Check if the required class exists.
+// Check if the required classes exist.
 if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
     wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\TaxonomyFilter could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
+}
+
+if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataTaxonomySearch' ) ) {
+    wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\MetadataTaxonomySearch could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
 }
 
 /**
@@ -51,8 +53,12 @@ function wordpress_search_init() {
     register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultCount' );
 
     // Initialize filter functionality.
-    $wordpress_search_taxonomy_filter = new TaxonomyFilter();
+    $wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
     $wordpress_search_taxonomy_filter->init();
+
+    // Initialize metadata and taxonomy search functionality.
+    $wordpress_search_metadata_taxonomy_search = new \Bcgov\WordpressSearch\MetadataTaxonomySearch();
+    $wordpress_search_metadata_taxonomy_search->init();
 }
 add_action( 'init', 'wordpress_search_init' );
 
