@@ -35,6 +35,8 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
 
 if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataTaxonomySearch' ) ) {
     wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\MetadataTaxonomySearch could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
+if ( ! class_exists( 'Bcgov\\WordpressSearch\\SearchHighlight' ) ) {
+    wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\SearchHighlight could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
 }
 
 /**
@@ -59,6 +61,10 @@ function wordpress_search_init() {
     // Initialize metadata and taxonomy search functionality.
     $wordpress_search_metadata_taxonomy_search = new \Bcgov\WordpressSearch\MetadataTaxonomySearch();
     $wordpress_search_metadata_taxonomy_search->init();
+    // Initialize enhanced search highlight functionality.
+    $wordpress_search_highlight = new \Bcgov\WordpressSearch\SearchHighlight();
+    $wordpress_search_highlight->init();
+
 }
 add_action( 'init', 'wordpress_search_init' );
 
