@@ -35,49 +35,54 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
 
 if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataTaxonomySearch' ) ) {
     wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\MetadataTaxonomySearch could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
+	if ( ! class_exists( 'Bcgov\\WordpressSearch\\SearchHighlight' ) ) {
+		wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\SearchHighlight could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
+	}
 }
-
-/**
- * Initialize the plugin
- *
- * This function is called when the plugin is loaded.
- * It registers blocks and initializes the filter functionality.
- */
+	/**
+	 * Initialize the plugin
+	 *
+	 * This function is called when the plugin is loaded.
+	 * It registers blocks and initializes the filter functionality.
+	 */
 function wordpress_search_init() {
-    // Register blocks.
-    register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/Search' );
-    register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchPostFilter' );
-    register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsPostMetadataDisplay' );
-    register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter' );
-    register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchActiveFilters' );
-    register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultCount' );
+	// Register blocks.
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/Search' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchPostFilter' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsPostMetadataDisplay' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchActiveFilters' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultCount' );
 
-    // Initialize filter functionality.
-    $wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
-    $wordpress_search_taxonomy_filter->init();
+	// Initialize filter functionality.
+	$wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
+	$wordpress_search_taxonomy_filter->init();
 
-    // Initialize metadata and taxonomy search functionality.
-    $wordpress_search_metadata_taxonomy_search = new \Bcgov\WordpressSearch\MetadataTaxonomySearch();
-    $wordpress_search_metadata_taxonomy_search->init();
+	// Initialize metadata and taxonomy search functionality.
+	$wordpress_search_metadata_taxonomy_search = new \Bcgov\WordpressSearch\MetadataTaxonomySearch();
+	$wordpress_search_metadata_taxonomy_search->init();
+	// Initialize enhanced search highlight functionality.
+	$wordpress_search_highlight = new \Bcgov\WordpressSearch\SearchHighlight();
+	$wordpress_search_highlight->init();
 }
-add_action( 'init', 'wordpress_search_init' );
+	add_action( 'init', 'wordpress_search_init' );
 
-/**
- * Register custom block category for search blocks.
- *
- * @param array $categories Array of block categories.
- * @return array Modified array of block categories.
- */
+	/**
+	 * Register custom block category for search blocks.
+	 *
+	 * @param array $categories Array of block categories.
+	 * @return array Modified array of block categories.
+	 */
 function wordpress_search_register_block_category( $categories ) {
-    return array_merge(
-        array(
-            array(
-                'slug'  => 'search',
-                'title' => __( 'Search', 'wordpress-search' ),
-                'icon'  => 'search',
-            ),
-        ),
-        $categories
-    );
+	return array_merge(
+		array(
+			array(
+				'slug'  => 'search',
+				'title' => __( 'Search', 'wordpress-search' ),
+				'icon'  => 'search',
+			),
+		),
+		$categories
+	);
 }
-add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );
+	add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );

@@ -1,0 +1,136 @@
+/**
+ * Enhanced Search Highlight Styles
+ * Improved styling with better accessibility and visual appeal
+ */
+
+.search-highlight {
+    background-color: #ffed4d70 !important;
+    color: #000 !important;
+    border-radius: 3px !important;
+    text-decoration: none !important;
+    position: relative !important;
+    display: inline !important;
+    line-height: inherit !important;
+    word-break: keep-all !important;
+    hyphens: none !important;
+}
+
+.search-highlight:hover {
+    background-color: #ffed4d90 !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Ensure highlighted text in links remains clickable */
+a .search-highlight {
+    text-decoration: inherit !important;
+    color: inherit !important;
+}
+
+a:hover .search-highlight {
+    background-color: #fdd835 !important;
+}
+
+/* Focus styles for accessibility */
+.search-highlight:focus {
+    outline: 2px solid #007cba !important;
+    outline-offset: 2px !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .search-highlight {
+        background-color: #ffed4d70 !important;
+        color: #000 !important;
+    }
+    .search-highlight:hover {
+        background-color: #ffb300 !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .search-highlight {
+        background-color: #ffff00 !important;
+        color: #000000 !important;
+        border: 2px solid #000000 !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .search-highlight {
+        transition: none !important;
+    }
+    .search-highlight:hover {
+        transform: none !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .search-highlight {
+        background-color: #ffff00 !important;
+        color: #000000 !important;
+        border: 1px solid #000000 !important;
+    }
+}
+
+/* Animation for new highlights */
+@keyframes highlightFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.search-highlight {
+    animation: highlightFadeIn 0.3s ease-out;
+}
+
+/* Multiple highlight variations for different terms */
+.search-highlight.term-0 {
+    background-color: #ffed4d70 !important;
+}
+
+.search-highlight.term-1 {
+    background-color: #ff9800 !important;
+}
+
+.search-highlight.term-2 {
+    background-color: #4caf50 !important;
+    color: #fff !important;
+}
+
+.search-highlight.term-3 {
+    background-color: #2196f3 !important;
+    color: #fff !important;
+}
+
+.search-highlight.term-4 {
+    background-color: #9c27b0 !important;
+    color: #fff !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-highlight {
+        padding: 1px 2px !important;
+        font-size: 0.9em !important;
+    }
+}
+
+/* Screen reader support */
+@media screen and (prefers-reduced-motion: no-preference) {
+    .search-highlight::before {
+        content: "Search term: ";
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+}
