@@ -97,21 +97,21 @@ a:hover .search-highlight {
 }
 
 .search-highlight.term-1 {
-    background-color: #ff9800 !important;
+    background-color: #ffed4d70 !important;
 }
 
 .search-highlight.term-2 {
-    background-color: #4caf50 !important;
+    background-color: #ffed4d70 !important;
     color: #fff !important;
 }
 
 .search-highlight.term-3 {
-    background-color: #2196f3 !important;
+    background-color: #ffed4d70 !important;
     color: #fff !important;
 }
 
 .search-highlight.term-4 {
-    background-color: #9c27b0 !important;
+    background-color: #ffed4d70 !important;
     color: #fff !important;
 }
 
