@@ -10,8 +10,6 @@ namespace Bcgov\WordpressSearch\SearchResultsSort;
 // Get selected meta fields from block attributes.
 $selected_meta_fields = $attributes['selectedMetaFields'] ?? [];
 
-
-
 // Only render on search pages or when there's a search query.
 if ( ! is_search() && empty( get_query_var( 's' ) ) ) {
     return;
@@ -29,42 +27,9 @@ $meta_fields = [];
 $meta_fields_api = new \Bcgov\WordpressSearch\MetaFieldsAPI();
 $meta_fields     = $meta_fields_api->get_meta_fields_data();
 
-
-
-// Fallback: Add some hardcoded options if no meta fields found.
+// If no meta fields are available, don't render the block.
 if ( empty( $meta_fields ) ) {
-    $meta_fields = [
-        [
-            'label'    => 'Document: sort_relevance',
-            'value'    => 'document:sort_relevance',
-            'postType' => 'document',
-            'metaKey'  => 'sort_relevance',
-        ],
-        [
-            'label'    => 'Document: test',
-            'value'    => 'document:test',
-            'postType' => 'document',
-            'metaKey'  => 'test',
-        ],
-        [
-            'label'    => 'Document: this',
-            'value'    => 'document:this',
-            'postType' => 'document',
-            'metaKey'  => 'this',
-        ],
-        [
-            'label'    => 'Document: this2',
-            'value'    => 'document:this2',
-            'postType' => 'document',
-            'metaKey'  => 'this2',
-        ],
-        [
-            'label'    => 'Document: document_file_name',
-            'value'    => 'document:document_file_name',
-            'postType' => 'document',
-            'metaKey'  => 'document_file_name',
-        ],
-    ];
+    return;
 }
 
 // Sort by label.
@@ -75,22 +40,21 @@ usort(
 	}
 );
 
-// Verify nonce for form data processing.
-$nonce_verified = wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'search_results_sort' );
+// Note: Nonce verification not required for URL-based sorting of public search results.
+// This allows users to share and bookmark sorted search result URLs.
+// Sorting public search results is a read-only operation similar to taxonomy filtering.
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
 
 // Get current selections from URL (support both old and new formats).
-$current_meta_field = '';
-$current_sort       = 'off';
-
-// Only process URL parameters if nonce is verified.
-if ( $nonce_verified ) {
-    $current_meta_field = $_GET['sort_meta_field'] ?? '';
-    $current_sort       = $_GET['sort_meta'] ?? 'off';
-}
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+$current_meta_field = $_GET['sort_meta_field'] ?? '';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+$current_sort = $_GET['sort_meta'] ?? 'off';
 
 // Check for new simplified format.
-if ( $nonce_verified && ( empty( $current_meta_field ) || 'off' === $current_sort ) ) {
+if ( empty( $current_meta_field ) || 'off' === $current_sort ) {
     // Look for simplified format parameters: field_name=direction with proper sanitization.
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
     foreach ( $_GET as $param_name => $param_value ) {
         // Sanitize input immediately.
         $sanitized_key   = sanitize_key( $param_name );
@@ -130,17 +94,16 @@ if ( ! in_array( $current_sort, [ 'off', 'asc', 'desc' ], true ) ) {
 $parameters_to_remove = [ 'sort_meta', 'sort_meta_field' ];
 
 // Dynamically find and remove any simplified format parameters.
-if ( $nonce_verified ) {
-    foreach ( $_GET as $param_name => $param_value ) {
-        $sanitized_key = sanitize_key( $param_name );
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+foreach ( $_GET as $param_name => $param_value ) {
+    $sanitized_key = sanitize_key( $param_name );
 
-        // Remove parameters that look like meta field names with sort values.
-        if ( preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) &&
-            in_array( sanitize_text_field( $param_value ), [ 'asc', 'desc' ], true ) &&
-            ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
-             in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) ) {
-            $parameters_to_remove[] = $sanitized_key;
-        }
+    // Remove parameters that look like meta field names with sort values.
+    if ( preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) &&
+        in_array( sanitize_text_field( $param_value ), [ 'asc', 'desc' ], true ) &&
+        ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
+         in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) ) {
+        $parameters_to_remove[] = $sanitized_key;
     }
 }
 
@@ -218,7 +181,7 @@ if ( ! empty( $meta_fields ) ) {
 
 ?>
 
-<div class="wp-block-wordpress-search-searchresultssort" id="<?php echo esc_attr( $block_id ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'search_results_sort' ) ); ?>">
+<div class="wp-block-wordpress-search-searchresultssort" id="<?php echo esc_attr( $block_id ); ?>">
     <div class="search-results-sort">
         <div class="search-results-sort__controls">
             <div class="search-results-sort__field-group">
@@ -269,10 +232,3 @@ if ( ! empty( $meta_fields ) ) {
     </div>
 </div>
 
-<?php
-// Store the current meta field for the sorting hook.
-if ( ! empty( $current_meta_field ) ) {
-    global $wordpress_search_sort_meta_field;
-    $wordpress_search_sort_meta_field = $current_meta_field;
-}
-?>

@@ -85,19 +85,19 @@ function wordpress_search_handle_meta_sorting( $query ) {
         return;
     }
 
-    // Verify nonce for form data processing.
-    $nonce_verified = wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'search_results_sort' );
-
-    if ( ! $nonce_verified ) {
-        return;
-    }
+    // Note: Nonce verification not required for URL-based sorting of public search results.
+    // This allows users to share and bookmark sorted search result URLs.
+    // Sorting public search results is a read-only operation similar to taxonomy filtering.
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
 
     $meta_key    = '';
     $sort_order  = '';
     $sort_source = '';
 
     // Check for old format first (backward compatibility).
-    $sort_meta       = $_GET['sort_meta'] ?? '';
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+    $sort_meta = $_GET['sort_meta'] ?? '';
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
     $sort_meta_field = $_GET['sort_meta_field'] ?? '';
 
     if ( in_array( $sort_meta, [ 'asc', 'desc' ], true ) && ! empty( $sort_meta_field ) ) {
@@ -113,6 +113,7 @@ function wordpress_search_handle_meta_sorting( $query ) {
     } else {
         // Check for new simplified format: field_name=direction.
         // Use a single pass through $_GET with proper sanitization.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
         foreach ( $_GET as $param_name => $param_value ) {
             // Sanitize input immediately.
             $sanitized_key   = sanitize_key( $param_name );

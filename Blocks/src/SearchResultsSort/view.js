@@ -15,9 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		select.addEventListener('change', function () {
 			const currentUrl = this.dataset.currentUrl;
 			const fieldValue = this.value;
-			const container = this.closest('.wp-block-wordpress-search-searchresultssort');
-			const nonce = container ? container.dataset.nonce : '';
-
 			// Store scroll position before navigation
 			sessionStorage.setItem('sortScrollPosition', window.scrollY);
 
@@ -34,11 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				const separator = currentUrl.includes('?') ? '&' : '?';
 				// Use simplified format: field_name=direction
 				newUrl = currentUrl + separator + fieldName + '=desc'; // Default to descending
-				
-				// Add nonce for security
-				if (nonce) {
-					newUrl += '&_wpnonce=' + encodeURIComponent(nonce);
-				}
 			}
 
 			// Navigate to new URL
@@ -51,9 +43,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			const currentUrl = this.dataset.currentUrl;
 			const currentField = this.dataset.currentField;
 			const orderValue = this.value;
-			const container = this.closest('.wp-block-wordpress-search-searchresultssort');
-			const nonce = container ? container.dataset.nonce : '';
-
 			// Store scroll position before navigation
 			sessionStorage.setItem('sortScrollPosition', window.scrollY);
 
@@ -75,11 +64,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					fieldName +
 					'=' +
 					encodeURIComponent(orderValue);
-				
-				// Add nonce for security
-				if (nonce) {
-					newUrl += '&_wpnonce=' + encodeURIComponent(nonce);
-				}
 			}
 
 			// Navigate to new URL

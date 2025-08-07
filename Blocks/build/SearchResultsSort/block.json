@@ -21,7 +21,6 @@
   "style": "file:./view.css",
   "dependencies": [
     "wp-api-fetch",
-    "wp-url",
     "wp-components",
     "wp-element",
     "wp-i18n"
