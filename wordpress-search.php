@@ -129,10 +129,17 @@ function wordpress_search_handle_meta_sorting( $query ) {
                 continue;
             }
 
-            // Check if this looks like a meta field name (common patterns).
-            if ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
-                 in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) {
+            // Check if this parameter name exists as a meta field in the database.
+            // This makes the system fully dynamic - any real meta field will be recognized.
+            global $wpdb;
+            $meta_exists = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s LIMIT 1",
+                    $sanitized_key
+                )
+            );
 
+            if ( $meta_exists > 0 ) {
                 $meta_key    = $sanitized_key;
                 $sort_order  = $sanitized_value;
                 $sort_source = 'simplified_format';

@@ -70,10 +70,17 @@ if ( empty( $current_meta_field ) || 'off' === $current_sort ) {
             continue;
         }
 
-        // Check if this looks like a meta field name (common patterns).
-        if ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
-            in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) {
+        // Check if this parameter name exists as a meta field in the database.
+        // This makes the system fully dynamic - any real meta field will be recognized.
+        global $wpdb;
+        $meta_exists = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s LIMIT 1",
+                $sanitized_key
+            )
+        );
 
+        if ( $meta_exists > 0 ) {
             // Convert back to the format expected by the frontend display.
             $current_meta_field = 'document:' . $sanitized_key; // Assume document post type for display.
             $current_sort       = $sanitized_value;
@@ -98,12 +105,22 @@ $parameters_to_remove = [ 'sort_meta', 'sort_meta_field' ];
 foreach ( $_GET as $param_name => $param_value ) {
     $sanitized_key = sanitize_key( $param_name );
 
-    // Remove parameters that look like meta field names with sort values.
+    // Remove parameters that are meta field names with sort values.
     if ( preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) &&
-        in_array( sanitize_text_field( $param_value ), [ 'asc', 'desc' ], true ) &&
-        ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
-         in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) ) {
-        $parameters_to_remove[] = $sanitized_key;
+        in_array( sanitize_text_field( $param_value ), [ 'asc', 'desc' ], true ) ) {
+
+        // Check if this is actually a meta field in the database.
+        global $wpdb;
+        $meta_exists = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s LIMIT 1",
+                $sanitized_key
+            )
+        );
+
+        if ( $meta_exists > 0 ) {
+            $parameters_to_remove[] = $sanitized_key;
+        }
     }
 }
 

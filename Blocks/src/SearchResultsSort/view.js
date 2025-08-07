@@ -28,9 +28,26 @@ document.addEventListener('DOMContentLoaded', function () {
 					fieldName = parts[parts.length - 1];
 				}
 
-				const separator = currentUrl.includes('?') ? '&' : '?';
-				// Use simplified format: field_name=direction
-				newUrl = currentUrl + separator + fieldName + '=desc'; // Default to descending
+				// Clean URL by removing existing sort parameters first
+				const url = new URL(newUrl, window.location.origin);
+				const searchParams = new URLSearchParams(url.search);
+				
+				// Remove any existing sort parameters
+				// Look for parameters with sort values (asc/desc) and alphanumeric names
+				const keysToRemove = [];
+				for (const [key, value] of searchParams) {
+					if (['asc', 'desc'].includes(value) && 
+						key.match(/^[a-zA-Z0-9_]+$/)) {
+						keysToRemove.push(key);
+					}
+				}
+				keysToRemove.forEach(key => searchParams.delete(key));
+				
+				// Add the new sort parameter
+				searchParams.set(fieldName, 'desc');
+				
+				// Build final URL
+				newUrl = url.pathname + '?' + searchParams.toString();
 			}
 
 			// Navigate to new URL
@@ -56,14 +73,42 @@ document.addEventListener('DOMContentLoaded', function () {
 					fieldName = parts[parts.length - 1];
 				}
 
-				const separator = currentUrl.includes('?') ? '&' : '?';
-				// Use simplified format: field_name=direction
-				newUrl =
-					currentUrl +
-					separator +
-					fieldName +
-					'=' +
-					encodeURIComponent(orderValue);
+				// Clean URL by removing existing sort parameters first
+				const url = new URL(newUrl, window.location.origin);
+				const searchParams = new URLSearchParams(url.search);
+				
+				// Remove any existing sort parameters
+				// Look for parameters with sort values (asc/desc) and alphanumeric names
+				const keysToRemove = [];
+				for (const [key, value] of searchParams) {
+					if (['asc', 'desc'].includes(value) && 
+						key.match(/^[a-zA-Z0-9_]+$/)) {
+						keysToRemove.push(key);
+					}
+				}
+				keysToRemove.forEach(key => searchParams.delete(key));
+				
+				// Add the new sort parameter
+				searchParams.set(fieldName, orderValue);
+				
+				// Build final URL
+				newUrl = url.pathname + '?' + searchParams.toString();
+			} else if (orderValue === 'off') {
+				// Remove all sort parameters when turning off sorting
+				const url = new URL(newUrl, window.location.origin);
+				const searchParams = new URLSearchParams(url.search);
+				
+				const keysToRemove = [];
+				for (const [key, value] of searchParams) {
+					if (['asc', 'desc'].includes(value) && 
+						(key.match(/^(document_|new_|sort_|relevance_|file_|date|time|data_)/) ||
+						 ['new_date', 'sort_relevance', 'relevance_date', 'data_date', 'test'].includes(key))) {
+						keysToRemove.push(key);
+					}
+				}
+				keysToRemove.forEach(key => searchParams.delete(key));
+				
+				newUrl = url.pathname + '?' + searchParams.toString();
 			}
 
 			// Navigate to new URL
