@@ -7,90 +7,112 @@
 
 namespace Bcgov\WordpressSearch;
 
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_Error;
+use Exception;
+
+/**
+ * Class MetaFieldsAPI
+ *
+ * Provides a REST API endpoint to fetch all available metadata fields
+ * from the database for use in the SearchResultsSort block.
+ */
 class MetaFieldsAPI {
 
     /**
-     * Initialize the API endpoints
+     * Initialize the API endpoints.
      */
     public function init() {
         add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-        
-        // Invalidate cache when post meta is updated
-        add_action( 'added_post_meta', [ $this, 'invalidate_cache' ], 10, 4 );
-        add_action( 'updated_post_meta', [ $this, 'invalidate_cache' ], 10, 4 );
-        add_action( 'deleted_post_meta', [ $this, 'invalidate_cache' ], 10, 4 );
     }
 
-    	/**
-         * Register custom REST API routes
-         */
-	public function register_routes() {
-		register_rest_route(
+    /**
+     * Register custom REST API routes.
+     */
+    public function register_routes() {
+        register_rest_route(
             'wordpress-search/v1',
             '/meta-fields',
             [
-				'methods'             => 'GET',
-				'callback'            => [ $this, 'get_meta_fields' ],
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
-			]
+                'methods'             => 'GET',
+                'callback'            => [ $this, 'get_meta_fields' ],
+                'permission_callback' => function () {
+                    return current_user_can( 'edit_posts' );
+                },
+            ]
         );
-	}
-
+    }
 
     /**
-     * Get all available meta fields for all post types
+     * Get meta fields data (internal method without REST overhead).
      *
-     * @param WP_REST_Request $request The REST request.
-     * @return WP_REST_Response|WP_Error
-     */
-    /**
-     * Get meta fields data (internal method without REST overhead)
-     *
-     * @return array Array of meta field data
+     * @return array Array of meta field data.
      */
     public function get_meta_fields_data() {
-        // Check for cached results first (12 hour cache)
-        $cache_key = 'wordpress_search_meta_fields';
-        $cached_fields = get_transient( $cache_key );
-        
-        if ( false !== $cached_fields ) {
-            return $cached_fields;
-        }
-
         global $wpdb;
 
         try {
             $meta_fields = [];
 
-            // Get all public post types
-            $post_types = get_post_types( [ 'public' => true ], 'objects' );
+            $post_types      = get_post_types( [ 'public' => true ], 'objects' );
             $post_type_names = array_keys( $post_types );
 
             if ( empty( $post_type_names ) ) {
                 return [];
             }
 
-            // Single optimized query for all post types at once
-            // NOTE: For large sites, consider adding these database indexes for better performance:
-            // CREATE INDEX idx_postmeta_key_type ON wp_postmeta(meta_key, post_id);
-            // CREATE INDEX idx_posts_type_status ON wp_posts(post_type, post_status);
-            $placeholders = implode( ',', array_fill( 0, count( $post_type_names ), '%s' ) );
-            $query = $wpdb->prepare(
-                "SELECT DISTINCT pm.meta_key, p.post_type
-                 FROM {$wpdb->postmeta} pm
-                 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                 WHERE p.post_type IN ($placeholders)
-                 AND pm.meta_key NOT LIKE '\_%'
-                 AND pm.meta_key NOT IN ('_edit_lock', '_edit_last', '_wp_desired_post_slug', '_wp_trash_meta_status', '_wp_trash_meta_time')
-                 ORDER BY p.post_type, pm.meta_key",
-                ...$post_type_names
+            // Use a different approach: build separate queries for each post type and union them.
+            $all_results = [];
+
+            foreach ( $post_type_names as $post_type ) {
+                $type_results = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT DISTINCT pm.meta_key, p.post_type
+                         FROM {$wpdb->postmeta} pm
+                         INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                         WHERE p.post_type = %s
+                           AND pm.meta_key NOT LIKE %s
+                           AND pm.meta_key NOT IN (
+                               '_edit_lock',
+                               '_edit_last',
+                               '_wp_desired_post_slug',
+                               '_wp_trash_meta_status',
+                               '_wp_trash_meta_time'
+                           )",
+                        $post_type,
+                        '\\_%'
+                    )
+                );
+
+                if ( $type_results ) {
+                    $all_results = array_merge( $all_results, $type_results );
+                }
+            }
+
+            // Remove duplicates and sort results.
+            $unique_results    = [];
+            $seen_combinations = [];
+
+            foreach ( $all_results as $row ) {
+                $key = $row->post_type . ':' . $row->meta_key;
+                if ( ! in_array( $key, $seen_combinations, true ) ) {
+                    $seen_combinations[] = $key;
+                    $unique_results[]    = $row;
+                }
+            }
+
+            // Sort by post_type, then meta_key.
+            usort(
+                $unique_results,
+                function ( $a, $b ) {
+                    $type_compare = strcmp( $a->post_type, $b->post_type );
+                    return 0 !== $type_compare ? $type_compare : strcmp( $a->meta_key, $b->meta_key );
+                }
             );
 
-            $results = $wpdb->get_results( $query );
+            $results = $unique_results;
 
-            // Group results by post type for efficient processing
             foreach ( $results as $row ) {
                 $post_type = $post_types[ $row->post_type ] ?? null;
                 if ( $post_type && ! empty( $row->meta_key ) ) {
@@ -103,16 +125,12 @@ class MetaFieldsAPI {
                 }
             }
 
-            // Sort by label
             usort(
                 $meta_fields,
                 function ( $a, $b ) {
                     return strcmp( $a['label'], $b['label'] );
                 }
             );
-
-            // Cache results for 12 hours
-            set_transient( $cache_key, $meta_fields, 12 * HOUR_IN_SECONDS );
 
             return $meta_fields;
 
@@ -122,12 +140,14 @@ class MetaFieldsAPI {
     }
 
     /**
-     * REST API endpoint wrapper
+     * REST API endpoint wrapper.
      *
      * @param WP_REST_Request $request The REST request.
      * @return WP_REST_Response|WP_Error
      */
-    public function get_meta_fields( $request ) {
+    public function get_meta_fields( WP_REST_Request $request ) {
+        unset( $request ); // Parameter required by WordPress REST API callback signature.
+
         try {
             $meta_fields = $this->get_meta_fields_data();
             return rest_ensure_response( $meta_fields );
@@ -137,21 +157,6 @@ class MetaFieldsAPI {
                 'Could not fetch meta fields: ' . $e->getMessage(),
                 [ 'status' => 500 ]
             );
-        }
-    }
-    
-    /**
-     * Invalidate the meta fields cache when post meta changes
-     *
-     * @param int    $meta_id    ID of the metadata entry.
-     * @param int    $post_id    Post ID.
-     * @param string $meta_key   Meta key.
-     * @param mixed  $meta_value Meta value.
-     */
-    public function invalidate_cache( $meta_id, $post_id, $meta_key, $meta_value ) {
-        // Only invalidate for non-private meta keys (same filter as our query)
-        if ( ! str_starts_with( $meta_key, '_' ) ) {
-            delete_transient( 'wordpress_search_meta_fields' );
         }
     }
 }

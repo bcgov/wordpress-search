@@ -76,10 +76,19 @@ function wordpress_search_init() {
 /**
  * Handle search results sorting by meta fields
  * Supports both old format (sort_meta_field + sort_meta) and new simplified format (field_name=direction)
+ *
+ * @param WP_Query $query The WordPress query object.
  */
 function wordpress_search_handle_meta_sorting( $query ) {
-    // Only modify main search queries on frontend
+    // Only modify main search queries on frontend.
     if ( is_admin() || ! $query->is_main_query() || ! $query->is_search() ) {
+        return;
+    }
+
+    // Verify nonce for form data processing.
+    $nonce_verified = wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'search_results_sort' );
+
+    if ( ! $nonce_verified ) {
         return;
     }
 
@@ -87,56 +96,55 @@ function wordpress_search_handle_meta_sorting( $query ) {
     $sort_order  = '';
     $sort_source = '';
 
-    // Check for old format first (backward compatibility)
+    // Check for old format first (backward compatibility).
     $sort_meta       = $_GET['sort_meta'] ?? '';
     $sort_meta_field = $_GET['sort_meta_field'] ?? '';
 
     if ( in_array( $sort_meta, [ 'asc', 'desc' ], true ) && ! empty( $sort_meta_field ) ) {
-        // Old format: sort_meta_field=document:new_date&sort_meta=asc
+        // Old format: sort_meta_field=document:new_date&sort_meta=asc.
         if ( strpos( $sort_meta_field, ':' ) !== false ) {
             $parts    = explode( ':', $sort_meta_field );
-            $meta_key = end( $parts ); // Get the meta field name part
+            $meta_key = end( $parts ); // Get the meta field name part.
         } else {
             $meta_key = $sort_meta_field;
         }
         $sort_order  = $sort_meta;
         $sort_source = 'old_format';
     } else {
-        // Check for new simplified format: field_name=direction
-        // Use a single pass through $_GET with proper sanitization
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search sorting
+        // Check for new simplified format: field_name=direction.
+        // Use a single pass through $_GET with proper sanitization.
         foreach ( $_GET as $param_name => $param_value ) {
-            // Sanitize input immediately
+            // Sanitize input immediately.
             $sanitized_key   = sanitize_key( $param_name );
             $sanitized_value = sanitize_text_field( $param_value );
 
-            // Validate parameter name (alphanumeric + underscore only)
+            // Validate parameter name (alphanumeric + underscore only).
             if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) ) {
                 continue;
             }
 
-            // Validate sort direction
+            // Validate sort direction.
             if ( ! in_array( $sanitized_value, [ 'asc', 'desc' ], true ) ) {
                 continue;
             }
 
-            // Check if this looks like a meta field name (common patterns)
+            // Check if this looks like a meta field name (common patterns).
             if ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
                  in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) {
 
                 $meta_key    = $sanitized_key;
                 $sort_order  = $sanitized_value;
                 $sort_source = 'simplified_format';
-                break; // Only use the first matching field
+                break; // Only use the first matching field.
             }
         }
     }
 
     if ( ! empty( $meta_key ) && ! empty( $sort_order ) ) {
-        // Set meta query to sort by the selected meta field
+        // Set meta query to sort by the selected meta field.
         $query->set( 'meta_key', $meta_key );
 
-        // Determine if this is a date field for proper sorting
+        // Determine if this is a date field for proper sorting.
         $is_date_field = false;
         if ( strpos( strtolower( $meta_key ), 'date' ) !== false ||
              strpos( strtolower( $meta_key ), 'time' ) !== false ||
@@ -147,8 +155,11 @@ function wordpress_search_handle_meta_sorting( $query ) {
         $query->set( 'orderby', $is_date_field ? 'meta_value_datetime' : 'meta_value' );
         $query->set( 'order', strtoupper( $sort_order ) );
 
-        // Include posts without the meta field at the end
-        $meta_query   = $query->get( 'meta_query' ) ?: [];
+        // Include posts without the meta field at the end.
+        $meta_query = $query->get( 'meta_query' );
+        if ( empty( $meta_query ) ) {
+            $meta_query = [];
+        }
         $meta_query[] = [
             'relation' => 'OR',
             [

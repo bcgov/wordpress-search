@@ -7,7 +7,7 @@
 
 namespace Bcgov\WordpressSearch\SearchResultsSort;
 
-// Get selected meta fields from block attributes
+// Get selected meta fields from block attributes.
 $selected_meta_fields = $attributes['selectedMetaFields'] ?? [];
 
 
@@ -17,21 +17,21 @@ if ( ! is_search() && empty( get_query_var( 's' ) ) ) {
     return;
 }
 
-// Don't render if no meta fields are selected in block settings
+// Don't render if no meta fields are selected in block settings.
 if ( empty( $selected_meta_fields ) ) {
     return;
 }
 
-// Get available meta fields from the optimized API
+// Get available meta fields from the optimized API.
 $meta_fields = [];
 
-// Use the MetaFieldsAPI class for efficiency (shared cache, single query)
+// Use the MetaFieldsAPI class for efficiency (shared cache, single query).
 $meta_fields_api = new \Bcgov\WordpressSearch\MetaFieldsAPI();
-$meta_fields = $meta_fields_api->get_meta_fields_data();
+$meta_fields     = $meta_fields_api->get_meta_fields_data();
 
 
 
-// Fallback: Add some hardcoded options if no meta fields found
+// Fallback: Add some hardcoded options if no meta fields found.
 if ( empty( $meta_fields ) ) {
     $meta_fields = [
         [
@@ -67,7 +67,7 @@ if ( empty( $meta_fields ) ) {
     ];
 }
 
-// Sort by label
+// Sort by label.
 usort(
     $meta_fields,
     function ( $a, $b ) {
@@ -75,35 +75,43 @@ usort(
 	}
 );
 
-// Get current selections from URL (support both old and new formats)
-$current_meta_field = $_GET['sort_meta_field'] ?? '';
-$current_sort       = $_GET['sort_meta'] ?? 'off';
+// Verify nonce for form data processing.
+$nonce_verified = wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'search_results_sort' );
 
-// Check for new simplified format
-if ( empty( $current_meta_field ) || $current_sort === 'off' ) {
-    // Look for simplified format parameters: field_name=direction with proper sanitization
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search sorting
+// Get current selections from URL (support both old and new formats).
+$current_meta_field = '';
+$current_sort       = 'off';
+
+// Only process URL parameters if nonce is verified.
+if ( $nonce_verified ) {
+    $current_meta_field = $_GET['sort_meta_field'] ?? '';
+    $current_sort       = $_GET['sort_meta'] ?? 'off';
+}
+
+// Check for new simplified format.
+if ( $nonce_verified && ( empty( $current_meta_field ) || 'off' === $current_sort ) ) {
+    // Look for simplified format parameters: field_name=direction with proper sanitization.
     foreach ( $_GET as $param_name => $param_value ) {
-        // Sanitize input immediately
+        // Sanitize input immediately.
         $sanitized_key   = sanitize_key( $param_name );
         $sanitized_value = sanitize_text_field( $param_value );
 
-        // Validate parameter name (alphanumeric + underscore only)
+        // Validate parameter name (alphanumeric + underscore only).
         if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) ) {
             continue;
         }
 
-        // Validate sort direction
+        // Validate sort direction.
         if ( ! in_array( $sanitized_value, [ 'asc', 'desc' ], true ) ) {
             continue;
         }
 
-        // Check if this looks like a meta field name (common patterns)
+        // Check if this looks like a meta field name (common patterns).
         if ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
             in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) {
 
-            // Convert back to the format expected by the frontend display
-            $current_meta_field = 'document:' . $sanitized_key; // Assume document post type for display
+            // Convert back to the format expected by the frontend display.
+            $current_meta_field = 'document:' . $sanitized_key; // Assume document post type for display.
             $current_sort       = $sanitized_value;
             break;
         }
@@ -118,20 +126,21 @@ if ( ! in_array( $current_sort, [ 'off', 'asc', 'desc' ], true ) ) {
     $current_sort = 'off';
 }
 
-// Build the current URL without the sort parameters (both old and new formats)
+// Build the current URL without the sort parameters (both old and new formats).
 $parameters_to_remove = [ 'sort_meta', 'sort_meta_field' ];
 
-// Dynamically find and remove any simplified format parameters
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search sorting
-foreach ( $_GET as $param_name => $param_value ) {
-    $sanitized_key = sanitize_key( $param_name );
+// Dynamically find and remove any simplified format parameters.
+if ( $nonce_verified ) {
+    foreach ( $_GET as $param_name => $param_value ) {
+        $sanitized_key = sanitize_key( $param_name );
 
-    // Remove parameters that look like meta field names with sort values
-    if ( preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) &&
-        in_array( sanitize_text_field( $param_value ), [ 'asc', 'desc' ], true ) &&
-        ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
-         in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) ) {
-        $parameters_to_remove[] = $sanitized_key;
+        // Remove parameters that look like meta field names with sort values.
+        if ( preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) &&
+            in_array( sanitize_text_field( $param_value ), [ 'asc', 'desc' ], true ) &&
+            ( preg_match( '/^(document_|new_|sort_|relevance_|file_|date|time)/', $sanitized_key ) ||
+             in_array( $sanitized_key, [ 'new_date', 'sort_relevance', 'relevance_date' ], true ) ) ) {
+            $parameters_to_remove[] = $sanitized_key;
+        }
     }
 }
 
@@ -144,14 +153,19 @@ $sort_options = [
     'asc'  => __( 'Oldest first', 'wordpress-search' ),
 ];
 
-// Meta field options for the dropdown - only include selected fields
+// Meta field options for the dropdown - only include selected fields.
 $meta_field_options = [
     '' => __( 'Select a field to sort by...', 'wordpress-search' ),
 ];
 
-// Function to convert field names to user-friendly titles
+/**
+ * Function to convert field names to user-friendly titles.
+ *
+ * @param string $field_value The field value in format 'posttype:fieldname'.
+ * @return string Formatted field label for display.
+ */
 function format_field_label( $field_value ) {
-    // Extract just the field name (remove post type prefix)
+    // Extract just the field name (remove post type prefix).
     if ( strpos( $field_value, ':' ) !== false ) {
         $parts      = explode( ':', $field_value );
         $field_name = end( $parts );
@@ -159,11 +173,11 @@ function format_field_label( $field_value ) {
         $field_name = $field_value;
     }
 
-    // Convert underscores to spaces and title case
+    // Convert underscores to spaces and title case.
     $formatted = str_replace( '_', ' ', $field_name );
     $formatted = ucwords( $formatted );
 
-    // Handle common field name patterns
+    // Handle common field name patterns.
     $replacements = [
         'Sort Relevance'     => 'Sort Relevance',
         'Document File Name' => 'File Name',
@@ -172,7 +186,7 @@ function format_field_label( $field_value ) {
         'Document File Type' => 'File Type',
         'Post Date'          => 'Publication Date',
         'Page Order'         => 'Page Order',
-        'This2'              => 'This 2',  // Handle numbered fields
+        'This2'              => 'This 2',  // Handle numbered fields.
     ];
 
     foreach ( $replacements as $search => $replace ) {
@@ -186,7 +200,7 @@ function format_field_label( $field_value ) {
 
 
 
-// If we have meta fields from database query, filter by selected ones
+// If we have meta fields from database query, filter by selected ones.
 if ( ! empty( $meta_fields ) ) {
     foreach ( $meta_fields as $field ) {
         if ( in_array( $field['value'], $selected_meta_fields, true ) ) {
@@ -194,7 +208,7 @@ if ( ! empty( $meta_fields ) ) {
         }
     }
 } else {
-    // Fallback: Create options directly from selected fields with formatted labels
+    // Fallback: Create options directly from selected fields with formatted labels.
     foreach ( $selected_meta_fields as $field_value ) {
         $meta_field_options[ $field_value ] = format_field_label( $field_value );
     }
@@ -204,7 +218,7 @@ if ( ! empty( $meta_fields ) ) {
 
 ?>
 
-<div class="wp-block-wordpress-search-searchresultssort" id="<?php echo esc_attr( $block_id ); ?>">
+<div class="wp-block-wordpress-search-searchresultssort" id="<?php echo esc_attr( $block_id ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'search_results_sort' ) ); ?>">
     <div class="search-results-sort">
         <div class="search-results-sort__controls">
             <div class="search-results-sort__field-group">
@@ -256,7 +270,7 @@ if ( ! empty( $meta_fields ) ) {
 </div>
 
 <?php
-// Store the current meta field for the sorting hook
+// Store the current meta field for the sorting hook.
 if ( ! empty( $current_meta_field ) ) {
     global $wordpress_search_sort_meta_field;
     $wordpress_search_sort_meta_field = $current_meta_field;
