@@ -1,0 +1,85 @@
+// Editor-specific overrides for the search results sort block
+// Use the same classes as frontend but with editor-specific styling
+
+.wp-block-wordpress-search-searchresultssort {
+	// Minimal styling to fit well in group blocks
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
+	// Make sure we inherit all the frontend styles
+	.search-results-sort {
+		margin: 0; // Reset any default margins
+		
+		&__controls {
+			display: flex;
+			gap: 16px;
+			margin-bottom: 0;
+			flex-wrap: wrap;
+			
+			// Responsive stacking for smaller editor widths
+			@media (max-width: 600px) {
+				flex-direction: column;
+				gap: 12px;
+			}
+		}
+
+		&__field-group,
+		&__order-group {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			min-width: 160px;
+			flex: 1;
+		}
+
+		&__label {
+			font-size: 14px;
+			font-weight: 600;
+			color: #1e1e1e;
+			margin: 0;
+		}
+
+		&__field-select,
+		&__order-select {
+			padding: 8px 12px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			background: white;
+			font-size: 14px;
+			line-height: 1.4;
+			color: #1e1e1e;
+
+			&:disabled {
+				cursor: not-allowed;
+				color: #757575;
+			}
+
+			option {
+				padding: 4px 8px;
+			}
+		}
+	}
+}
+
+// Inspector controls styling
+.components-panel__body .components-base-control__help {
+	font-size: 12px;
+	font-style: italic;
+	color: #757575;
+	margin-bottom: 16px;
+}
+
+.components-checkbox-control {
+	margin-bottom: 8px;
+}
+
+.components-notice {
+	margin: 16px 0;
+	padding: 12px;
+	border-left: 4px solid #dba617;
+	background: #fff8e5;
+	
+	p {
+		margin: 0;
+		font-size: 13px;
+	}
+}
