@@ -35,9 +35,10 @@ if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
 
 if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataTaxonomySearch' ) ) {
     wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\MetadataTaxonomySearch could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
-	if ( ! class_exists( 'Bcgov\\WordpressSearch\\SearchHighlight' ) ) {
-		wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\SearchHighlight could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
-	}
+}
+
+if ( ! class_exists( 'Bcgov\\WordpressSearch\\SearchHighlight' ) ) {
+    wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\SearchHighlight could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
 }
 	/**
 	 * Initialize the plugin
@@ -53,6 +54,7 @@ function wordpress_search_init() {
 	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter' );
 	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchActiveFilters' );
 	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultCount' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsSort' );
 
 	// Initialize filter functionality.
 	$wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
@@ -64,15 +66,23 @@ function wordpress_search_init() {
 	// Initialize enhanced search highlight functionality.
 	$wordpress_search_highlight = new \Bcgov\WordpressSearch\SearchHighlight();
 	$wordpress_search_highlight->init();
-}
-	add_action( 'init', 'wordpress_search_init' );
 
-	/**
-	 * Register custom block category for search blocks.
-	 *
-	 * @param array $categories Array of block categories.
-	 * @return array Modified array of block categories.
-	 */
+	// Initialize meta fields API.
+	$wordpress_search_meta_fields_api = new \Bcgov\WordpressSearch\MetaFieldsAPI();
+	$wordpress_search_meta_fields_api->init();
+
+	// Initialize search results sorting.
+	$wordpress_search_results_sort = new \Bcgov\WordpressSearch\SearchResultsSort();
+	$wordpress_search_results_sort->init();
+}
+add_action( 'init', 'wordpress_search_init' );
+
+/**
+ * Register custom block category for search blocks.
+ *
+ * @param array $categories Array of block categories.
+ * @return array Modified array of block categories.
+ */
 function wordpress_search_register_block_category( $categories ) {
 	return array_merge(
 		array(
