@@ -70,127 +70,19 @@ function wordpress_search_init() {
 	// Initialize meta fields API.
 	$wordpress_search_meta_fields_api = new \Bcgov\WordpressSearch\MetaFieldsAPI();
 	$wordpress_search_meta_fields_api->init();
+
+	// Initialize search results sorting.
+	$wordpress_search_results_sort = new \Bcgov\WordpressSearch\SearchResultsSort();
+	$wordpress_search_results_sort->init();
 }
-	add_action( 'init', 'wordpress_search_init' );
+add_action( 'init', 'wordpress_search_init' );
 
 /**
- * Handle search results sorting by meta fields
- * Supports both old format (sort_meta_field + sort_meta) and new simplified format (field_name=direction)
+ * Register custom block category for search blocks.
  *
- * @param WP_Query $query The WordPress query object.
+ * @param array $categories Array of block categories.
+ * @return array Modified array of block categories.
  */
-function wordpress_search_handle_meta_sorting( $query ) {
-    // Only modify main search queries on frontend.
-    if ( is_admin() || ! $query->is_main_query() || ! $query->is_search() ) {
-        return;
-    }
-
-    // Note: Nonce verification not required for URL-based sorting of public search results.
-    // This allows users to share and bookmark sorted search result URLs.
-    // Sorting public search results is a read-only operation similar to taxonomy filtering.
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-
-    $meta_key    = '';
-    $sort_order  = '';
-    $sort_source = '';
-
-    // Check for old format first (backward compatibility).
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-    $sort_meta = $_GET['sort_meta'] ?? '';
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-    $sort_meta_field = $_GET['sort_meta_field'] ?? '';
-
-    if ( in_array( $sort_meta, [ 'asc', 'desc' ], true ) && ! empty( $sort_meta_field ) ) {
-        // Old format: sort_meta_field=document:new_date&sort_meta=asc.
-        if ( strpos( $sort_meta_field, ':' ) !== false ) {
-            $parts    = explode( ':', $sort_meta_field );
-            $meta_key = end( $parts ); // Get the meta field name part.
-        } else {
-            $meta_key = $sort_meta_field;
-        }
-        $sort_order  = $sort_meta;
-        $sort_source = 'old_format';
-    } else {
-        // Check for new simplified format: field_name=direction.
-        // Use a single pass through $_GET with proper sanitization.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-        foreach ( $_GET as $param_name => $param_value ) {
-            // Sanitize input immediately.
-            $sanitized_key   = sanitize_key( $param_name );
-            $sanitized_value = sanitize_text_field( $param_value );
-
-            // Validate parameter name (alphanumeric + underscore only).
-            if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) ) {
-                continue;
-            }
-
-            // Validate sort direction.
-            if ( ! in_array( $sanitized_value, [ 'asc', 'desc' ], true ) ) {
-                continue;
-            }
-
-            // Check if this parameter name exists as a meta field in the database.
-            // This makes the system fully dynamic - any real meta field will be recognized.
-            global $wpdb;
-            $meta_exists = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s LIMIT 1",
-                    $sanitized_key
-                )
-            );
-
-            if ( $meta_exists > 0 ) {
-                $meta_key    = $sanitized_key;
-                $sort_order  = $sanitized_value;
-                $sort_source = 'simplified_format';
-                break; // Only use the first matching field.
-            }
-        }
-    }
-
-    if ( ! empty( $meta_key ) && ! empty( $sort_order ) ) {
-        // Set meta query to sort by the selected meta field.
-        $query->set( 'meta_key', $meta_key );
-
-        // Determine if this is a date field for proper sorting.
-        $is_date_field = false;
-        if ( strpos( strtolower( $meta_key ), 'date' ) !== false ||
-             strpos( strtolower( $meta_key ), 'time' ) !== false ||
-             strpos( strtolower( $meta_key ), 'relevance' ) !== false ) {
-            $is_date_field = true;
-        }
-
-        $query->set( 'orderby', $is_date_field ? 'meta_value_datetime' : 'meta_value' );
-        $query->set( 'order', strtoupper( $sort_order ) );
-
-        // Include posts without the meta field at the end.
-        $meta_query = $query->get( 'meta_query' );
-        if ( empty( $meta_query ) ) {
-            $meta_query = [];
-        }
-        $meta_query[] = [
-            'relation' => 'OR',
-            [
-                'key'     => $meta_key,
-                'compare' => 'EXISTS',
-            ],
-            [
-                'key'     => $meta_key,
-                'compare' => 'NOT EXISTS',
-            ],
-        ];
-        $query->set( 'meta_query', $meta_query );
-
-    }
-}
-add_action( 'pre_get_posts', 'wordpress_search_handle_meta_sorting', 20 );
-
-	/**
-	 * Register custom block category for search blocks.
-	 *
-	 * @param array $categories Array of block categories.
-	 * @return array Modified array of block categories.
-	 */
 function wordpress_search_register_block_category( $categories ) {
 	return array_merge(
 		array(
