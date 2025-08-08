@@ -126,27 +126,27 @@ class SearchResultsSort {
         $is_date_field = $this->is_date_field( $meta_key );
 
         if ( $is_date_field ) {
-            // For date fields, use a meta query with DATE type for proper sorting
+            // For date fields, use a meta query with DATE type for proper sorting.
             $meta_query = $query->get( 'meta_query' );
             if ( empty( $meta_query ) ) {
                 $meta_query = [];
             }
-            
-            // Add meta query clause with a key for ordering
+
+            // Add meta query clause with a key for ordering.
             $meta_query['date_clause'] = [
                 'key'     => $meta_key,
                 'compare' => 'EXISTS',
                 'type'    => 'DATE',
             ];
-            
+
             $query->set( 'meta_query', $meta_query );
             $query->set( 'orderby', [ 'date_clause' => strtoupper( $sort_order ) ] );
         } else {
-            // For non-date fields, use the original approach
+            // For non-date fields, use the original approach.
             $query->set( 'meta_key', $meta_key );
             $query->set( 'orderby', 'meta_value' );
             $query->set( 'order', strtoupper( $sort_order ) );
-            
+
             // Include posts without the meta field at the end.
             $meta_query = $query->get( 'meta_query' );
             if ( empty( $meta_query ) ) {
