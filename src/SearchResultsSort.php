@@ -122,32 +122,49 @@ class SearchResultsSort {
      * @param string    $sort_order The sort order (asc or desc).
      */
     private function apply_meta_sorting( $query, $meta_key, $sort_order ) {
-        // Set meta query to sort by the selected meta field.
-        $query->set( 'meta_key', $meta_key );
-
         // Determine if this is a date field for proper sorting.
         $is_date_field = $this->is_date_field( $meta_key );
 
-        $query->set( 'orderby', $is_date_field ? 'meta_value_datetime' : 'meta_value' );
-        $query->set( 'order', strtoupper( $sort_order ) );
-
-        // Include posts without the meta field at the end.
-        $meta_query = $query->get( 'meta_query' );
-        if ( empty( $meta_query ) ) {
-            $meta_query = [];
-        }
-        $meta_query[] = [
-            'relation' => 'OR',
-            [
+        if ( $is_date_field ) {
+            // For date fields, use a meta query with DATE type for proper sorting
+            $meta_query = $query->get( 'meta_query' );
+            if ( empty( $meta_query ) ) {
+                $meta_query = [];
+            }
+            
+            // Add meta query clause with a key for ordering
+            $meta_query['date_clause'] = [
                 'key'     => $meta_key,
                 'compare' => 'EXISTS',
-            ],
-            [
-                'key'     => $meta_key,
-                'compare' => 'NOT EXISTS',
-            ],
-        ];
-        $query->set( 'meta_query', $meta_query );
+                'type'    => 'DATE',
+            ];
+            
+            $query->set( 'meta_query', $meta_query );
+            $query->set( 'orderby', [ 'date_clause' => strtoupper( $sort_order ) ] );
+        } else {
+            // For non-date fields, use the original approach
+            $query->set( 'meta_key', $meta_key );
+            $query->set( 'orderby', 'meta_value' );
+            $query->set( 'order', strtoupper( $sort_order ) );
+            
+            // Include posts without the meta field at the end.
+            $meta_query = $query->get( 'meta_query' );
+            if ( empty( $meta_query ) ) {
+                $meta_query = [];
+            }
+            $meta_query[] = [
+                'relation' => 'OR',
+                [
+                    'key'     => $meta_key,
+                    'compare' => 'EXISTS',
+                ],
+                [
+                    'key'     => $meta_key,
+                    'compare' => 'NOT EXISTS',
+                ],
+            ];
+            $query->set( 'meta_query', $meta_query );
+        }
     }
 
     /**
