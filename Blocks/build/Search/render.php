@@ -9,7 +9,7 @@
  * @subpackage search-bar
  */
 
-namespace Bcgov\WordpressSearch\Searchbar
+namespace Bcgov\WordpressSearch\Searchbar;
 
 ?>
 <div class="wp-block-wordpress-search-search-bar">

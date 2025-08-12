@@ -108,7 +108,7 @@ foreach ( $_GET as $param_name => $param_value ) {
     // Remove parameters that are meta field names with sort values.
     if ( preg_match( '/^[a-zA-Z0-9_]+$/', $sanitized_key ) &&
         in_array( sanitize_text_field( $param_value ), [ 'asc', 'desc' ], true ) ) {
-        
+
         // Check if this is actually a meta field in the database.
         global $wpdb;
         $meta_exists = $wpdb->get_var(
@@ -117,7 +117,7 @@ foreach ( $_GET as $param_name => $param_value ) {
                 $sanitized_key
             )
         );
-        
+
         if ( $meta_exists > 0 ) {
             $parameters_to_remove[] = $sanitized_key;
         }
