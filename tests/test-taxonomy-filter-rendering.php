@@ -368,8 +368,8 @@ class TaxonomyBlockRenderingTest extends WP_UnitTestCase {
             'Should generate proper checkbox ID'
         );
 
-        // Should contain nonce field for security.
-        $this->assertStringContainsString( 'name="_wpnonce"', $output, 'Should contain nonce field' );
+        // Should NOT contain nonce field (removed for cleaner URLs).
+        $this->assertStringNotContainsString( 'name="_wpnonce"', $output, 'Should not contain nonce field' );
     }
 
     /**

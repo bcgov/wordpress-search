@@ -179,14 +179,11 @@ export default function Edit({ attributes, setAttributes }) {
 			<div {...blockProps}>
 				<div className="dswp-search-post-type-filter__container dswp-search-post-type-filter__container--editor">
 					{displayedPostTypes.length > 0 ? (
-						displayedPostTypes.map((postType, index) => (
+						<>
+							{/* Add "All" button as the first option - always active in editor preview */}
 							<button
-								key={postType.slug}
-								className={`dswp-search-post-type-filter__button ${
-									index === 0
-										? 'dswp-search-post-type-filter__button--active'
-										: ''
-								}`}
+								key="all"
+								className="dswp-search-post-type-filter__button dswp-search-post-type-filter__button--active"
 								onClick={(e) => e.preventDefault()}
 								disabled
 								style={{
@@ -194,10 +191,25 @@ export default function Edit({ attributes, setAttributes }) {
 								}}
 							>
 								<span className="dswp-search-post-type-filter__text">
-									{postType.name}
+									{__('All', 'wordpress-search')}
 								</span>
 							</button>
-						))
+							{displayedPostTypes.map((postType) => (
+								<button
+									key={postType.slug}
+									className="dswp-search-post-type-filter__button"
+									onClick={(e) => e.preventDefault()}
+									disabled
+									style={{
+										'--underline-color': underlineColor,
+									}}
+								>
+									<span className="dswp-search-post-type-filter__text">
+										{postType.name}
+									</span>
+								</button>
+							))}
+						</>
 					) : (
 						<div
 							style={{
