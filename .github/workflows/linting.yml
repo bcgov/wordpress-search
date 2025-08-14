@@ -11,10 +11,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Node.js 20
+      - name: Install Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install dependencies
         run: |

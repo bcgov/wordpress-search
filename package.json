@@ -25,6 +25,7 @@
     "node": ">=22.16.0"
   },
   "main": "index.js",
+  "type": "module",
   "devDependencies": {
     "@bcgov/wordpress-eslint": "git+https://github.com/bcgov/wordpress-eslint.git#semver:1.x",
     "@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",
