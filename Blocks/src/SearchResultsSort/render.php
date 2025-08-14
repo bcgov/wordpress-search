@@ -212,6 +212,18 @@ echo wp_kses( $inline_styles, [ 'style' => [] ] );
     <div class="search-results-sort">
         <div class="search-results-sort__controls">
             <div class="search-results-sort__field-group">
+                <svg class="search-results-sort__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <!-- Arrow line -->
+                    <line x1="6" y1="4" x2="6" y2="20" stroke="currentColor" stroke-width="2"/>
+                    <!-- Arrow head -->
+                    <polyline points="3,17 6,20 9,17" fill="none" stroke="currentColor" stroke-width="2"/>
+                    
+                    <!-- Horizontal bars (representing sort levels) -->
+                    <line x1="12" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="14" x2="16" y2="14" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                
                 <label for="<?php echo esc_attr( $block_id ); ?>-sort-select" class="search-results-sort__label">
                     <?php echo esc_html__( 'Sort by:', 'wordpress-search' ); ?>
                 </label>
