@@ -38,10 +38,10 @@
   "scripts": {
     "start": "wp-scripts start",
     "build": "wp-scripts build",
-    "lint:css": "wp-scripts lint-style 'src/**/*.scss' --allow-empty-input",
-    "fix:css": "wp-scripts lint-style 'src/**/*.scss' --fix --allow-empty-input",
-    "lint:js": "wp-scripts lint-js 'src/**/*.js'",
-    "fix:js": "wp-scripts lint-js 'src/**/*.js' --fix",
+    "lint:css": "wp-scripts lint-style 'src/**/*.scss' 'Blocks/src/**/*.scss' --allow-empty-input --ignore-pattern '**/node_modules/**' --ignore-pattern '**/build/**'",
+    "fix:css": "wp-scripts lint-style 'src/**/*.scss' 'Blocks/src/**/*.scss' --fix --allow-empty-input --ignore-pattern '**/node_modules/**' --ignore-pattern '**/build/**'",
+    "lint:js": "wp-scripts lint-js 'src/**/*.js' 'Blocks/src/**/*.js' --allow-empty-input --ignore-pattern '**/node_modules/**' --ignore-pattern '**/build/**'",
+    "fix:js": "wp-scripts lint-js 'src/**/*.js' 'Blocks/src/**/*.js' --fix --allow-empty-input --ignore-pattern '**/node_modules/**' --ignore-pattern '**/build/**'",
     "test": "npm run test:unit",
     "test:unit": "wp-scripts test-unit-js --passWithNoTests"
   }
