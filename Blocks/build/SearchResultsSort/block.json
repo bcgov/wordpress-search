@@ -8,17 +8,21 @@
   "icon": "sort",
   "description": "A sort control for search results that sorts by relevance_date custom field",
   "attributes": {
-    "selectedMetaFields": {
-      "type": "array",
-      "default": []
+    "selectedMetaField": {
+      "type": "string",
+      "default": ""
+    },
+    "sortOrder": {
+      "type": "string",
+      "default": "newest"
     }
   },
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
-  "viewStyle": "file:./view.css",
-  "viewScript": "file:./view.js",
-  "render": "file:./render.php",
-  "style": "file:./view.css",
+  "viewStyle": "file://view.css",
+  "viewScript": "file://view.js",
+  "render": "file://render.php",
+  "style": "file://view.css",
   "dependencies": [
     "wp-api-fetch",
     "wp-components",
