@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "wordpress-search/search-modal",
+  "version": "1.0.0",
+  "title": "Search Modal",
+  "category": "search",
+  "icon": "welcome-view-site",
+  "description": "A modal container block that displays content only when a trigger button is clicked. Add any blocks inside the modal.",
+  "supports": {
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ]
+  },
+  "attributes": {
+    "buttonText": {
+      "type": "string",
+      "default": "Open Modal"
+    },
+    "buttonStyle": {
+      "type": "string",
+      "default": "primary"
+    },
+    "mobileBreakpoint": {
+      "type": "number",
+      "default": 768
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "viewStyle": "file:./view.css",
+  "viewScript": "file:./view.js",
+  "style": "file:./style-index.css"
+}

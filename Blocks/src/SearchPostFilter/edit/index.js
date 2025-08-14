@@ -23,7 +23,7 @@ import '../editor.scss';
  * @param {Function} props.setAttributes - Function to update block attributes
  * @return {JSX.Element} The editor interface for the block.
  */
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit( { attributes, setAttributes } ) {
 	const { selectedPostTypes, underlineColor } = attributes;
 
 	// Get the block props which include the necessary editor attributes and classes
@@ -36,8 +36,8 @@ export default function Edit({ attributes, setAttributes }) {
 	 * and filters them to include all post types except for WordPress internal ones.
 	 * This ensures custom post types like "document" are always included.
 	 */
-	const postTypes = useSelect((select) => {
-		const types = select('core').getPostTypes({ per_page: -1 });
+	const postTypes = useSelect( ( select ) => {
+		const types = select( 'core' ).getPostTypes( { per_page: -1 } );
 
 		// List of WordPress internal post types to exclude from the filter
 		const excludedPostTypes = [
@@ -58,18 +58,18 @@ export default function Edit({ attributes, setAttributes }) {
 		];
 
 		return (
-			types?.filter((type) => {
+			types?.filter( ( type ) => {
 				// Exclude only the WordPress internal post types
-				if (excludedPostTypes.includes(type.slug)) {
+				if ( excludedPostTypes.includes( type.slug ) ) {
 					return false;
 				}
 
 				// Include all other post types (this will include custom post types like "document")
 				// We're being very inclusive here since this is a search plugin
 				return true;
-			}) || []
+			} ) || []
 		);
-	}, []);
+	}, [] );
 
 	/**
 	 * Handle post type selection/deselection
@@ -77,20 +77,20 @@ export default function Edit({ attributes, setAttributes }) {
 	 * @param {string}  postTypeSlug - The slug of the post type to toggle
 	 * @param {boolean} isChecked    - Whether the checkbox is checked
 	 */
-	const handlePostTypeToggle = (postTypeSlug, isChecked) => {
+	const handlePostTypeToggle = ( postTypeSlug, isChecked ) => {
 		let updatedPostTypes;
 
-		if (isChecked) {
+		if ( isChecked ) {
 			// Add post type if it's not already selected
-			updatedPostTypes = [...selectedPostTypes, postTypeSlug];
+			updatedPostTypes = [ ...selectedPostTypes, postTypeSlug ];
 		} else {
 			// Remove post type from selection
 			updatedPostTypes = selectedPostTypes.filter(
-				(slug) => slug !== postTypeSlug
+				( slug ) => slug !== postTypeSlug
 			);
 		}
 
-		setAttributes({ selectedPostTypes: updatedPostTypes });
+		setAttributes( { selectedPostTypes: updatedPostTypes } );
 	};
 
 	/**
@@ -98,12 +98,12 @@ export default function Edit({ attributes, setAttributes }) {
 	 * If no post types are selected, show all available post types
 	 */
 	const getDisplayedPostTypes = () => {
-		if (selectedPostTypes.length === 0) {
+		if ( selectedPostTypes.length === 0 ) {
 			return postTypes;
 		}
 
-		return postTypes.filter((postType) =>
-			selectedPostTypes.includes(postType.slug)
+		return postTypes.filter( ( postType ) =>
+			selectedPostTypes.includes( postType.slug )
 		);
 	};
 
@@ -113,112 +113,115 @@ export default function Edit({ attributes, setAttributes }) {
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={__('Post Type Filter Settings', 'wordpress-search')}
-					initialOpen={true}
+					title={ __(
+						'Post Type Filter Settings',
+						'wordpress-search'
+					) }
+					initialOpen={ true }
 				>
 					<p>
-						{__(
+						{ __(
 							'Select which post types to show in the filter. If none are selected, all post types will be shown.',
 							'wordpress-search'
-						)}
+						) }
 					</p>
 
-					{postTypes.length > 0 ? (
-						postTypes.map((postType) => (
+					{ postTypes.length > 0 ? (
+						postTypes.map( ( postType ) => (
 							<CheckboxControl
-								key={postType.slug}
-								label={postType.name}
-								checked={selectedPostTypes.includes(
+								key={ postType.slug }
+								label={ postType.name }
+								checked={ selectedPostTypes.includes(
 									postType.slug
-								)}
-								onChange={(isChecked) =>
+								) }
+								onChange={ ( isChecked ) =>
 									handlePostTypeToggle(
 										postType.slug,
 										isChecked
 									)
 								}
 							/>
-						))
+						) )
 					) : (
 						<Placeholder>
-							{__('Loading post types…', 'wordpress-search')}
+							{ __( 'Loading post types…', 'wordpress-search' ) }
 						</Placeholder>
-					)}
+					) }
 
-					{selectedPostTypes.length > 0 && (
+					{ selectedPostTypes.length > 0 && (
 						<p
-							style={{
+							style={ {
 								marginTop: '16px',
 								fontSize: '12px',
 								color: '#666',
-							}}
+							} }
 						>
-							{__('Selected:', 'wordpress-search')}{' '}
-							{selectedPostTypes.length}{' '}
-							{__('post types', 'wordpress-search')}
+							{ __( 'Selected:', 'wordpress-search' ) }{ ' ' }
+							{ selectedPostTypes.length }{ ' ' }
+							{ __( 'post types', 'wordpress-search' ) }
 						</p>
-					)}
+					) }
 				</PanelBody>
 
 				<PanelColorSettings
-					title={__('Styling Options', 'wordpress-search')}
-					colorSettings={[
+					title={ __( 'Styling Options', 'wordpress-search' ) }
+					colorSettings={ [
 						{
 							value: underlineColor,
-							onChange: (color) =>
-								setAttributes({ underlineColor: color }),
+							onChange: ( color ) =>
+								setAttributes( { underlineColor: color } ),
 							label: __(
 								'Active Filter Underline Color',
 								'wordpress-search'
 							),
 						},
-					]}
+					] }
 				/>
 			</InspectorControls>
 
-			<div {...blockProps}>
+			<div { ...blockProps }>
 				<div className="dswp-search-post-type-filter__container dswp-search-post-type-filter__container--editor">
-					{displayedPostTypes.length > 0 ? (
+					{ displayedPostTypes.length > 0 ? (
 						<>
-							{/* Add "All" button as the first option - always active in editor preview */}
+							{ /* Add "All" button as the first option - always active in editor preview */ }
 							<button
 								key="all"
 								className="dswp-search-post-type-filter__button dswp-search-post-type-filter__button--active"
-								onClick={(e) => e.preventDefault()}
+								onClick={ ( e ) => e.preventDefault() }
 								disabled
-								style={{
+								style={ {
 									'--underline-color': underlineColor,
-								}}
+								} }
 							>
 								<span className="dswp-search-post-type-filter__text">
-									{__('All', 'wordpress-search')}
+									{ __( 'All', 'wordpress-search' ) }
 								</span>
 							</button>
-							{displayedPostTypes.map((postType) => (
+							{ displayedPostTypes.map( ( postType ) => (
 								<button
-									key={postType.slug}
+									key={ postType.slug }
 									className="dswp-search-post-type-filter__button"
-									onClick={(e) => e.preventDefault()}
+									onClick={ ( e ) => e.preventDefault() }
 									disabled
-									style={{
+									style={ {
 										'--underline-color': underlineColor,
-									}}
+									} }
 								>
 									<span className="dswp-search-post-type-filter__text">
-										{postType.name}
+										{ postType.name }
 									</span>
 								</button>
-							))}
+							) ) }
 						</>
 					) : (
 						<div
-							style={{
+							style={ {
 								padding: '16px',
 								textAlign: 'center',
 								color: '#666',
-							}}
+							} }
 						>
-							{selectedPostTypes.length === 0
+							{ selectedPostTypes.length === 0
 								? __(
 										'Select post types in the block settings sidebar →',
 										'wordpress-search'
@@ -226,9 +229,9 @@ export default function Edit({ attributes, setAttributes }) {
 								: __(
 										'No matching post types found',
 										'wordpress-search'
-								  )}
+								  ) }
 						</div>
-					)}
+					) }
 				</div>
 			</div>
 		</>

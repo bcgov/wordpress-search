@@ -16,17 +16,17 @@ import './view.scss';
  */
 
 // Wait for the DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener( 'DOMContentLoaded', function () {
 	// Find all search forms
-	const searchForms = document.querySelectorAll('.dswp-search-bar__form');
+	const searchForms = document.querySelectorAll( '.dswp-search-bar__form' );
 
-	searchForms.forEach((form) => {
-		const input = form.querySelector('.dswp-search-bar__input');
+	searchForms.forEach( ( form ) => {
+		const input = form.querySelector( '.dswp-search-bar__input' );
 		const clearButton = form.querySelector(
 			'.dswp-search-bar__clear-button'
 		);
 
-		if (input && clearButton) {
+		if ( input && clearButton ) {
 			// Show/hide clear button based on input content
 			const toggleClearButton = () => {
 				clearButton.style.display = input.value ? 'flex' : 'none';
@@ -43,10 +43,10 @@ document.addEventListener('DOMContentLoaded', function () {
 			toggleClearButton();
 
 			// Handle input changes
-			input.addEventListener('input', toggleClearButton);
+			input.addEventListener( 'input', toggleClearButton );
 
 			// Handle clear button click - clear text and search with empty string
-			clearButton.addEventListener('click', clearAndSearch);
+			clearButton.addEventListener( 'click', clearAndSearch );
 		}
-	});
-});
+	} );
+} );

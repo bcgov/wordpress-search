@@ -19,41 +19,41 @@ import './editor.scss';
  * @param {Function} props.setAttributes Function to set block attributes.
  * @return {JSX.Element} Element to render.
  */
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit( { attributes, setAttributes } ) {
 	const { selectedTaxonomy } = attributes;
 
-	const { taxonomies } = useSelect((select) => {
-		const { getTaxonomies } = select('core');
+	const { taxonomies } = useSelect( ( select ) => {
+		const { getTaxonomies } = select( 'core' );
 		const allTaxonomies =
-			getTaxonomies({ per_page: -1, context: 'view' }) || [];
+			getTaxonomies( { per_page: -1, context: 'view' } ) || [];
 
 		return {
 			taxonomies: allTaxonomies,
 		};
-	}, []);
+	}, [] );
 
 	// Format taxonomies for the select control
 	const taxonomyOptions = [
-		{ label: __('Select a taxonomy…', 'wordpress-search'), value: '' },
-		...(taxonomies || [])
-			.filter((tax) => {
-				if (!tax) {
+		{ label: __( 'Select a taxonomy…', 'wordpress-search' ), value: '' },
+		...( taxonomies || [] )
+			.filter( ( tax ) => {
+				if ( ! tax ) {
 					return false;
 				}
 
 				// Be more permissive - only require the taxonomy to have a name
-				if (!tax.name) {
+				if ( ! tax.name ) {
 					return false;
 				}
 
 				return true;
-			})
-			.map((taxonomy) => {
+			} )
+			.map( ( taxonomy ) => {
 				// Handle taxonomies that might not have types properly set
-				if (!taxonomy.types || taxonomy.types.length === 0) {
+				if ( ! taxonomy.types || taxonomy.types.length === 0 ) {
 					// Try to get object_type as fallback
 					const objectTypes = taxonomy.object_type || [];
-					if (objectTypes.length === 0) {
+					if ( objectTypes.length === 0 ) {
 						return null;
 					}
 					// Use the first object type as fallback
@@ -64,92 +64,95 @@ export default function Edit({ attributes, setAttributes }) {
 				const taxonomyLabel =
 					taxonomy.labels?.singular_name ||
 					taxonomy.name ||
-					__('Unknown', 'wordpress-search');
+					__( 'Unknown', 'wordpress-search' );
 
 				// Get the post type label for clarity
-				const postType = taxonomy.types[0];
+				const postType = taxonomy.types[ 0 ];
 				const postTypeLabel =
-					postType.charAt(0).toUpperCase() + postType.slice(1);
+					postType.charAt( 0 ).toUpperCase() + postType.slice( 1 );
 
 				// Combine post type and taxonomy name for clarity
-				const label = `${postTypeLabel}: ${
-					taxonomyLabel.charAt(0).toUpperCase() +
-					taxonomyLabel.slice(1)
+				const label = `${ postTypeLabel }: ${
+					taxonomyLabel.charAt( 0 ).toUpperCase() +
+					taxonomyLabel.slice( 1 )
 				}`;
 
 				// Use the actual taxonomy name without any prefix manipulation
-				const value = `${taxonomy.types[0]}:${taxonomy.name}`;
+				const value = `${ taxonomy.types[ 0 ] }:${ taxonomy.name }`;
 
 				return {
 					label,
 					value,
 				};
-			})
-			.filter(Boolean), // Remove any null entries from map
+			} )
+			.filter( Boolean ), // Remove any null entries from map
 	];
 
 	// Get the display name for the selected taxonomy
 	const getSelectedTaxonomyLabel = () => {
-		if (!selectedTaxonomy) {
-			return __('No taxonomy selected', 'wordpress-search');
+		if ( ! selectedTaxonomy ) {
+			return __( 'No taxonomy selected', 'wordpress-search' );
 		}
 
 		const selectedOption = taxonomyOptions.find(
-			(option) => option.value === selectedTaxonomy
+			( option ) => option.value === selectedTaxonomy
 		);
 		return selectedOption
 			? selectedOption.label
-			: __('Unknown taxonomy', 'wordpress-search');
+			: __( 'Unknown taxonomy', 'wordpress-search' );
 	};
 
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={__('Taxonomy Filter Settings', 'wordpress-search')}
-					initialOpen={true}
+					title={ __(
+						'Taxonomy Filter Settings',
+						'wordpress-search'
+					) }
+					initialOpen={ true }
 				>
 					<SelectControl
-						label={__('Select Taxonomy', 'wordpress-search')}
-						value={selectedTaxonomy}
-						options={taxonomyOptions}
-						onChange={(value) => {
-							setAttributes({ selectedTaxonomy: value });
-						}}
-						help={__(
+						label={ __( 'Select Taxonomy', 'wordpress-search' ) }
+						value={ selectedTaxonomy }
+						options={ taxonomyOptions }
+						onChange={ ( value ) => {
+							setAttributes( { selectedTaxonomy: value } );
+						} }
+						help={ __(
 							'Choose which taxonomy to use for filtering search results.',
 							'wordpress-search'
-						)}
+						) }
 					/>
 				</PanelBody>
 			</InspectorControls>
 
-			<div {...useBlockProps()}>
+			<div { ...useBlockProps() }>
 				<div className="taxonomy-filter-preview">
 					<div className="taxonomy-filter-preview__header">
-						<h4>{__('Taxonomy Filter', 'wordpress-search')}</h4>
+						<h4>{ __( 'Taxonomy Filter', 'wordpress-search' ) }</h4>
 						<p className="taxonomy-filter-preview__description">
-							{selectedTaxonomy
-								? __('Selected:', 'wordpress-search') +
+							{ selectedTaxonomy
+								? __( 'Selected:', 'wordpress-search' ) +
 								  getSelectedTaxonomyLabel()
 								: __(
 										'Configure taxonomy in the block settings →',
 										'wordpress-search'
-								  )}
+								  ) }
 						</p>
 					</div>
-					{selectedTaxonomy && (
+					{ selectedTaxonomy && (
 						<div className="taxonomy-filter-preview__content">
 							<div className="taxonomy-filter-preview__placeholder">
 								<p>
-									{__(
+									{ __(
 										'Filter options will appear here on the frontend',
 										'wordpress-search'
-									)}
+									) }
 								</p>
 							</div>
 						</div>
-					)}
+					) }
 				</div>
 			</div>
 		</>
