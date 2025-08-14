@@ -20,23 +20,23 @@ import './editor.scss';
  * @param {Function} props.setAttributes Function to set block attributes.
  * @return {JSX.Element} Element to render.
  */
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit( { attributes, setAttributes } ) {
 	const { selectedMetaFields } = attributes;
-	const [availableMetaFields, setAvailableMetaFields] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const [ availableMetaFields, setAvailableMetaFields ] = useState( [] );
+	const [ isLoading, setIsLoading ] = useState( true );
 
 	// Function to format field labels for display
-	const formatFieldLabel = (fieldValue) => {
+	const formatFieldLabel = ( fieldValue ) => {
 		// Extract just the field name (remove post type prefix)
 		let fieldName = fieldValue;
-		if (fieldValue.includes(':')) {
-			const parts = fieldValue.split(':');
-			fieldName = parts[parts.length - 1];
+		if ( fieldValue.includes( ':' ) ) {
+			const parts = fieldValue.split( ':' );
+			fieldName = parts[ parts.length - 1 ];
 		}
 
 		// Convert underscores to spaces and title case
-		let formatted = fieldName.replace(/_/g, ' ');
-		formatted = formatted.replace(/\b\w/g, (l) => l.toUpperCase());
+		let formatted = fieldName.replace( /_/g, ' ' );
+		formatted = formatted.replace( /\b\w/g, ( l ) => l.toUpperCase() );
 
 		// Handle common field name patterns
 		const replacements = {
@@ -50,8 +50,8 @@ export default function Edit({ attributes, setAttributes }) {
 			This2: 'This 2',
 		};
 
-		if (replacements[formatted]) {
-			return replacements[formatted];
+		if ( replacements[ formatted ] ) {
+			return replacements[ formatted ];
 		}
 
 		return formatted;
@@ -59,127 +59,127 @@ export default function Edit({ attributes, setAttributes }) {
 
 	// Fetch available metadata fields - this runs automatically
 	const fetchMetaFields = async () => {
-		setIsLoading(true);
+		setIsLoading( true );
 		try {
 			// Fetch data - server handles caching efficiently
-			const metaFieldsResponse = await apiFetch({
+			const metaFieldsResponse = await apiFetch( {
 				path: '/wordpress-search/v1/meta-fields',
 				method: 'GET',
-			});
+			} );
 
-			if (metaFieldsResponse && metaFieldsResponse.length > 0) {
-				setAvailableMetaFields(metaFieldsResponse);
+			if ( metaFieldsResponse && metaFieldsResponse.length > 0 ) {
+				setAvailableMetaFields( metaFieldsResponse );
 			} else {
-				setAvailableMetaFields([]);
+				setAvailableMetaFields( [] );
 			}
-		} catch (error) {
-			setAvailableMetaFields([]);
+		} catch ( error ) {
+			setAvailableMetaFields( [] );
 		} finally {
-			setIsLoading(false);
+			setIsLoading( false );
 		}
 	};
 
 	// Auto-fetch when component mounts
-	useEffect(() => {
+	useEffect( () => {
 		fetchMetaFields();
-	}, []);
+	}, [] );
 
 	// Refresh when selected fields change (for when user makes changes)
-	useEffect(() => {
+	useEffect( () => {
 		// Only fetch if we don't have any available fields yet
-		if (availableMetaFields.length === 0) {
+		if ( availableMetaFields.length === 0 ) {
 			fetchMetaFields();
 		}
-	}, [selectedMetaFields, availableMetaFields.length]);
+	}, [ selectedMetaFields, availableMetaFields.length ] );
 
 	// Handle checkbox change
-	const handleMetaFieldToggle = (fieldValue, isChecked) => {
+	const handleMetaFieldToggle = ( fieldValue, isChecked ) => {
 		const newSelectedFields = isChecked
-			? [...selectedMetaFields, fieldValue]
-			: selectedMetaFields.filter((field) => field !== fieldValue);
+			? [ ...selectedMetaFields, fieldValue ]
+			: selectedMetaFields.filter( ( field ) => field !== fieldValue );
 
-		setAttributes({ selectedMetaFields: newSelectedFields });
+		setAttributes( { selectedMetaFields: newSelectedFields } );
 	};
 
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={__('Available Sort Fields', 'wordpress-search')}
-					initialOpen={true}
+					title={ __( 'Available Sort Fields', 'wordpress-search' ) }
+					initialOpen={ true }
 				>
 					<p className="components-base-control__help">
-						{__(
+						{ __(
 							'Select which metadata fields should be available for sorting on the frontend. Fields are automatically refreshed.',
 							'wordpress-search'
-						)}
+						) }
 					</p>
 
-					{!isLoading && availableMetaFields.length === 0 && (
+					{ ! isLoading && availableMetaFields.length === 0 && (
 						<div
-							style={{
+							style={ {
 								padding: '12px',
 								background: '#f0f0f0',
 								borderRadius: '4px',
 								marginBottom: '8px',
 								textAlign: 'center',
-							}}
+							} }
 						>
 							<p
-								style={{
+								style={ {
 									margin: 0,
 									fontSize: '14px',
 									color: '#666',
-								}}
+								} }
 							>
-								{__(
+								{ __(
 									'No metadata fields found. Check that your posts have custom metadata.',
 									'wordpress-search'
-								)}
+								) }
 							</p>
 						</div>
-					)}
+					) }
 
-					{isLoading && (
+					{ isLoading && (
 						<p>
-							{__(
+							{ __(
 								'Loading available fields…',
 								'wordpress-search'
-							)}
+							) }
 						</p>
-					)}
+					) }
 
-					{!isLoading &&
-						availableMetaFields.map((field) => (
+					{ ! isLoading &&
+						availableMetaFields.map( ( field ) => (
 							<CheckboxControl
-								key={field.value}
-								label={formatFieldLabel(field.value)}
-								checked={selectedMetaFields.includes(
+								key={ field.value }
+								label={ formatFieldLabel( field.value ) }
+								checked={ selectedMetaFields.includes(
 									field.value
-								)}
-								onChange={(isChecked) =>
+								) }
+								onChange={ ( isChecked ) =>
 									handleMetaFieldToggle(
 										field.value,
 										isChecked
 									)
 								}
 							/>
-						))}
+						) ) }
 
-					{selectedMetaFields.length === 0 && !isLoading && (
+					{ selectedMetaFields.length === 0 && ! isLoading && (
 						<div className="components-notice components-notice--warning">
 							<p>
-								{__(
+								{ __(
 									'No fields selected. Users will not see any sort options.',
 									'wordpress-search'
-								)}
+								) }
 							</p>
 						</div>
-					)}
+					) }
 				</PanelBody>
 			</InspectorControls>
 
-			<div {...useBlockProps()}>
+			<div { ...useBlockProps() }>
 				<div className="wp-block-wordpress-search-searchresultssort">
 					<div className="search-results-sort">
 						<div className="search-results-sort__controls">
@@ -188,66 +188,73 @@ export default function Edit({ attributes, setAttributes }) {
 									className="search-results-sort__label"
 									htmlFor="preview-field-select"
 								>
-									{__('Sort by field:', 'wordpress-search')}
+									{ __(
+										'Sort by field:',
+										'wordpress-search'
+									) }
 								</label>
 								<select
 									id="preview-field-select"
 									className="search-results-sort__field-select"
 									disabled
-									style={{ opacity: 0.7 }}
+									style={ { opacity: 0.7 } }
 								>
 									<option>
-										{__(
+										{ __(
 											'Select a field to sort by…',
 											'wordpress-search'
-										)}
+										) }
 									</option>
-									{selectedMetaFields.map((fieldValue) => (
-										<option
-											key={fieldValue}
-											value={fieldValue}
-										>
-											{formatFieldLabel(fieldValue)}
-										</option>
-									))}
+									{ selectedMetaFields.map(
+										( fieldValue ) => (
+											<option
+												key={ fieldValue }
+												value={ fieldValue }
+											>
+												{ formatFieldLabel(
+													fieldValue
+												) }
+											</option>
+										)
+									) }
 								</select>
 							</div>
 
-							{selectedMetaFields.length > 0 && (
+							{ selectedMetaFields.length > 0 && (
 								<div className="search-results-sort__order-group">
 									<label
 										className="search-results-sort__label"
 										htmlFor="preview-order-select"
 									>
-										{__('Order:', 'wordpress-search')}
+										{ __( 'Order:', 'wordpress-search' ) }
 									</label>
 									<select
 										id="preview-order-select"
 										className="search-results-sort__order-select"
 										disabled
-										style={{ opacity: 0.7 }}
+										style={ { opacity: 0.7 } }
 									>
 										<option value="off">
-											{__(
+											{ __(
 												'Default (No sorting)',
 												'wordpress-search'
-											)}
+											) }
 										</option>
 										<option value="desc">
-											{__(
+											{ __(
 												'Newest first',
 												'wordpress-search'
-											)}
+											) }
 										</option>
 										<option value="asc">
-											{__(
+											{ __(
 												'Oldest first',
 												'wordpress-search'
-											)}
+											) }
 										</option>
 									</select>
 								</div>
-							)}
+							) }
 						</div>
 					</div>
 				</div>

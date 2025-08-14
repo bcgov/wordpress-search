@@ -12,7 +12,7 @@ import metadata from './block.json';
 /**
  * Register block type
  */
-registerBlockType(metadata.name, {
+registerBlockType( metadata.name, {
 	...metadata,
 	edit: Edit,
-});
+} );

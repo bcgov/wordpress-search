@@ -1,0 +1,182 @@
+/**
+ * Search Modal Block Editor Styles
+ *
+ * Styles for the modal block in the WordPress block editor.
+ * Designed to look similar to the Group block for a clean,
+ * content-focused appearance.
+ */
+
+.wp-block-wordpress-search-search-modal {
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	padding: 16px;
+	margin: 16px 0;
+	background: #fff;
+	position: relative;
+
+	.dswp-search-modal__container {
+		display: block;
+	}
+
+	.dswp-search-modal__trigger-preview {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 12px;
+		background: #f6f7f7;
+		border-radius: 2px;
+		border: 1px solid #ddd;
+		margin-bottom: 12px;
+		font-size: 12px;
+		color: #666;
+
+
+	}
+
+	.dswp-search-modal__trigger {
+		padding: 6px 12px;
+		border-radius: 2px;
+		border: none;
+		cursor: pointer;
+		font-weight: 400;
+		font-size: 12px;
+		transition: all 0.2s ease;
+
+		&--primary {
+			background: #2271b1;
+			color: #fff;
+
+			&:hover {
+				background: #135e96;
+			}
+		}
+
+		&--secondary {
+			background: #f6f7f7;
+			color: #2c3338;
+			border: 1px solid #8c8f94;
+
+			&:hover {
+				background: #f0f0f1;
+			}
+		}
+
+		&--outline {
+			background: transparent;
+			color: #2271b1;
+			border: 1px solid #2271b1;
+
+			&:hover {
+				background: #2271b1;
+				color: #fff;
+			}
+		}
+
+		&--link {
+			background: transparent;
+			color: #2271b1;
+			border: none;
+			text-decoration: underline;
+			padding: 2px 4px;
+
+			&:hover {
+				color: #135e96;
+			}
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+	}
+
+	.dswp-search-modal__mobile-note {
+		font-size: 11px;
+		color: #646970;
+		font-style: italic;
+		margin: 0;
+		margin-left: 8px;
+	}
+
+	.dswp-search-modal__content-preview {
+		background: transparent;
+		border: none;
+		overflow: visible;
+	}
+
+	.dswp-search-modal__header {
+		display: none; // Hide the modal header in group-style view
+	}
+
+	.dswp-search-modal__title {
+		display: none; // Hide the title in group-style view
+	}
+
+	.dswp-search-modal__instructions {
+		background: #f0f6fc;
+		padding: 8px 12px;
+		border-radius: 2px;
+		margin: 0 0 12px 0;
+		font-size: 12px;
+		color: #0073aa;
+		border-left: 3px solid #2271b1;
+		font-style: italic;
+	}
+
+	// Mobile-only preview styling
+	&.mobile-only {
+
+		.dswp-search-modal__trigger-preview {
+			opacity: 0.7;
+
+			&::before {
+				content: "📱";
+			}
+		}
+	}
+
+	// InnerBlocks styling in editor - similar to Group block
+	.wp-block {
+		margin: 12px 0;
+
+		&:first-child {
+			margin-top: 0;
+		}
+
+		&:last-child {
+			margin-bottom: 16px;
+		}
+	}
+
+	// Clean InnerBlocks styling using useInnerBlocksProps
+	.dswp-search-modal__body {
+		padding: 0;
+
+		// Style the blocks properly
+		.wp-block {
+			margin: 12px 0;
+
+			&:first-child {
+				margin-top: 0;
+			}
+
+			&:last-child {
+				margin-bottom: 12px;
+			}
+		}
+
+		// Style the appender
+		.block-list-appender {
+			margin-top: 16px;
+			display: flex;
+			justify-content: center;
+			position: relative;
+
+			.block-editor-button-block-appender {
+				margin: 0;
+			}
+		}
+	}
+
+
+}

@@ -55,6 +55,7 @@ function wordpress_search_init() {
 	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchActiveFilters' );
 	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultCount' );
 	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsSort' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchModal' );
 
 	// Initialize filter functionality.
 	$wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();

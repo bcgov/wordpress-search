@@ -25,6 +25,7 @@
     "node": ">=22.16.0"
   },
   "main": "index.js",
+  "type": "module",
   "devDependencies": {
     "@bcgov/wordpress-eslint": "git+https://github.com/bcgov/wordpress-eslint.git#semver:1.x",
     "@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",
@@ -40,7 +41,7 @@
     "lint:css": "wp-scripts lint-style 'src/**/*.scss' --allow-empty-input",
     "fix:css": "wp-scripts lint-style 'src/**/*.scss' --fix --allow-empty-input",
     "lint:js": "wp-scripts lint-js 'src/**/*.js'",
-    "fix:js": "wp-scripts lint-js 'src/**/*.js' --fix",
+    "fix:js": "wp-scripts lint-js 'src/**/*.js' --fix'",
     "test": "npm run test:unit",
     "test:unit": "wp-scripts test-unit-js --passWithNoTests"
   }
