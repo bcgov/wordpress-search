@@ -1,18 +1,37 @@
 .wp-block-wordpress-search-search-results-post-metadata-display {
 
 	.post-metadata {
-		font-size: 0.875rem; // Smaller text (14px equivalent)
-		color: #6b7280; // Greyish color - same as frontend
+		font-size: 0.875rem;
+		color: #4a5568;
 		line-height: 1.4;
 		margin: 0.5rem 0;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	}
 
-	.editor-note {
-		margin-top: 0.75rem;
-		padding: 0.5rem;
-		background: #e7f3ff;
-		border-left: 4px solid #0073aa;
-		font-size: 12px;
-		color: #0073aa;
+	.metadata-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.metadata-item {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.4;
+		font-size: inherit;
+		color: inherit;
+	}
+
+	.metadata-label {
+		font-weight: 600;
+		color: inherit;
+		margin-bottom: 0.125rem;
+	}
+
+	.metadata-value {
+		color: inherit;
+		font-weight: 400;
+		word-break: break-word;
+		text-indent: 0;
 	}
 }

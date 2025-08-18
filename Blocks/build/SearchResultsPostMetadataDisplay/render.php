@@ -35,13 +35,15 @@ if ( ! $current_post ) {
 $metadata = get_post_meta( $current_post->ID );
 
 // Filter out empty values and WordPress internal meta keys (starting with _).
-// Also exclude specific document file metadata fields.
+// Also exclude specific document file metadata fields and internal properties.
 $excluded_fields = [
     'document_file_id',
     'document_file_url',
     'document_file_name',
     'document_file_size',
     'document_file_type',
+    'inpage_nav', // Exclude internal navigation control property
+    'show_inpage_nav', // Exclude Design System in-page navigation control property
 ];
 
 $filtered_metadata = array();
