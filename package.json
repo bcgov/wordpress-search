@@ -41,7 +41,7 @@
     "lint:css": "wp-scripts lint-style 'src/**/*.scss' --allow-empty-input",
     "fix:css": "wp-scripts lint-style 'src/**/*.scss' --fix --allow-empty-input",
     "lint:js": "wp-scripts lint-js 'src/**/*.js'",
-    "fix:js": "wp-scripts lint-js 'src/**/*.js' --fix'",
+    "fix:js": "wp-scripts lint-js 'src/**/*.js' --fix",
     "test": "npm run test:unit",
     "test:unit": "wp-scripts test-unit-js --passWithNoTests"
   }
