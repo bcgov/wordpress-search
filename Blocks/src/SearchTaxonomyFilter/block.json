@@ -8,9 +8,12 @@
     "icon": "filter",
     "description": "A modular search taxonomy filter block that connects to the search page template",
     "attributes": {
-        "selectedTaxonomy": {
-            "type": "string",
-            "default": ""
+        "selectedTaxonomies": {
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            }
         }
     },
     "editorScript": "file:./index.js",
