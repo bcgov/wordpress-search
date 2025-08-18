@@ -42,8 +42,8 @@ $excluded_fields = [
     'document_file_name',
     'document_file_size',
     'document_file_type',
-    'inpage_nav', // Exclude internal navigation control property
-    'show_inpage_nav', // Exclude Design System in-page navigation control property
+    'inpage_nav', // Exclude internal navigation control property.
+    'show_inpage_nav', // Exclude Design System in-page navigation control property.
 ];
 
 $filtered_metadata = array();
