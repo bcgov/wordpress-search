@@ -1,139 +1,131 @@
 .wp-block-wordpress-search-searchresultssort {
-	margin: 1rem 0;
+    margin: 1rem 0;
+    
+    .search-results-sort {
+        &__controls {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        &__field-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0;
+        }
+        
+        &__label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #374151;
+            margin: 0;
 
-	.search-results-sort {
-
-		&__controls {
-			display: flex;
-			align-items: flex-end;
-			gap: 1rem;
-			flex-wrap: wrap;
-		}
-
-		&__field-group,
-		&__order-group {
-			display: flex;
-			flex-direction: column;
-			gap: 0.5rem;
-		}
-
-		&__label {
-			font-weight: 500;
-			font-size: 0.9rem;
-			color: #374151;
-			margin: 0;
-		}
-
-		&__field-select {
-			padding: 0.5rem 0.75rem;
-			border: 1px solid #d1d5db;
-			border-radius: 0.375rem;
-			background-color: #fff;
-			font-size: 0.875rem;
-			line-height: 1.25;
-			color: #374151;
-			min-width: 200px;
-			cursor: pointer;
-			transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-
-			option {
-				padding: 0.5rem;
-			}
-
-			&:hover {
-				border-color: #9ca3af;
-			}
-
-			&:focus {
-				outline: none;
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-			}
-		}
-
-		&__order-select {
-			padding: 0.5rem 0.75rem;
-			border: 1px solid #d1d5db;
-			border-radius: 0.375rem;
-			background-color: #fff;
-			font-size: 0.875rem;
-			line-height: 1.25;
-			color: #374151;
-			min-width: 150px;
-			cursor: pointer;
-			transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-
-			option {
-				padding: 0.5rem;
-			}
-
-			&:hover {
-				border-color: #9ca3af;
-			}
-
-			&:focus {
-				outline: none;
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-			}
-		}
-	}
+        }
+        
+        &__icon {
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        &__sort-select {
+            padding: 0.5rem 0.75rem !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            background-color: #ffffff !important;
+            font-size: 0.875rem !important;
+            line-height: 1.25rem !important;
+            color: #6b7280 !important;
+            min-width: 250px !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+            background-position: right 0.5rem center !important;
+            background-repeat: no-repeat !important;
+            background-size: 1.5em 1.5em !important;
+            padding-right: 2.5rem !important;
+            
+            &:hover {
+                border-color: #d1d5db !important;
+                color: #374151 !important;
+            }
+            
+            &:focus {
+                outline: none !important;
+                border-color: #3b82f6 !important;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+                color: #374151 !important;
+            }
+            
+            option {
+                padding: 0.5rem !important;
+                color: #374151 !important;
+                background-color: #ffffff !important;
+                
+                &:checked {
+                    background-color: #f3f4f6 !important;
+                    color: #374151 !important;
+                }
+            }
+        }
+    }
 }
 
 // Responsive design
 @media (max-width: 640px) {
-
-	.wp-block-wordpress-search-searchresultssort {
-
-		.search-results-sort {
-
-			&__controls {
-				flex-direction: column;
-				align-items: stretch;
-				gap: 1rem;
-			}
-
-			&__field-select,
-			&__order-select {
-				width: 100%;
-				min-width: auto;
-			}
-		}
-	}
+    .wp-block-wordpress-search-searchresultssort {
+        .search-results-sort {
+            &__controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            &__field-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+            
+            &__sort-select {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    }
 }
 
 // High contrast mode support
 @media (prefers-contrast: high) {
-
-	.wp-block-wordpress-search-searchresultssort {
-
-		.search-results-sort {
-
-			&__field-select,
-			&__order-select {
-				border-width: 2px;
-				border-color: #000;
-
-				&:focus {
-					border-color: #00f;
-					box-shadow: 0 0 0 3px rgba(0, 0, 255, 0.3);
-				}
-			}
-		}
-	}
+    .wp-block-wordpress-search-searchresultssort {
+        .search-results-sort {
+            &__sort-select {
+                border-width: 2px;
+                border-color: #000000;
+                
+                &:focus {
+                    border-color: #0000ff;
+                    box-shadow: 0 0 0 3px rgba(0, 0, 255, 0.3);
+                }
+            }
+        }
+    }
 }
 
 // Reduced motion support
 @media (prefers-reduced-motion: reduce) {
-
-	.wp-block-wordpress-search-searchresultssort {
-
-		.search-results-sort {
-
-			&__field-select,
-			&__order-select {
-				transition: none;
-			}
-		}
-	}
+    .wp-block-wordpress-search-searchresultssort {
+        .search-results-sort {
+            &__sort-select {
+                transition: none;
+            }
+        }
+    }
 }

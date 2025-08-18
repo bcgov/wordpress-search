@@ -8,13 +8,13 @@
 	// Make sure we inherit all the frontend styles
 	.search-results-sort {
 		margin: 0; // Reset any default margins
-
+		
 		&__controls {
 			display: flex;
 			gap: 16px;
 			margin-bottom: 0;
 			flex-wrap: wrap;
-
+			
 			// Responsive stacking for smaller editor widths
 			@media (max-width: 600px) {
 				flex-direction: column;
@@ -22,13 +22,20 @@
 			}
 		}
 
-		&__field-group,
-		&__order-group {
+		&__field-group {
 			display: flex;
-			flex-direction: column;
-			gap: 6px;
-			min-width: 160px;
+			flex-direction: row;
+			align-items: center;
+			gap: 0;
+			min-width: 200px;
 			flex: 1;
+			
+			// Responsive stacking for smaller editor widths
+			@media (max-width: 600px) {
+				flex-direction: column;
+				align-items: stretch;
+				gap: 6px;
+			}
 		}
 
 		&__label {
@@ -38,23 +45,38 @@
 			margin: 0;
 		}
 
-		&__field-select,
-		&__order-select {
+		&__icon {
+			width: 20px;
+			height: 20px;
+			color: #6b7280;
+			margin-right: 8px;
+			flex-shrink: 0;
+		}
+
+		&__sort-select {
 			padding: 8px 12px;
-			border: 1px solid #ddd;
-			border-radius: 4px;
-			background: #fff;
+			border: 1px solid #e5e7eb;
+			border-radius: 8px;
+			background: white;
 			font-size: 14px;
 			line-height: 1.4;
-			color: #1e1e1e;
+			color: #6b7280;
+			appearance: none;
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+			background-position: right 8px center;
+			background-repeat: no-repeat;
+			background-size: 20px 20px;
+			padding-right: 40px;
 
 			&:disabled {
 				cursor: not-allowed;
-				color: #757575;
+				color: #9ca3af;
+				opacity: 0.7;
 			}
 
 			option {
 				padding: 4px 8px;
+				color: #374151;
 			}
 		}
 	}
@@ -68,8 +90,12 @@
 	margin-bottom: 16px;
 }
 
-.components-checkbox-control {
-	margin-bottom: 8px;
+.components-radio-control {
+	margin-bottom: 16px;
+}
+
+.components-select-control {
+	margin-bottom: 16px;
 }
 
 .components-notice {
@@ -77,7 +103,7 @@
 	padding: 12px;
 	border-left: 4px solid #dba617;
 	background: #fff8e5;
-
+	
 	p {
 		margin: 0;
 		font-size: 13px;
