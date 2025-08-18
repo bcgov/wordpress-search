@@ -181,9 +181,16 @@ $hidden_params = array_filter(
             $current_terms = array();
             $taxonomy_param_key = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy;
             if ( isset( $all_query_params_raw[ $taxonomy_param_key ] ) ) {
-                $current_terms = is_array( $all_query_params_raw[ $taxonomy_param_key ] )
-                    ? $all_query_params_raw[ $taxonomy_param_key ]
-                    : array( $all_query_params_raw[ $taxonomy_param_key ] );
+                $current_terms_raw = $all_query_params_raw[ $taxonomy_param_key ];
+                // Handle comma-separated values
+                if ( is_string( $current_terms_raw ) ) {
+                    $current_terms = array_filter( array_map( 'trim', explode( ',', $current_terms_raw ) ) );
+                } elseif ( is_array( $current_terms_raw ) ) {
+                    // Fallback for array format (backward compatibility)
+                    $current_terms = $current_terms_raw;
+                } else {
+                    $current_terms = array( $current_terms_raw );
+                }
             }
 
             // Convert to strings for comparison.
@@ -211,17 +218,7 @@ $hidden_params = array_filter(
                     <?php echo esc_html__( 'No terms available in this taxonomy.', 'wordpress-search' ); ?>
                 </div>
             <?php else : ?>
-                <form class="taxonomy-filter-form" method="get" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
-                    <?php foreach ( $hidden_params as $key => $value ) : ?>
-                        <?php if ( is_array( $value ) ) : ?>
-                            <?php foreach ( $value as $val ) : ?>
-                                <input type="hidden" name="<?php echo esc_attr( $key ); ?>[]" value="<?php echo esc_attr( $val ); ?>">
-                            <?php endforeach; ?>
-                        <?php else : ?>
-                            <input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>">
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-
+                <div class="taxonomy-filter-section" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
                     <fieldset class="taxonomy-filter">
                         <div class="taxonomy-filter__header" onclick="toggleTaxonomyFilter(this)">
                             <legend class="taxonomy-filter__label"><?php echo esc_html( $taxonomy_label ); ?></legend>
@@ -252,8 +249,68 @@ $hidden_params = array_filter(
                             </div>
                         </div>
                     </fieldset>
-                </form>
+                </div>
             <?php endif; ?>
         <?php endforeach; ?>
+
+        <!-- Apply Button -->
+        <div class="taxonomy-filter-apply">
+            <button type="button" class="taxonomy-filter-apply__button" onclick="applyTaxonomyFilters()">
+                <?php echo esc_html__( 'Apply Filters', 'wordpress-search' ); ?>
+            </button>
+        </div>
     </div>
-</div> 
+</div>
+
+<!-- Active Filters Display -->
+<?php
+// Get all active taxonomy filters from URL
+$active_filters = array();
+foreach ( $all_query_params_raw as $key => $value ) {
+    if ( strpos( $key, 'taxonomy_' ) === 0 ) {
+        $taxonomy_name = str_replace( 'taxonomy_', '', $key );
+        
+        // Handle comma-separated values
+        if ( is_string( $value ) ) {
+            $term_values = array_filter( array_map( 'trim', explode( ',', $value ) ) );
+        } elseif ( is_array( $value ) ) {
+            $term_values = $value;
+        } else {
+            $term_values = array( $value );
+        }
+        
+        foreach ( $term_values as $term_value ) {
+            $term = get_term( intval( $term_value ) );
+            if ( $term && ! is_wp_error( $term ) ) {
+                $active_filters[] = array(
+                    'taxonomy' => $taxonomy_name,
+                    'term_id' => $term_value,
+                    'term_name' => $term->name,
+                    'taxonomy_label' => get_taxonomy( $taxonomy_name ) ? get_taxonomy( $taxonomy_name )->labels->singular_name : $taxonomy_name
+                );
+            }
+        }
+    }
+}
+?>
+
+<?php if ( ! empty( $active_filters ) ) : ?>
+    <div class="active-taxonomy-filters">
+        <h4><?php echo esc_html__( 'Active Filters:', 'wordpress-search' ); ?></h4>
+        <div class="active-filters-list">
+            <?php foreach ( $active_filters as $filter ) : ?>
+                <span class="active-filter-tag">
+                    <?php echo esc_html( $filter['taxonomy_label'] . ': ' . $filter['term_name'] ); ?>
+                    <button 
+                        type="button" 
+                        class="remove-filter-btn" 
+                        onclick="removeTaxonomyFilter('<?php echo esc_js( $filter['taxonomy'] ); ?>', '<?php echo esc_js( $filter['term_id'] ); ?>')"
+                        title="<?php echo esc_attr__( 'Remove filter', 'wordpress-search' ); ?>"
+                    >
+                        ×
+                    </button>
+                </span>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?> 

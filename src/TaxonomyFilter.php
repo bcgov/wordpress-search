@@ -127,8 +127,14 @@ class TaxonomyFilter {
                     continue;
                 }
 
-                // Handle both array and string values.
-                $term_ids = is_array( $value ) ? $value : array( $value );
+                // Handle both array and string values, including comma-separated strings.
+                if ( is_array( $value ) ) {
+                    $term_ids = $value;
+                } else {
+                    // Handle comma-separated values
+                    $term_ids = array_filter( array_map( 'trim', explode( ',', $value ) ) );
+                }
+                
                 $term_ids = array_map( 'sanitize_text_field', $term_ids );
                 $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
 
