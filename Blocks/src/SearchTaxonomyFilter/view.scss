@@ -14,17 +14,17 @@
 		border-radius: 6px;
 		background: #fff;
 		overflow: hidden;
+		min-width: 11.875rem;
 	}
 
 	.taxonomy-filter__header {
-		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 1rem;
-		background: #f9f9f9;
-		border-bottom: 1px solid #ddd;
+		background: #E0DEDC;
 		cursor: pointer;
-		transition: background-color 0.2s ease;
+		display: flex;
+		justify-content: space-between;
+		transition: background-color .2s ease;
+		margin-bottom: 1rem;
 
 		&:hover {
 			background: #f0f0f0;
@@ -32,11 +32,12 @@
 	}
 
 	.taxonomy-filter__label {
-		font-weight: 600;
 		color: #333;
-		margin: 0;
-		font-size: 1rem;
 		flex: 1;
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0;
+		padding-left: 1.8rem;
 	}
 
 	.taxonomy-filter__toggle {
@@ -62,7 +63,6 @@
 	}
 
 	.taxonomy-filter__content {
-		padding: 1rem;
 		transition: all 0.3s ease;
 
 		&.collapsed {
@@ -149,6 +149,32 @@
 			margin: 0;
 			cursor: pointer;
 			accent-color: #2271b1;
+		}
+	}
+}
+
+// Apply button styles
+.taxonomy-filter-apply {
+	padding-left: .75rem;
+
+	.taxonomy-filter-apply__button {
+		background: var(--dswp-color-secondary, #EDEBE9);
+		color: var(--dswp-typography-color-primary, #2D2D2D);
+		border: none;
+		padding: 0.75rem 1.5rem;
+		border-radius: 4px;
+		font-size: 14px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+
+		&:hover {
+			filter: brightness(0.9); // Makes it 10% darker
+		}
+
+		&:focus {
+			outline: 2px solid #007cba;
+			outline-offset: 2px;
 		}
 	}
 }

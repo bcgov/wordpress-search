@@ -127,8 +127,14 @@ class TaxonomyFilter {
                     continue;
                 }
 
-                // Handle both array and string values.
-                $term_ids = is_array( $value ) ? $value : array( $value );
+                // Handle both array and string values, including comma-separated strings.
+                if ( is_array( $value ) ) {
+                    $term_ids = $value;
+                } else {
+                    // Handle comma-separated values.
+                    $term_ids = array_filter( array_map( 'trim', explode( ',', $value ) ) );
+                }
+
                 $term_ids = array_map( 'sanitize_text_field', $term_ids );
                 $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
 
@@ -154,6 +160,56 @@ class TaxonomyFilter {
     }
 
     /**
+     * Resolve taxonomy name with fallbacks for case-insensitive matching.
+     *
+     * @param string $document_post_type The post type.
+     * @param string $taxonomy_name The taxonomy name to resolve.
+     * @return string|null The resolved taxonomy name or null if not found.
+     */
+    public static function resolve_taxonomy_name( $document_post_type, $taxonomy_name ) {
+        // Get registered taxonomies for the post type.
+        $registered_taxonomies = get_object_taxonomies( $document_post_type, 'names' );
+
+        // If no taxonomies found for the exact post type, try case-insensitive post type matching.
+        if ( empty( $registered_taxonomies ) ) {
+            $all_post_types = get_post_types( array(), 'names' );
+            foreach ( $all_post_types as $matched_post_type ) {
+                if ( strcasecmp( $matched_post_type, $document_post_type ) === 0 ) {
+                    $registered_taxonomies = get_object_taxonomies( $matched_post_type, 'names' );
+                    if ( ! empty( $registered_taxonomies ) ) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Early return if no taxonomies found.
+        if ( empty( $registered_taxonomies ) ) {
+            return null;
+        }
+
+        // Direct validation - check exact match first (most efficient).
+        if ( in_array( $taxonomy_name, $registered_taxonomies, true ) ) {
+            return $taxonomy_name;
+        }
+
+        // Check for case-insensitive match and partial matches in a single loop.
+        foreach ( $registered_taxonomies as $tax_name ) {
+            // Case-insensitive exact match.
+            if ( strcasecmp( $tax_name, $taxonomy_name ) === 0 ) {
+                return $tax_name;
+            }
+
+            // Partial match (for backward compatibility).
+            if ( stripos( $tax_name, $taxonomy_name ) !== false ) {
+                return $tax_name;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Determine the post type based on the taxonomies being filtered.
      *
      * @param array $tax_query The taxonomy query array.
@@ -162,15 +218,15 @@ class TaxonomyFilter {
     private function get_post_type_from_taxonomy_filters( $tax_query ) {
         foreach ( $tax_query as $tax_filter ) {
             if ( isset( $tax_filter['taxonomy'] ) ) {
-                $taxonomy = $tax_filter['taxonomy'];
+                $taxonomy     = $tax_filter['taxonomy'];
+                $taxonomy_obj = get_taxonomy( $taxonomy );
 
-                // Get all post types associated with this taxonomy.
-                $post_types = get_taxonomy( $taxonomy )->object_type ?? array();
-
-                // Return the first non-post post type we find.
-                foreach ( $post_types as $post_type ) {
-                    if ( 'post' !== $post_type ) {
-                        return $post_type;
+                if ( $taxonomy_obj && ! empty( $taxonomy_obj->object_type ) ) {
+                    // Return the first non-post post type we find.
+                    foreach ( $taxonomy_obj->object_type as $post_type ) {
+                        if ( 'post' !== $post_type ) {
+                            return $post_type;
+                        }
                     }
                 }
             }

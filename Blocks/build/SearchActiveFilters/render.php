@@ -9,10 +9,23 @@ namespace Bcgov\WordpressSearch\SearchActiveFilters;
 
 $current_url = add_query_arg( null, null );
 
+// Get current URL parameters using WordPress global objects.
 global $wp_query;
-$query_params = $wp_query->query;
+$query_params = array();
+$search_param = '';
 
-$search_param = sanitize_text_field( $query_params['s'] ?? '' );
+// Get search parameter safely.
+if ( get_query_var( 's' ) ) {
+    $search_param = sanitize_text_field( get_query_var( 's' ) );
+}
+
+// Get all query parameters from wp_query.
+$all_query_vars = $wp_query->query_vars;
+foreach ( $all_query_vars as $key => $value ) {
+    if ( 's' !== $key && 'paged' !== $key && 'posts_per_page' !== $key && ! empty( $value ) ) {
+        $query_params[ $key ] = $value;
+    }
+}
 
 unset( $query_params['s'] );
 
@@ -73,10 +86,9 @@ function get_tag_name_safe( $tag_id ) {
 
 // Custom filters and their resolvers.
 $custom_filters = [
-    'category'  => __NAMESPACE__ . '\\get_category_name_safe',
-    'tag'       => __NAMESPACE__ . '\\get_tag_name_safe',
-    'post_type' => __NAMESPACE__ . '\\get_post_type_label_safe',
-    'author'    => __NAMESPACE__ . '\\get_user_name_safe',
+    'category' => __NAMESPACE__ . '\\get_category_name_safe',
+    'tag'      => __NAMESPACE__ . '\\get_tag_name_safe',
+    'author'   => __NAMESPACE__ . '\\get_user_name_safe',
 ];
 
 // Taxonomy filters.
@@ -90,7 +102,14 @@ foreach ( $query_params as $param => $values ) {
         continue;
     }
 
-    foreach ( (array) $values as $value ) {
+    // Handle comma-separated values for taxonomy filters.
+    if ( is_string( $values ) ) {
+        $term_values = array_filter( array_map( 'trim', explode( ',', $values ) ) );
+    } else {
+        $term_values = (array) $values;
+    }
+
+    foreach ( $term_values as $value ) {
         if ( ! $value ) {
             continue;
         }
@@ -163,12 +182,25 @@ $clear_all_url = $search_param
                 <?php
                 $param      = $filter['param'];
                 $value      = $filter['value'];
-                $param_vals = (array) ( $query_params[ $param ] ?? [] );
+                $param_vals = $query_params[ $param ] ?? '';
+
+                // Handle comma-separated values for taxonomy filters.
+                if ( strpos( $param, 'taxonomy_' ) === 0 && is_string( $param_vals ) ) {
+                    $param_vals = array_filter( array_map( 'trim', explode( ',', $param_vals ) ) );
+                } else {
+                    $param_vals = (array) $param_vals;
+                }
+
                 $remove_url = $current_url;
 
                 if ( count( $param_vals ) > 1 ) {
-                    $new_vals   = array_diff( $param_vals, [ $value ] );
-                    $remove_url = add_query_arg( $param, $new_vals, remove_query_arg( $param, $remove_url ) );
+                    $new_vals = array_diff( $param_vals, [ $value ] );
+                    // For taxonomy filters, join back as comma-separated.
+                    if ( strpos( $param, 'taxonomy_' ) === 0 ) {
+                        $remove_url = add_query_arg( $param, implode( ',', $new_vals ), remove_query_arg( $param, $remove_url ) );
+                    } else {
+                        $remove_url = add_query_arg( $param, $new_vals, remove_query_arg( $param, $remove_url ) );
+                    }
                 } else {
                     $remove_url = remove_query_arg( $param, $remove_url );
                 }
