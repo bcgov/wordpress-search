@@ -94,10 +94,10 @@ foreach ( $selected_taxonomies as $selected_taxonomy ) {
 	$taxonomy_parts = explode( ':', $selected_taxonomy );
 	if ( count( $taxonomy_parts ) === 2 ) {
 		$document_post_type = $taxonomy_parts[0];
-		$taxonomy_name = $taxonomy_parts[1];
-		
+		$taxonomy_name      = $taxonomy_parts[1];
+
 		$actual_taxonomy = resolve_taxonomy_name( $document_post_type, $taxonomy_name );
-		
+
 		if ( $actual_taxonomy && taxonomy_exists( $actual_taxonomy ) ) {
 			$taxonomy_param_keys[] = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy;
 		}
@@ -114,7 +114,7 @@ $hidden_params = array_filter(
     function ( $key ) use ( $taxonomy_param_keys ) {
         foreach ( $taxonomy_param_keys as $taxonomy_param_key ) {
             if ( strpos( $key, $taxonomy_param_key ) === 0 ) {
-                return false; // Exclude taxonomy parameters
+                return false; // Exclude taxonomy parameters.
             }
         }
         return true;
@@ -144,15 +144,15 @@ $hidden_params = array_filter(
             }
 
             // Get currently selected terms (expecting term IDs).
-            $current_terms = array();
+            $current_terms      = array();
             $taxonomy_param_key = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy;
             if ( isset( $all_query_params_raw[ $taxonomy_param_key ] ) ) {
                 $current_terms_raw = $all_query_params_raw[ $taxonomy_param_key ];
-                // Handle comma-separated values
+                // Handle comma-separated values.
                 if ( is_string( $current_terms_raw ) ) {
                     $current_terms = array_filter( array_map( 'trim', explode( ',', $current_terms_raw ) ) );
                 } elseif ( is_array( $current_terms_raw ) ) {
-                    // Fallback for array format (backward compatibility)
+                    // Fallback for array format (backward compatibility).
                     $current_terms = $current_terms_raw;
                 } else {
                     $current_terms = array( $current_terms_raw );

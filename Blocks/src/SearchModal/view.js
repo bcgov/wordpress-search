@@ -49,27 +49,13 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			return;
 		}
 
-		// Clone the content for both inline and modal use
-		const inlineContent = innerBlocks.cloneNode( true );
-		const modalContent = innerBlocks.cloneNode( true );
-
 		// Clear the block and rebuild structure
 		block.innerHTML = '';
 
-		// Create inline content (mobile/tablet)
+		// Create inline content wrapper (mobile/tablet)
 		const inlineWrapper = document.createElement( 'div' );
 		inlineWrapper.className = 'dswp-search-modal__inline-content';
-		inlineWrapper.appendChild( inlineContent );
-
-		// Create trigger button (desktop)
-		const trigger = document.createElement( 'button' );
-		trigger.type = 'button';
-		trigger.className = `dswp-search-modal__trigger dswp-search-modal__trigger--${ buttonStyle }`;
-		trigger.setAttribute( 'data-modal-target', modalId );
-		trigger.setAttribute( 'aria-controls', modalId );
-		trigger.setAttribute( 'aria-expanded', 'false' );
-		trigger.textContent = buttonText;
-
+		
 		// Create modal overlay
 		const overlay = document.createElement( 'div' );
 		overlay.className = 'dswp-search-modal__overlay';
@@ -95,14 +81,30 @@ document.addEventListener( 'DOMContentLoaded', function () {
             </div>
         `;
 
-		// Insert modal content
+		// Get modal body for content insertion
 		const modalBody = overlay.querySelector( '.dswp-search-modal__body' );
-		modalBody.appendChild( modalContent );
+
+		// Create trigger button (desktop)
+		const trigger = document.createElement( 'button' );
+		trigger.type = 'button';
+		trigger.className = `dswp-search-modal__trigger dswp-search-modal__trigger--${ buttonStyle }`;
+		trigger.setAttribute( 'data-modal-target', modalId );
+		trigger.setAttribute( 'aria-controls', modalId );
+		trigger.setAttribute( 'aria-expanded', 'false' );
+		trigger.textContent = buttonText;
 
 		// Append all elements to block
 		block.appendChild( inlineWrapper );
 		block.appendChild( trigger );
 		block.appendChild( overlay );
+
+		// Store references for content movement
+		block._inlineWrapper = inlineWrapper;
+		block._modalBody = modalBody;
+		block._innerBlocks = innerBlocks;
+
+		// Initially show content inline
+		inlineWrapper.appendChild( innerBlocks );
 	}
 
 	/**
@@ -246,22 +248,32 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				parseInt( block.dataset.mobileBreakpoint ) || 768;
 			const isMobile = window.innerWidth < breakpoint;
 
-			const inlineContent = block.querySelector(
+			const inlineWrapper = block.querySelector(
 				'.dswp-search-modal__inline-content'
 			);
 			const trigger = block.querySelector(
 				'.dswp-search-modal__trigger'
 			);
 
-			if ( inlineContent && trigger ) {
+			if ( inlineWrapper && trigger && block._innerBlocks ) {
 				if ( isMobile ) {
 					// Mobile: hide inline content, show trigger button
-					inlineContent.style.display = 'none';
+					inlineWrapper.style.display = 'none';
 					trigger.style.display = 'block';
+					
+					// Move content to modal if not already there
+					if ( ! block._modalBody.contains( block._innerBlocks ) ) {
+						block._modalBody.appendChild( block._innerBlocks );
+					}
 				} else {
 					// Desktop: show content inline, hide trigger
-					inlineContent.style.display = 'block';
+					inlineWrapper.style.display = 'block';
 					trigger.style.display = 'none';
+					
+					// Move content back to inline if not already there
+					if ( ! inlineWrapper.contains( block._innerBlocks ) ) {
+						inlineWrapper.appendChild( block._innerBlocks );
+					}
 				}
 			}
 		} );

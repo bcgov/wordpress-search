@@ -9,7 +9,7 @@ namespace Bcgov\WordpressSearch\SearchActiveFilters;
 
 $current_url = add_query_arg( null, null );
 
-// Get current URL parameters using WordPress global objects
+// Get current URL parameters using WordPress global objects.
 global $wp_query;
 $query_params = array();
 $search_param = '';
@@ -19,7 +19,7 @@ if ( get_query_var( 's' ) ) {
     $search_param = sanitize_text_field( get_query_var( 's' ) );
 }
 
-// Get all query parameters from wp_query
+// Get all query parameters from wp_query.
 $all_query_vars = $wp_query->query_vars;
 foreach ( $all_query_vars as $key => $value ) {
     if ( 's' !== $key && 'paged' !== $key && 'posts_per_page' !== $key && ! empty( $value ) ) {
@@ -86,9 +86,9 @@ function get_tag_name_safe( $tag_id ) {
 
 // Custom filters and their resolvers.
 $custom_filters = [
-    'category'  => __NAMESPACE__ . '\\get_category_name_safe',
-    'tag'       => __NAMESPACE__ . '\\get_tag_name_safe',
-    'author'    => __NAMESPACE__ . '\\get_user_name_safe',
+    'category' => __NAMESPACE__ . '\\get_category_name_safe',
+    'tag'      => __NAMESPACE__ . '\\get_tag_name_safe',
+    'author'   => __NAMESPACE__ . '\\get_user_name_safe',
 ];
 
 // Taxonomy filters.
