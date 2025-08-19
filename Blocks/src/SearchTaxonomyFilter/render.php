@@ -11,7 +11,13 @@ namespace Bcgov\WordpressSearch\SearchTaxonomyFilter;
 use Bcgov\WordpressSearch\TaxonomyFilter;
 
 // Get the selected taxonomies from block attributes.
-$selected_taxonomies = $attributes['selectedTaxonomies'] ?? [];
+// Support both singular and plural attribute names for backward compatibility.
+$selected_taxonomies = $attributes['selectedTaxonomies'] ?? $attributes['selectedTaxonomy'] ?? [];
+
+// Convert single taxonomy to array format if needed
+if ( ! is_array( $selected_taxonomies ) && ! empty( $selected_taxonomies ) ) {
+    $selected_taxonomies = array( $selected_taxonomies );
+}
 
 // If no taxonomies are selected, don't render anything.
 if ( empty( $selected_taxonomies ) || ! is_array( $selected_taxonomies ) ) {
@@ -25,6 +31,7 @@ if ( empty( $selected_taxonomies ) || ! is_array( $selected_taxonomies ) ) {
  * @param string $taxonomy_name The taxonomy name to resolve.
  * @return string|null The resolved taxonomy name or null if not found.
  */
+if ( ! function_exists( __NAMESPACE__ . '\\resolve_taxonomy_name' ) ) {
 function resolve_taxonomy_name( $document_post_type, $taxonomy_name ) {
 	// Optimized taxonomy name resolution.
 	$registered_taxonomies = get_object_taxonomies( $document_post_type, 'names' );
@@ -66,6 +73,7 @@ function resolve_taxonomy_name( $document_post_type, $taxonomy_name ) {
 	}
 
 	return null;
+}
 }
 
 // Get current URL parameters and filter relevant ones upfront.
@@ -124,6 +132,7 @@ $hidden_params = array_filter(
 
 ?>
 
+<form class="taxonomy-filter-form" method="get">
 <div class="wp-block-wordpress-search-taxonomy-filter">
     <div class="search-taxonomy-filter__container">
         <?php foreach ( $selected_taxonomies as $selected_taxonomy ) : ?>
@@ -226,4 +235,5 @@ $hidden_params = array_filter(
             </button>
         </div>
     </div>
-</div> 
+</div>
+</form> 

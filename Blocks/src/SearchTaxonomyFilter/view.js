@@ -2,7 +2,7 @@
 
 import './view.scss';
 
-// Toggle function for taxonomy filter
+// Toggle function for taxonomy filter.
 window.toggleTaxonomyFilter = function ( header ) {
 	const content = header.nextElementSibling;
 	const toggle = header.querySelector( '.taxonomy-filter__toggle' );
@@ -16,16 +16,16 @@ window.toggleTaxonomyFilter = function ( header ) {
 	}
 };
 
-// Apply taxonomy filters function - simplified approach
+// Apply taxonomy filters function.
 window.applyTaxonomyFilters = function () {
-	// Store scroll position before form submission
+	// Store scroll position before form submission.
 	sessionStorage.setItem( 'filterScrollPosition', window.scrollY );
 
 	// Get current URL
 	const currentUrl = new URL( window.location.href );
 	const params = currentUrl.searchParams;
 	
-	// Remove ALL existing taxonomy parameters first (simplified)
+	// Remove ALL existing taxonomy parameters first.
 	Array.from( params.keys() )
 		.filter( key => key.startsWith( 'taxonomy_' ) )
 		.forEach( key => params.delete( key ) );
