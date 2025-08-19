@@ -195,12 +195,12 @@ class TaxonomyFilter {
 
         // Check for case-insensitive match and partial matches in a single loop.
         foreach ( $registered_taxonomies as $tax_name ) {
-            // Case-insensitive exact match
+            // Case-insensitive exact match.
             if ( strcasecmp( $tax_name, $taxonomy_name ) === 0 ) {
                 return $tax_name;
             }
-            
-            // Partial match (for backward compatibility)
+
+            // Partial match (for backward compatibility).
             if ( stripos( $tax_name, $taxonomy_name ) !== false ) {
                 return $tax_name;
             }
