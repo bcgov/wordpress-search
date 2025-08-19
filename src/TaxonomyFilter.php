@@ -131,10 +131,10 @@ class TaxonomyFilter {
                 if ( is_array( $value ) ) {
                     $term_ids = $value;
                 } else {
-                    // Handle comma-separated values
+                    // Handle comma-separated values.
                     $term_ids = array_filter( array_map( 'trim', explode( ',', $value ) ) );
                 }
-                
+
                 $term_ids = array_map( 'sanitize_text_field', $term_ids );
                 $term_ids = array_map( 'intval', $term_ids ); // Convert to integers.
 
