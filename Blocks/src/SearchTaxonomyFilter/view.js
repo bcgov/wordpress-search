@@ -16,57 +16,45 @@ window.toggleTaxonomyFilter = function ( header ) {
 	}
 };
 
-// Apply taxonomy filters function
+// Apply taxonomy filters function - simplified approach
 window.applyTaxonomyFilters = function () {
 	// Store scroll position before form submission
 	sessionStorage.setItem( 'filterScrollPosition', window.scrollY );
 
 	// Get current URL
 	const currentUrl = new URL( window.location.href );
-	
-	// Clear existing taxonomy parameters
 	const params = currentUrl.searchParams;
+	
+	// Remove ALL existing taxonomy parameters first
 	const keysToRemove = [];
 	for ( const key of params.keys() ) {
 		if ( key.startsWith( 'taxonomy_' ) ) {
 			keysToRemove.push( key );
 		}
 	}
-	
-	// Remove the taxonomy parameters
 	keysToRemove.forEach( key => params.delete( key ) );
 
-	// Collect all checked checkboxes and group them by taxonomy
-	const taxonomyGroups = {};
+	// Now collect ALL currently checked checkboxes and add them as new parameters
 	document.querySelectorAll( '.taxonomy-filter__checkbox:checked' ).forEach( ( checkbox ) => {
 		const name = checkbox.getAttribute( 'name' );
 		const value = checkbox.value;
 		
 		if ( name && value ) {
-			// Handle array parameters (remove the [] suffix for the URL)
-			if ( name.endsWith( '[]' ) ) {
-				const baseName = name.slice( 0, -2 );
-				if ( ! taxonomyGroups[ baseName ] ) {
-					taxonomyGroups[ baseName ] = [];
-				}
-				taxonomyGroups[ baseName ].push( value );
+			// Remove the [] suffix for the URL parameter name
+			const paramName = name.endsWith( '[]' ) ? name.slice( 0, -2 ) : name;
+			
+			// If this taxonomy already has values, append to it (comma-separated)
+			if ( params.has( paramName ) ) {
+				const existingValue = params.get( paramName );
+				params.set( paramName, existingValue + ',' + value );
 			} else {
-				if ( ! taxonomyGroups[ name ] ) {
-					taxonomyGroups[ name ] = [];
-				}
-				taxonomyGroups[ name ].push( value );
+				// First value for this taxonomy
+				params.set( paramName, value );
 			}
 		}
 	} );
 
-	// Add taxonomy parameters as comma-separated values
-	Object.keys( taxonomyGroups ).forEach( taxonomyKey => {
-		if ( taxonomyGroups[ taxonomyKey ].length > 0 ) {
-			params.set( taxonomyKey, taxonomyGroups[ taxonomyKey ].join( ',' ) );
-		}
-	} );
-
-	// Navigate to the new URL
+	// Navigate to the new URL with all the new filters
 	window.location.href = currentUrl.toString();
 };
 
@@ -138,6 +126,8 @@ function syncCheckboxStates() {
 		}
 	} );
 }
+
+
 
 document.addEventListener( 'DOMContentLoaded', function () {
 	// Sync checkbox states with URL parameters

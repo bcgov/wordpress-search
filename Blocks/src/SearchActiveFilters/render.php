@@ -9,10 +9,17 @@ namespace Bcgov\WordpressSearch\SearchActiveFilters;
 
 $current_url = add_query_arg( null, null );
 
-global $wp_query;
-$query_params = $wp_query->query;
+// Get current URL parameters instead of wp_query->query
+$query_params = array();
+if ( isset( $_GET ) ) {
+    foreach ( $_GET as $key => $value ) {
+        if ( $key !== 's' && ! empty( $value ) ) {
+            $query_params[ $key ] = $value;
+        }
+    }
+}
 
-$search_param = sanitize_text_field( $query_params['s'] ?? '' );
+$search_param = sanitize_text_field( $_GET['s'] ?? '' );
 
 unset( $query_params['s'] );
 
@@ -90,7 +97,14 @@ foreach ( $query_params as $param => $values ) {
         continue;
     }
 
-    foreach ( (array) $values as $value ) {
+    // Handle comma-separated values for taxonomy filters
+    if ( is_string( $values ) ) {
+        $term_values = array_filter( array_map( 'trim', explode( ',', $values ) ) );
+    } else {
+        $term_values = (array) $values;
+    }
+
+    foreach ( $term_values as $value ) {
         if ( ! $value ) {
             continue;
         }
@@ -163,12 +177,25 @@ $clear_all_url = $search_param
                 <?php
                 $param      = $filter['param'];
                 $value      = $filter['value'];
-                $param_vals = (array) ( $query_params[ $param ] ?? [] );
+                $param_vals = $query_params[ $param ] ?? '';
+                
+                // Handle comma-separated values for taxonomy filters
+                if ( strpos( $param, 'taxonomy_' ) === 0 && is_string( $param_vals ) ) {
+                    $param_vals = array_filter( array_map( 'trim', explode( ',', $param_vals ) ) );
+                } else {
+                    $param_vals = (array) $param_vals;
+                }
+                
                 $remove_url = $current_url;
 
                 if ( count( $param_vals ) > 1 ) {
                     $new_vals   = array_diff( $param_vals, [ $value ] );
-                    $remove_url = add_query_arg( $param, $new_vals, remove_query_arg( $param, $remove_url ) );
+                    // For taxonomy filters, join back as comma-separated
+                    if ( strpos( $param, 'taxonomy_' ) === 0 ) {
+                        $remove_url = add_query_arg( $param, implode( ',', $new_vals ), remove_query_arg( $param, $remove_url ) );
+                    } else {
+                        $remove_url = add_query_arg( $param, $new_vals, remove_query_arg( $param, $remove_url ) );
+                    }
                 } else {
                     $remove_url = remove_query_arg( $param, $remove_url );
                 }
