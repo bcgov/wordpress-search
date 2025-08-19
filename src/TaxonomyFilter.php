@@ -160,6 +160,57 @@ class TaxonomyFilter {
     }
 
     /**
+     * Resolve taxonomy name with fallbacks for case-insensitive matching.
+     *
+     * @param string $document_post_type The post type.
+     * @param string $taxonomy_name The taxonomy name to resolve.
+     * @return string|null The resolved taxonomy name or null if not found.
+     */
+    public static function resolve_taxonomy_name( $document_post_type, $taxonomy_name ) {
+        // Get registered taxonomies for the post type.
+        $registered_taxonomies = get_object_taxonomies( $document_post_type, 'names' );
+
+        // If no taxonomies found for the exact post type, try case-insensitive post type matching.
+        if ( empty( $registered_taxonomies ) ) {
+            $all_post_types = get_post_types( array(), 'names' );
+            foreach ( $all_post_types as $matched_post_type ) {
+                if ( strcasecmp( $matched_post_type, $document_post_type ) === 0 ) {
+                    $registered_taxonomies = get_object_taxonomies( $matched_post_type, 'names' );
+                    if ( ! empty( $registered_taxonomies ) ) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Early return if no taxonomies found
+        if ( empty( $registered_taxonomies ) ) {
+            return null;
+        }
+
+        // Direct validation - check exact match first (most efficient).
+        if ( in_array( $taxonomy_name, $registered_taxonomies, true ) ) {
+            return $taxonomy_name;
+        }
+
+        // Check for case-insensitive match.
+        foreach ( $registered_taxonomies as $tax_name ) {
+            if ( strcasecmp( $tax_name, $taxonomy_name ) === 0 ) {
+                return $tax_name;
+            }
+        }
+
+        // Check for partial matches (for backward compatibility).
+        foreach ( $registered_taxonomies as $tax_name ) {
+            if ( stripos( $tax_name, $taxonomy_name ) !== false ) {
+                return $tax_name;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Determine the post type based on the taxonomies being filtered.
      *
      * @param array $tax_query The taxonomy query array.
@@ -169,14 +220,14 @@ class TaxonomyFilter {
         foreach ( $tax_query as $tax_filter ) {
             if ( isset( $tax_filter['taxonomy'] ) ) {
                 $taxonomy = $tax_filter['taxonomy'];
-
-                // Get all post types associated with this taxonomy.
-                $post_types = get_taxonomy( $taxonomy )->object_type ?? array();
-
-                // Return the first non-post post type we find.
-                foreach ( $post_types as $post_type ) {
-                    if ( 'post' !== $post_type ) {
-                        return $post_type;
+                $taxonomy_obj = get_taxonomy( $taxonomy );
+                
+                if ( $taxonomy_obj && ! empty( $taxonomy_obj->object_type ) ) {
+                    // Return the first non-post post type we find.
+                    foreach ( $taxonomy_obj->object_type as $post_type ) {
+                        if ( 'post' !== $post_type ) {
+                            return $post_type;
+                        }
                     }
                 }
             }

@@ -24,72 +24,15 @@ if ( empty( $selected_taxonomies ) || ! is_array( $selected_taxonomies ) ) {
     return;
 }
 
-/**
- * Helper function to resolve taxonomy name with fallbacks
- *
- * @param string $document_post_type The post type.
- * @param string $taxonomy_name The taxonomy name to resolve.
- * @return string|null The resolved taxonomy name or null if not found.
- */
-if ( ! function_exists( __NAMESPACE__ . '\\resolve_taxonomy_name' ) ) {
-function resolve_taxonomy_name( $document_post_type, $taxonomy_name ) {
-	// Optimized taxonomy name resolution.
-	$registered_taxonomies = get_object_taxonomies( $document_post_type, 'names' );
+// Use the static method from TaxonomyFilter class instead of inline function
 
-	// If no taxonomies found for the exact post type, try case-insensitive post type matching.
-	if ( empty( $registered_taxonomies ) ) {
-		$all_post_types = get_post_types( array(), 'names' );
-		foreach ( $all_post_types as $matched_post_type ) {
-			if ( strcasecmp( $matched_post_type, $document_post_type ) === 0 ) {
-				$registered_taxonomies = get_object_taxonomies( $matched_post_type, 'names' );
-				if ( ! empty( $registered_taxonomies ) ) {
-					$document_post_type = $matched_post_type; // Use the correctly cased post type.
-					break;
-				}
-			}
-		}
-	}
-
-	// Create a mapping for efficient lookup.
-	$taxonomy_map = array_flip( $registered_taxonomies );
-
-	// Direct validation - check exact match first.
-	if ( isset( $taxonomy_map[ $taxonomy_name ] ) ) {
-		return $taxonomy_name;
-	}
-
-	// If no exact match, check for case-insensitive match first.
-	foreach ( $registered_taxonomies as $tax_name ) {
-		if ( strcasecmp( $tax_name, $taxonomy_name ) === 0 ) {
-			return $tax_name;
-		}
-	}
-
-	// If still no match, check for partial matches (for backward compatibility).
-	foreach ( $registered_taxonomies as $tax_name ) {
-		if ( stripos( $tax_name, $taxonomy_name ) !== false ) {
-			return $tax_name;
-		}
-	}
-
-	return null;
-}
-}
-
-// Get current URL parameters and filter relevant ones upfront.
-$current_url = home_url( add_query_arg( null, null ) );
-$url_parts   = wp_parse_url( $current_url );
-parse_str( $url_parts['query'] ?? '', $all_query_params_raw );
-
-// Fallback to $_GET if URL parsing doesn't work (e.g., in test environments).
+// Get current URL parameters - simplified approach
+$all_query_params_raw = array();
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Safe read-only access to $_GET for search filtering context
-if ( empty( $all_query_params_raw ) && ! empty( $_GET ) ) {
-    // Sanitize $_GET parameters before using them.
-    $all_query_params_raw = array();
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Safe read-only access to $_GET for preserving search parameters, all values are sanitized
+if ( ! empty( $_GET ) ) {
     foreach ( $_GET as $key => $value ) {
-        $sanitized_key                          = sanitize_key( $key );
-        $sanitized_value                        = is_array( $value )
+        $sanitized_key = sanitize_key( $key );
+        $sanitized_value = is_array( $value )
             ? array_map( 'sanitize_text_field', $value )
             : sanitize_text_field( $value );
         $all_query_params_raw[ $sanitized_key ] = $sanitized_value;
@@ -104,7 +47,7 @@ foreach ( $selected_taxonomies as $selected_taxonomy ) {
 		$document_post_type = $taxonomy_parts[0];
 		$taxonomy_name      = $taxonomy_parts[1];
 
-		$actual_taxonomy = resolve_taxonomy_name( $document_post_type, $taxonomy_name );
+		$actual_taxonomy = TaxonomyFilter::resolve_taxonomy_name( $document_post_type, $taxonomy_name );
 
 		if ( $actual_taxonomy && taxonomy_exists( $actual_taxonomy ) ) {
 			$taxonomy_param_keys[] = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy;
@@ -146,7 +89,7 @@ $hidden_params = array_filter(
             $document_post_type     = $taxonomy_parts[0];
             $selected_taxonomy_name = $taxonomy_parts[1];
 
-            $actual_taxonomy = resolve_taxonomy_name( $document_post_type, $selected_taxonomy_name );
+            $actual_taxonomy = TaxonomyFilter::resolve_taxonomy_name( $document_post_type, $selected_taxonomy_name );
 
             if ( ! $actual_taxonomy || ! taxonomy_exists( $actual_taxonomy ) ) {
                 continue;
