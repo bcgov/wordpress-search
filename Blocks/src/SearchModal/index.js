@@ -29,7 +29,7 @@ import './style.scss';
  *
  * @see /render.php for frontend output
  */
-registerBlockType( 'wordpress-search/search-modal', {
+registerBlockType('wordpress-search/search-modal', {
 	/**
 	 * Edit Component
 	 * Provides the editor interface for the block
@@ -42,4 +42,4 @@ registerBlockType( 'wordpress-search/search-modal', {
 	 * This allows for proper JavaScript functionality and security
 	 */
 	save: Save,
-} );
+});
