@@ -183,7 +183,7 @@ class TaxonomyFilter {
             }
         }
 
-        // Early return if no taxonomies found
+        // Early return if no taxonomies found.
         if ( empty( $registered_taxonomies ) ) {
             return null;
         }
@@ -219,9 +219,9 @@ class TaxonomyFilter {
     private function get_post_type_from_taxonomy_filters( $tax_query ) {
         foreach ( $tax_query as $tax_filter ) {
             if ( isset( $tax_filter['taxonomy'] ) ) {
-                $taxonomy = $tax_filter['taxonomy'];
+                $taxonomy     = $tax_filter['taxonomy'];
                 $taxonomy_obj = get_taxonomy( $taxonomy );
-                
+
                 if ( $taxonomy_obj && ! empty( $taxonomy_obj->object_type ) ) {
                     // Return the first non-post post type we find.
                     foreach ( $taxonomy_obj->object_type as $post_type ) {

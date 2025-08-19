@@ -14,7 +14,7 @@ use Bcgov\WordpressSearch\TaxonomyFilter;
 // Support both singular and plural attribute names for backward compatibility.
 $selected_taxonomies = $attributes['selectedTaxonomies'] ?? $attributes['selectedTaxonomy'] ?? [];
 
-// Convert single taxonomy to array format if needed
+// Convert single taxonomy to array format if needed.
 if ( ! is_array( $selected_taxonomies ) && ! empty( $selected_taxonomies ) ) {
     $selected_taxonomies = array( $selected_taxonomies );
 }
@@ -24,18 +24,23 @@ if ( empty( $selected_taxonomies ) || ! is_array( $selected_taxonomies ) ) {
     return;
 }
 
-// Use the static method from TaxonomyFilter class instead of inline function
 
-// Get current URL parameters - simplified approach
+// Get current URL parameters using WordPress native functions.
 $all_query_params_raw = array();
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Safe read-only access to $_GET for search filtering context
-if ( ! empty( $_GET ) ) {
-    foreach ( $_GET as $key => $value ) {
-        $sanitized_key = sanitize_key( $key );
-        $sanitized_value = is_array( $value )
-            ? array_map( 'sanitize_text_field', $value )
-            : sanitize_text_field( $value );
-        $all_query_params_raw[ $sanitized_key ] = $sanitized_value;
+
+// Get all registered query vars from WordPress.
+global $wp_query;
+$query_vars = $wp_query->query_vars;
+
+if ( ! empty( $query_vars ) ) {
+    foreach ( $query_vars as $key => $value ) {
+        if ( ! empty( $value ) ) {
+            $sanitized_key                          = sanitize_key( $key );
+            $sanitized_value                        = is_array( $value )
+                ? array_map( 'sanitize_text_field', $value )
+                : sanitize_text_field( $value );
+            $all_query_params_raw[ $sanitized_key ] = $sanitized_value;
+        }
     }
 }
 
