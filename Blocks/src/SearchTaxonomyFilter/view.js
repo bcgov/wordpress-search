@@ -54,7 +54,11 @@ window.applyTaxonomyFilters = function () {
 			}
 		});
 
-	// Navigate to the new URL with all the new filters
+	// Ensure all other parameters (including search query) are preserved
+	// This is already handled by the URL manipulation above, but let's be explicit
+	// The search query (s) and other filter parameters will remain intact
+
+	// Navigate to the new URL with all the new filters and preserved parameters
 	window.location.href = currentUrl.toString();
 };
 

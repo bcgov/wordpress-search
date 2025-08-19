@@ -7,27 +7,30 @@
 
 namespace Bcgov\WordpressSearch\SearchActiveFilters;
 
+// Get current URL using WordPress functions.
 $current_url = add_query_arg( null, null );
 
-// Get current URL parameters using WordPress global objects.
-global $wp_query;
+// Parse the current URL to get all parameters.
+$parsed_url   = wp_parse_url( $current_url );
 $query_params = array();
 $search_param = '';
 
-// Get search parameter safely.
-if ( get_query_var( 's' ) ) {
-    $search_param = sanitize_text_field( get_query_var( 's' ) );
-}
+if ( isset( $parsed_url['query'] ) ) {
+    parse_str( $parsed_url['query'], $url_params );
 
-// Get all query parameters from wp_query.
-$all_query_vars = $wp_query->query_vars;
-foreach ( $all_query_vars as $key => $value ) {
-    if ( 's' !== $key && 'paged' !== $key && 'posts_per_page' !== $key && ! empty( $value ) ) {
-        $query_params[ $key ] = $value;
+    // Extract search parameter.
+    if ( isset( $url_params['s'] ) ) {
+        $search_param = sanitize_text_field( $url_params['s'] );
+        unset( $url_params['s'] );
     }
-}
 
-unset( $query_params['s'] );
+    // Remove pagination parameters.
+    unset( $url_params['paged'] );
+    unset( $url_params['posts_per_page'] );
+
+    // Store all other parameters.
+    $query_params = $url_params;
+}
 
 $applied_filters = [];
 $filter_count    = 0;
@@ -152,12 +155,16 @@ foreach ( $custom_filters as $param => $resolver ) {
     }
 }
 
-// Build clear all URL.
-$clear_all_url = $search_param
-    ? add_query_arg( 's', $search_param, $current_url )
-    : remove_query_arg( array_keys( $query_params ), $current_url );
-?>
+// Build clear all URL - preserve only search parameter if it exists.
+$clear_all_url = home_url( '/' );
+if ( $search_param ) {
+    $clear_all_url = add_query_arg( 's', $search_param, $clear_all_url );
+} else {
+    // If no search term, redirect to empty search results instead of homepage.
+    $clear_all_url = add_query_arg( 's', '', $clear_all_url );
+}
 
+?>
 <div class="wp-block-wordpress-search-search-active-filters">
     <div class="search-active-filters">
             <div class="search-active-filters__header">
@@ -191,22 +198,35 @@ $clear_all_url = $search_param
                     $param_vals = (array) $param_vals;
                 }
 
-                $remove_url = $current_url;
+                $remove_url = home_url( '/' );
 
                 if ( count( $param_vals ) > 1 ) {
                     $new_vals = array_diff( $param_vals, [ $value ] );
                     // For taxonomy filters, join back as comma-separated.
                     if ( strpos( $param, 'taxonomy_' ) === 0 ) {
-                        $remove_url = add_query_arg( $param, implode( ',', $new_vals ), remove_query_arg( $param, $remove_url ) );
+                        $remove_url = add_query_arg( $param, implode( ',', $new_vals ), $remove_url );
                     } else {
-                        $remove_url = add_query_arg( $param, $new_vals, remove_query_arg( $param, $remove_url ) );
+                        $remove_url = add_query_arg( $param, $new_vals, $remove_url );
                     }
-                } else {
-                    $remove_url = remove_query_arg( $param, $remove_url );
                 }
 
+                // Add back all other filter parameters.
+                foreach ( $query_params as $other_param => $other_value ) {
+                    if ( $other_param !== $param ) {
+                        if ( is_array( $other_value ) ) {
+                            $remove_url = add_query_arg( $other_param, $other_value, $remove_url );
+                        } else {
+                            $remove_url = add_query_arg( $other_param, $other_value, $remove_url );
+                        }
+                    }
+                }
+
+                // Always add search parameter to stay on search results page.
                 if ( $search_param ) {
                     $remove_url = add_query_arg( 's', $search_param, $remove_url );
+                } else {
+                    // If no search term, add empty search to stay on search results instead of homepage.
+                    $remove_url = add_query_arg( 's', '', $remove_url );
                 }
                 ?>
                 <div class="search-active-filters__chip"

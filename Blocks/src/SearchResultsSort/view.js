@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			// Store scroll position before navigation
 			sessionStorage.setItem('sortScrollPosition', window.scrollY);
 
-			// Build new URL with sort parameters
+			// Build new URL with sort parameters while preserving all other filters
 			let newUrl = currentUrl;
 			
 			if (sortValue.startsWith('title_')) {
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				newUrl = url.pathname + '?' + searchParams.toString();
 			}
 
-			// Navigate to new URL
+			// Navigate to new URL with preserved filters and new sort
 			window.location.href = newUrl;
 		});
 	});
