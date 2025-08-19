@@ -25,14 +25,10 @@ window.applyTaxonomyFilters = function () {
 	const currentUrl = new URL( window.location.href );
 	const params = currentUrl.searchParams;
 	
-	// Remove ALL existing taxonomy parameters first
-	const keysToRemove = [];
-	for ( const key of params.keys() ) {
-		if ( key.startsWith( 'taxonomy_' ) ) {
-			keysToRemove.push( key );
-		}
-	}
-	keysToRemove.forEach( key => params.delete( key ) );
+	// Remove ALL existing taxonomy parameters first (simplified)
+	Array.from( params.keys() )
+		.filter( key => key.startsWith( 'taxonomy_' ) )
+		.forEach( key => params.delete( key ) );
 
 	// Now collect ALL currently checked checkboxes and add them as new parameters
 	document.querySelectorAll( '.taxonomy-filter__checkbox:checked' ).forEach( ( checkbox ) => {
@@ -58,34 +54,6 @@ window.applyTaxonomyFilters = function () {
 	window.location.href = currentUrl.toString();
 };
 
-// Remove individual filter function
-window.removeTaxonomyFilter = function ( taxonomyName, termValue ) {
-	// Store scroll position
-	sessionStorage.setItem( 'filterScrollPosition', window.scrollY );
-
-	// Get current URL
-	const currentUrl = new URL( window.location.href );
-	const params = currentUrl.searchParams;
-	
-	// Remove the specific taxonomy term
-	const taxonomyKey = 'taxonomy_' + taxonomyName;
-	if ( params.has( taxonomyKey ) ) {
-		const currentValue = params.get( taxonomyKey );
-		const values = currentValue.split( ',' ).filter( val => val !== termValue );
-		
-		// Remove the parameter completely if no values left
-		if ( values.length === 0 ) {
-			params.delete( taxonomyKey );
-		} else {
-			// Update with remaining values as comma-separated
-			params.set( taxonomyKey, values.join( ',' ) );
-		}
-	}
-
-	// Navigate to the new URL
-	window.location.href = currentUrl.toString();
-};
-
 // Preserve scroll position on filter changes
 ( function () {
 	if ( 'scrollRestoration' in history ) {
@@ -101,38 +69,7 @@ window.removeTaxonomyFilter = function ( taxonomyName, termValue ) {
 	}
 } )();
 
-// Function to sync checkbox states with URL parameters
-function syncCheckboxStates() {
-	const urlParams = new URLSearchParams( window.location.search );
-	
-	// Reset all checkboxes to unchecked first
-	document.querySelectorAll( '.taxonomy-filter__checkbox' ).forEach( checkbox => {
-		checkbox.checked = false;
-	} );
-	
-	// Check boxes based on URL parameters
-	urlParams.forEach( ( value, key ) => {
-		if ( key.startsWith( 'taxonomy_' ) ) {
-			const taxonomyName = key.replace( 'taxonomy_', '' );
-			// Handle comma-separated values
-			const termValues = value.split( ',' );
-			
-			termValues.forEach( termValue => {
-				const checkboxes = document.querySelectorAll( `input[name="taxonomy_${taxonomyName}[]"][value="${termValue.trim()}"]` );
-				checkboxes.forEach( checkbox => {
-					checkbox.checked = true;
-				} );
-			} );
-		}
-	} );
-}
-
-
-
 document.addEventListener( 'DOMContentLoaded', function () {
-	// Sync checkbox states with URL parameters
-	syncCheckboxStates();
-	
 	// Initialize any collapsed taxonomy filters
 	const taxonomyFilters = document.querySelectorAll( '.taxonomy-filter__content' );
 	taxonomyFilters.forEach( ( filter ) => {

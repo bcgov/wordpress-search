@@ -156,92 +156,26 @@
 // Apply button styles
 .taxonomy-filter-apply {
 	margin-top: 1.5rem;
-	padding-top: 1rem;
-	border-top: 1px solid #e2e8f0;
 	text-align: center;
 
-	&__button {
-		background-color: #007cba;
+	.taxonomy-filter-apply__button {
+		background: #007cba;
 		color: white;
 		border: none;
-		border-radius: 4px;
 		padding: 0.75rem 1.5rem;
+		border-radius: 4px;
 		font-size: 14px;
 		font-weight: 500;
 		cursor: pointer;
 		transition: background-color 0.2s ease;
 
 		&:hover {
-			background-color: #005a87;
-		}
-
-		&:active {
-			background-color: #004a73;
+			background: #005a87;
 		}
 
 		&:focus {
 			outline: 2px solid #007cba;
 			outline-offset: 2px;
-		}
-	}
-}
-
-// Active filters display
-.active-taxonomy-filters {
-	margin-top: 1.5rem;
-	padding: 1rem;
-	background: #f8f9fa;
-	border-radius: 4px;
-	border: 1px solid #e2e8f0;
-
-	h4 {
-		margin: 0 0 0.75rem 0;
-		font-size: 14px;
-		font-weight: 600;
-		color: #374151;
-	}
-
-	.active-filters-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	.active-filter-tag {
-		display: inline-flex;
-		align-items: center;
-		background: #007cba;
-		color: white;
-		padding: 0.25rem 0.5rem;
-		border-radius: 16px;
-		font-size: 12px;
-		font-weight: 500;
-		gap: 0.25rem;
-
-		.remove-filter-btn {
-			background: none;
-			border: none;
-			color: white;
-			cursor: pointer;
-			font-size: 14px;
-			font-weight: bold;
-			padding: 0;
-			width: 16px;
-			height: 16px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 50%;
-			transition: background-color 0.2s ease;
-
-			&:hover {
-				background-color: rgba(255, 255, 255, 0.2);
-			}
-
-			&:focus {
-				outline: 2px solid white;
-				outline-offset: 1px;
-			}
 		}
 	}
 }
