@@ -18,9 +18,6 @@ window.toggleTaxonomyFilter = function (header) {
 
 // Apply taxonomy filters function.
 window.applyTaxonomyFilters = function () {
-	// Store scroll position before form submission.
-	sessionStorage.setItem('filterScrollPosition', window.scrollY);
-
 	// Get current URL
 	const currentUrl = new URL(window.location.href);
 	const params = currentUrl.searchParams;
@@ -58,20 +55,7 @@ window.applyTaxonomyFilters = function () {
 	window.location.href = currentUrl.toString();
 };
 
-// Preserve scroll position on filter changes
-(function () {
-	if ('scrollRestoration' in history) {
-		history.scrollRestoration = 'manual';
-	}
 
-	const scrollPos = sessionStorage.getItem('filterScrollPosition');
-	if (scrollPos) {
-		requestAnimationFrame(() => {
-			window.scrollTo(0, parseInt(scrollPos));
-			sessionStorage.removeItem('filterScrollPosition');
-		});
-	}
-})();
 
 document.addEventListener('DOMContentLoaded', function () {
 	// Initialize any collapsed taxonomy filters

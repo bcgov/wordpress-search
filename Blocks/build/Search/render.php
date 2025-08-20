@@ -80,7 +80,7 @@ $current_url_params = apply_filters( 'wordpress_search_filter_parameters', $curr
             </div>
             
             <?php
-            
+
             // Hidden inputs to preserve all current filter parameters.
             if ( ! empty( $current_url_params ) ) :
                 foreach ( $current_url_params as $param_key => $param_value ) :
