@@ -155,18 +155,24 @@
 
 // Apply button styles
 .taxonomy-filter-apply {
-	padding-left: .75rem;
+	background: #fff;
+    bottom: 0;
+    margin-top: 0;
+    padding: 1rem 0;
+    position: sticky;
+    z-index: 1000;
 
 	.taxonomy-filter-apply__button {
-		background: var(--dswp-color-secondary, #EDEBE9);
-		color: var(--dswp-typography-color-primary, #2D2D2D);
+		background: var(--dswp-surface-color-primary-button-default, #013366);
+		color: var(--dswp-typography-color-primary-invert, #ffffff);
 		border: none;
-		padding: 0.75rem 1.5rem;
 		border-radius: 4px;
+		color: #f8f9fa;
+		cursor: pointer;
 		font-size: 14px;
 		font-weight: 500;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
+		padding: .75rem 5.5rem;
+		transition: background-color .2s ease;
 
 		&:hover {
 			filter: brightness(0.9); // Makes it 10% darker
