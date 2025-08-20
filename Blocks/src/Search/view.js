@@ -11,8 +11,9 @@ import './view.scss';
  *
  * Current features:
  * - Imports and applies frontend styles
- * - Clear button that clears text and searches with empty string
+ * - Clear button that clears text and submits form with empty search term
  * - Responsive clear button visibility
+ * - Filter persistence handled by PHP backend
  */
 
 // Wait for the DOM to be fully loaded
@@ -32,10 +33,16 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				clearButton.style.display = input.value ? 'flex' : 'none';
 			};
 
-			// Function to clear input and search with empty string
+			// Function to clear input and submit form with empty search term
+			// Filters are automatically preserved by the PHP backend hidden inputs
 			const clearAndSearch = () => {
+				// Clear the search input
 				input.value = '';
+				
+				// Hide the clear button
 				toggleClearButton();
+				
+				// Submit the form - PHP backend handles filter persistence
 				form.submit();
 			};
 
@@ -45,7 +52,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			// Handle input changes
 			input.addEventListener( 'input', toggleClearButton );
 
-			// Handle clear button click - clear text and search with empty string
+			// Handle clear button click - clear text and submit form
 			clearButton.addEventListener( 'click', clearAndSearch );
 		}
 	} );

@@ -1,5 +1,3 @@
-/* global sessionStorage, requestAnimationFrame, history */
-
 import './view.scss';
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -8,15 +6,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		'.search-results-sort__sort-select'
 	);
 
-	sortSelects.forEach(function (select) {
-		select.addEventListener('change', function () {
-			const currentUrl = this.dataset.currentUrl;
-			const sortValue = this.value;
-			
-			// Store scroll position before navigation
-			sessionStorage.setItem('sortScrollPosition', window.scrollY);
+			sortSelects.forEach(function (select) {
+			select.addEventListener('change', function () {
+				const currentUrl = this.dataset.currentUrl;
+				const sortValue = this.value;
 
-			// Build new URL with sort parameters
+			// Build new URL with sort parameters while preserving all other filters
 			let newUrl = currentUrl;
 			
 			if (sortValue.startsWith('title_')) {
@@ -57,23 +52,10 @@ document.addEventListener('DOMContentLoaded', function () {
 				newUrl = url.pathname + '?' + searchParams.toString();
 			}
 
-			// Navigate to new URL
+			// Navigate to new URL with preserved filters and new sort
 			window.location.href = newUrl;
 		});
 	});
 });
 
-// Preserve scroll position after sort changes
-(function () {
-	if ('scrollRestoration' in history) {
-		history.scrollRestoration = 'manual';
-	}
 
-	const scrollPos = sessionStorage.getItem('sortScrollPosition');
-	if (scrollPos) {
-		requestAnimationFrame(() => {
-			window.scrollTo(0, parseInt(scrollPos));
-			sessionStorage.removeItem('sortScrollPosition');
-		});
-	}
-})();
