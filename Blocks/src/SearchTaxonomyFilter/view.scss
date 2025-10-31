@@ -19,11 +19,11 @@
 
 	.taxonomy-filter__header {
 		align-items: center;
-		background: #E0DEDC;
+		background: #e0dedc;
 		cursor: pointer;
 		display: flex;
 		justify-content: space-between;
-		transition: background-color .2s ease;
+		transition: background-color 0.2s ease;
 		margin-bottom: 1rem;
 
 		&:hover {
@@ -156,23 +156,22 @@
 // Apply button styles
 .taxonomy-filter-apply {
 	background: #fff;
-    bottom: 0;
-    margin-top: 0;
-    padding: 1rem 0;
-    position: sticky;
-    z-index: 1000;
+	bottom: 0;
+	margin-top: 0;
+	padding: 1rem 0;
+	position: sticky;
+	z-index: 1000;
 
 	.taxonomy-filter-apply__button {
 		background: var(--dswp-surface-color-primary-button-default, #013366);
-		color: var(--dswp-typography-color-primary-invert, #ffffff);
 		border: none;
 		border-radius: 4px;
 		color: #f8f9fa;
 		cursor: pointer;
 		font-size: 14px;
 		font-weight: 500;
-		padding: .75rem 5.5rem;
-		transition: background-color .2s ease;
+		padding: 0.75rem 5.5rem;
+		transition: background-color 0.2s ease;
 
 		&:hover {
 			filter: brightness(0.9); // Makes it 10% darker
