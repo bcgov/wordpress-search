@@ -14,33 +14,24 @@
 	}
 
 	&__number {
-		font-size: 1rem;
-		font-weight: 500;
-		color: #666;
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: #474543;
 		line-height: 1;
 	}
 
 	&__message {
-		font-size: 1rem;
-		color: #666;
-		font-weight: 400;
+		font-size: 1.125rem;
+		color: #474543;
+		font-weight: 700;
 		line-height: 1.4;
 	}
 
-	// Responsive design
+	// Responsive design - keep consistent size and left alignment on mobile
 	@media (max-width: 768px) {
-
+		// Keep same size and left alignment, just adjust spacing if needed
 		&__content {
-			flex-direction: column;
-			gap: 0.25rem;
-		}
-
-		&__number {
-			font-size: 0.875rem;
-		}
-
-		&__message {
-			font-size: 0.875rem;
+			gap: 0.5rem;
 		}
 	}
 }
