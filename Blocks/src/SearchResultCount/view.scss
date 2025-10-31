@@ -1,3 +1,5 @@
+@use "~@wordpress/base-styles/breakpoints" as *; // variable names depend on that package
+
 .search-result-count {
 	display: flex;
 	align-items: center;
@@ -14,21 +16,21 @@
 	}
 
 	&__number {
-		font-size: 1.125rem;
+		font-size: 16px;
 		font-weight: 700;
 		color: #474543;
 		line-height: 1;
 	}
 
 	&__message {
-		font-size: 1.125rem;
+		font-size: 16px;
 		color: #474543;
 		font-weight: 700;
 		line-height: 1.4;
 	}
 
 	// Responsive design - keep consistent size and left alignment on mobile
-	@media (max-width: 768px) {
+	@media (max-width: $break-medium) {
 		// Keep same size and left alignment, just adjust spacing if needed
 		&__content {
 			gap: 0.5rem;
