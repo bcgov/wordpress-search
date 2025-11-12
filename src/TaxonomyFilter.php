@@ -67,27 +67,18 @@ class TaxonomyFilter {
         $query_vars = $query->query_vars;
 
         // Get URL parameters safely using filter_input.
-        // In test environments, filter_input may return null, so fall back to $_GET with sanitization.
         $post_type_param = filter_input( INPUT_GET, 'post_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
         $get_params      = filter_input_array( INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
         // Fallback for test environments where filter_input_array returns null.
-        if ( null === $get_params && isset( $_GET ) && is_array( $_GET ) ) {
-            // Sanitize $_GET manually for test environments.
-            $get_params = array();
-            foreach ( $_GET as $key => $value ) {
-                $sanitized_key = sanitize_key( $key );
-                if ( is_array( $value ) ) {
-                    $get_params[ $sanitized_key ] = array_map( 'sanitize_text_field', $value );
-                } else {
-                    $get_params[ $sanitized_key ] = sanitize_text_field( $value );
-                }
-            }
+        // Extract parameters from query_vars which WordPress populates from URL parameters.
+        if ( null === $get_params ) {
+            $get_params = $this->extract_params_from_query_vars( $query_vars );
         }
 
         // Fallback for post_type in test environments.
-        if ( null === $post_type_param && isset( $_GET['post_type'] ) ) {
-            $post_type_param = sanitize_text_field( $_GET['post_type'] );
+        if ( null === $post_type_param && isset( $query_vars['post_type'] ) ) {
+            $post_type_param = sanitize_text_field( $query_vars['post_type'] );
         }
 
         // Handle post_type parameter from URL (takes priority over taxonomy-based post type detection).
@@ -246,6 +237,40 @@ class TaxonomyFilter {
         }
 
         return null;
+    }
+
+    /**
+     * Extract URL parameters from query_vars for test environment compatibility.
+     *
+     * WordPress populates query_vars from URL parameters, so we can safely extract
+     * taxonomy and post_type parameters from there without accessing $_GET directly.
+     *
+     * @param array $query_vars The query variables array.
+     * @return array Extracted and sanitized parameters.
+     */
+    private function extract_params_from_query_vars( $query_vars ) {
+        $params = array();
+
+        // Extract taxonomy parameters (those with the taxonomy_ prefix).
+        $taxonomies = get_taxonomies();
+        foreach ( $taxonomies as $taxonomy ) {
+            $param_name = self::TAXONOMY_PREFIX . $taxonomy;
+            if ( isset( $query_vars[ $param_name ] ) ) {
+                $value = $query_vars[ $param_name ];
+                if ( is_array( $value ) ) {
+                    $params[ $param_name ] = array_map( 'sanitize_text_field', $value );
+                } else {
+                    $params[ $param_name ] = sanitize_text_field( $value );
+                }
+            }
+        }
+
+        // Extract post_type parameter.
+        if ( isset( $query_vars['post_type'] ) ) {
+            $params['post_type'] = sanitize_text_field( $query_vars['post_type'] );
+        }
+
+        return $params;
     }
 
     /**
