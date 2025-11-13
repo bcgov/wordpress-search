@@ -66,11 +66,38 @@ class TaxonomyFilter {
         // Get all query variables.
         $query_vars = $query->query_vars;
 
+        // Get URL parameters safely using filter_input.
+        $post_type_param = filter_input( INPUT_GET, 'post_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+        $get_params      = filter_input_array( INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+
+        // Fallback for test environments where filter_input_array returns null.
+        // Extract parameters from query_vars which WordPress populates from URL parameters.
+        if ( null === $get_params ) {
+            $get_params = $this->extract_params_from_query_vars( $query_vars );
+        }
+
+        // Fallback for post_type in test environments.
+        if ( null === $post_type_param && isset( $query_vars['post_type'] ) ) {
+            $post_type_param = sanitize_text_field( $query_vars['post_type'] );
+        }
+
+        // Handle post_type parameter from URL (takes priority over taxonomy-based post type detection).
+        if ( ! empty( $post_type_param ) ) {
+            $post_type_param = sanitize_key( $post_type_param );
+            // Validate that the post type exists and is public.
+            if ( post_type_exists( $post_type_param ) ) {
+                $post_type_obj = get_post_type_object( $post_type_param );
+                if ( $post_type_obj && $post_type_obj->public ) {
+                    // Set the post type filter - this ensures only the specified post type is shown.
+                    // When "page" is selected, only pages are shown (not documents).
+                    // When "document" is selected, only documents are shown (not pages).
+                    $query->set( 'post_type', $post_type_param );
+                }
+            }
+        }
+
         // Build taxonomy query from URL parameters.
-        // Note: Nonce verification not required here as this is read-only filtering of public search results.
-        // Users can share/bookmark these URLs, and nonces would break this functionality.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search filtering.
-        $tax_query = $this->process_taxonomy_parameters( $_GET, array() );
+        $tax_query = $this->process_taxonomy_parameters( $get_params ? $get_params : array(), array() );
 
         // If we have taxonomy filters, add them to the query.
         if ( ! empty( $tax_query ) ) {
@@ -86,14 +113,17 @@ class TaxonomyFilter {
 
             $query->set( 'tax_query', $tax_query );
 
-            // Determine and set the correct post type based on the taxonomies being filtered.
-            $current_post_type = $query->get( 'post_type' );
+            // Only determine post type from taxonomy if no explicit post_type parameter was set.
+            if ( empty( $post_type_param ) ) {
+                // Determine and set the correct post type based on the taxonomies being filtered.
+                $current_post_type = $query->get( 'post_type' );
 
-            if ( empty( $current_post_type ) || 'post' === $current_post_type ) {
-                // Determine post type from the taxonomy.
-                $target_post_type = $this->get_post_type_from_taxonomy_filters( $tax_query );
-                if ( $target_post_type ) {
-                    $query->set( 'post_type', $target_post_type );
+                if ( empty( $current_post_type ) || 'post' === $current_post_type ) {
+                    // Determine post type from the taxonomy.
+                    $target_post_type = $this->get_post_type_from_taxonomy_filters( $tax_query );
+                    if ( $target_post_type ) {
+                        $query->set( 'post_type', $target_post_type );
+                    }
                 }
             }
         }
@@ -207,6 +237,40 @@ class TaxonomyFilter {
         }
 
         return null;
+    }
+
+    /**
+     * Extract URL parameters from query_vars for test environment compatibility.
+     *
+     * WordPress populates query_vars from URL parameters, so we can safely extract
+     * taxonomy and post_type parameters from there without accessing $_GET directly.
+     *
+     * @param array $query_vars The query variables array.
+     * @return array Extracted and sanitized parameters.
+     */
+    private function extract_params_from_query_vars( $query_vars ) {
+        $params = array();
+
+        // Extract taxonomy parameters (those with the taxonomy_ prefix).
+        $taxonomies = get_taxonomies();
+        foreach ( $taxonomies as $taxonomy ) {
+            $param_name = self::TAXONOMY_PREFIX . $taxonomy;
+            if ( isset( $query_vars[ $param_name ] ) ) {
+                $value = $query_vars[ $param_name ];
+                if ( is_array( $value ) ) {
+                    $params[ $param_name ] = array_map( 'sanitize_text_field', $value );
+                } else {
+                    $params[ $param_name ] = sanitize_text_field( $value );
+                }
+            }
+        }
+
+        // Extract post_type parameter.
+        if ( isset( $query_vars['post_type'] ) ) {
+            $params['post_type'] = sanitize_text_field( $query_vars['post_type'] );
+        }
+
+        return $params;
     }
 
     /**
