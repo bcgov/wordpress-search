@@ -1,0 +1,10 @@
+{
+    "core": "WordPress/WordPress#6.8",
+    "multisite": true,
+    "plugins": [ "." ],
+    "env": {
+        "tests": {
+            "phpVersion": "7.4"
+        }
+    }
+}
