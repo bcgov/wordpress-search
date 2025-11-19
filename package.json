@@ -45,13 +45,13 @@
     "fix:css": "wp-scripts lint-style 'src/**/*.scss' --fix --allow-empty-input",
     "lint:js": "wp-scripts lint-js 'src/**/*.js'",
     "fix:js": "wp-scripts lint-js 'src/**/*.js' --fix",
-    "test": "npm run test:unit",
-    "test:unit": "wp-scripts test-unit-js --passWithNoTests",
-    "test:playwright": "wp-scripts test-playwright",
-    "test:playwright:help": "wp-scripts test-playwright --help",
-    "test:playwright:debug": "wp-scripts test-playwright --debug",
-    "test:playwright:headed": "wp-scripts test-playwright --headed",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run test",
+    "test": "npm run test:unit:js",
+    "test:unit:js": "wp-scripts test-unit-js --passWithNoTests",
+    "test:e2e": "wp-scripts test-playwright",
+    "test:e2e:help": "wp-scripts test-playwright --help",
+    "test:e2e:debug": "wp-scripts test-playwright --debug",
+    "test:e2e:headed": "wp-scripts test-playwright --headed",
+    "test:unit:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run test",
     "wp-env": "wp-env"
   }
 }
