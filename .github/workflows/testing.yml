@@ -21,8 +21,14 @@ jobs:
           composer install
           npm ci
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Start wp-env
+        run: npm run wp-env start
+
       - name: Run tests
         run: |
-          npm run test:php
           npm run test:playwright
+          npm run test:php
           npm run test

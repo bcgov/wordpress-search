@@ -51,7 +51,7 @@
     "test:playwright:help": "wp-scripts test-playwright --help",
     "test:playwright:debug": "wp-scripts test-playwright --debug",
     "test:playwright:headed": "wp-scripts test-playwright --headed",
-    "test:php": "wp-env start && wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run test",
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run test",
     "wp-env": "wp-env"
   }
 }
