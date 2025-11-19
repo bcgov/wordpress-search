@@ -33,6 +33,9 @@ vendor
 
 .DS_Store
 
+# e2e testing artifacts
+artifacts/
+test-results/
 
 # documentation
 documentation/docs/.vuepress/.temp

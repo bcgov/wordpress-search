@@ -24,4 +24,5 @@ jobs:
       - name: Run tests
         run: |
           npm run test:php
+          npm run test:playwright
           npm run test
