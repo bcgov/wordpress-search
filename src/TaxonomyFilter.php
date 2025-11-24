@@ -192,53 +192,61 @@ class TaxonomyFilter {
     /**
      * Resolve taxonomy name with fallbacks for case-insensitive matching.
      *
-     * @param string $document_post_type The post type.
-     * @param string $taxonomy_name The taxonomy name to resolve.
-     * @return string|null The resolved taxonomy name or null if not found.
+     * Handles various input formats including titles with spaces, slugs with underscores,
+     * and different cases. Matches against taxonomy slugs and labels.
+     *
+     * @param string $post_type The post type (currently unused but kept for backward compatibility).
+     * @param string $input The taxonomy name to resolve (can be slug, label, or title with spaces).
+     * @return string|null The resolved taxonomy name (slug) or null if not found.
      */
-    public static function resolve_taxonomy_name( $document_post_type, $taxonomy_name ) {
-        // Get registered taxonomies for the post type.
-        $registered_taxonomies = get_object_taxonomies( $document_post_type, 'names' );
-
-        // If no taxonomies found for the exact post type, try case-insensitive post type matching.
-        if ( empty( $registered_taxonomies ) ) {
-            $all_post_types = get_post_types( array(), 'names' );
-            foreach ( $all_post_types as $matched_post_type ) {
-                if ( strcasecmp( $matched_post_type, $document_post_type ) === 0 ) {
-                    $registered_taxonomies = get_object_taxonomies( $matched_post_type, 'names' );
-                    if ( ! empty( $registered_taxonomies ) ) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Early return if no taxonomies found.
-        if ( empty( $registered_taxonomies ) ) {
+    public static function resolve_taxonomy_name( $post_type, $input ) {
+        if ( empty( $input ) ) {
             return null;
         }
 
-        // Direct validation - check exact match first (most efficient).
-        if ( in_array( $taxonomy_name, $registered_taxonomies, true ) ) {
-            return $taxonomy_name;
+        $input = trim( $input );
+        // Normalize input: convert spaces/hyphens to underscores and lowercase.
+        $norm = sanitize_key( $input );
+
+        // Fast path: check if input matches a taxonomy slug exactly.
+        if ( taxonomy_exists( $input ) ) {
+            return $input;
         }
 
-        // Check for case-insensitive match and partial matches in a single loop.
-        foreach ( $registered_taxonomies as $tax_name ) {
-            // Case-insensitive exact match.
-            if ( strcasecmp( $tax_name, $taxonomy_name ) === 0 ) {
-                return $tax_name;
+        // Check if normalized version matches a taxonomy slug.
+        if ( taxonomy_exists( $norm ) ) {
+            return $norm;
+        }
+
+        // Iterate through all registered taxonomies to find a match.
+        foreach ( get_taxonomies( array(), 'objects' ) as $tax ) {
+            // Match by slug: compare normalized versions (case and space/underscore insensitive).
+            if ( sanitize_key( $tax->name ) === $norm ) {
+                return $tax->name;
             }
 
-            // Partial match (for backward compatibility).
-            if ( stripos( $tax_name, $taxonomy_name ) !== false ) {
-                return $tax_name;
+            // Collect all possible label variations for this taxonomy.
+            $labels = array( $tax->label );
+            if ( ! empty( $tax->labels->name ) ) {
+                $labels[] = $tax->labels->name;
+            }
+            if ( ! empty( $tax->labels->singular_name ) ) {
+                $labels[] = $tax->labels->singular_name;
+            }
+            if ( ! empty( $tax->labels->menu_name ) ) {
+                $labels[] = $tax->labels->menu_name;
+            }
+
+            // Match by label: check case-insensitive exact match or normalized match.
+            foreach ( $labels as $label ) {
+                if ( strcasecmp( $label, $input ) === 0 || sanitize_key( $label ) === $norm ) {
+                    return $tax->name;
+                }
             }
         }
 
         return null;
     }
-
     /**
      * Extract URL parameters from query_vars for test environment compatibility.
      *
