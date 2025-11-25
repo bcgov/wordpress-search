@@ -52,6 +52,7 @@
     "test:e2e:debug": "wp-scripts test-playwright --debug",
     "test:e2e:headed": "wp-scripts test-playwright --headed",
     "test:unit:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run test",
+    "test:unit:php:coverage": "wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run coverage",
     "wp-env": "wp-env"
   }
 }
