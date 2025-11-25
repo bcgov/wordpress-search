@@ -52,6 +52,7 @@ class BlockUnitTestCase extends \WP_UnitTestCase {
      * @return void
      */
     public function assert_equals_snapshot( string $expected_snapshot_filename, string $actual ) {
+        // phpcs:ignore
         $expected = file_get_contents( dirname( __DIR__, 2 ) . '/tests/php/Blocks/' . $this->block_class . '/__snapshots__/' . $expected_snapshot_filename );
         $this->assertEquals( $expected, $actual );
     }
