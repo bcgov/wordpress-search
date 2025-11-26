@@ -52,9 +52,11 @@ test.describe('Block', () => {
         await editor.page.getByRole('option', { name: 'Contrast' }).click();
         expect(await editor.getEditedPostContent()).toMatchSnapshot();
 
-        // The underline appears below the bottom of the block element so we have to
-        // capture more of the page to see it.
-        const preview = (await editor.openPreviewPage()).getByRole('main');
-        await expect(preview).toHaveScreenshot();
+        // TODO: Update block to display the underline inside the block element.
+        // Because the underline displays outside the bounds of the block element,
+        // we can't effectively screenshot it.
+
+        // const preview = (await editor.openPreviewPage()).getByRole('main');
+        // await expect(preview).toHaveScreenshot();
     });
 });

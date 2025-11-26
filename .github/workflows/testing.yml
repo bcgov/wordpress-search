@@ -31,6 +31,13 @@ jobs:
       - name: Run e2e tests
         run: npm run test:e2e
 
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
       - name: Run PHP unit tests
         run: npm run test:unit:php
           
