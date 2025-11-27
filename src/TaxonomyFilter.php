@@ -194,8 +194,9 @@ class TaxonomyFilter {
      *
      * Handles various input formats including titles with spaces, slugs with underscores,
      * and different cases. Matches against taxonomy slugs and labels.
+     * Prioritizes taxonomies associated with the specified post type.
      *
-     * @param string $post_type The post type (currently unused but kept for backward compatibility).
+     * @param string $post_type The post type to filter taxonomies by (e.g., 'document').
      * @param string $input The taxonomy name to resolve (can be slug, label, or title with spaces).
      * @return string|null The resolved taxonomy name (slug) or null if not found.
      */
@@ -208,18 +209,52 @@ class TaxonomyFilter {
         // Normalize input: convert spaces/hyphens to underscores and lowercase.
         $norm = sanitize_key( $input );
 
+        // Helper function to check if taxonomy exists and is associated with post type.
+        $check_taxonomy = function ( $taxonomy_name ) use ( $post_type ) {
+            if ( ! taxonomy_exists( $taxonomy_name ) ) {
+                return false;
+            }
+            // If post_type is specified, verify the taxonomy is associated with it.
+            if ( ! empty( $post_type ) ) {
+                $tax_obj = get_taxonomy( $taxonomy_name );
+                return $tax_obj && in_array( $post_type, (array) $tax_obj->object_type, true );
+            }
+            return true;
+        };
+
         // Fast path: check if input matches a taxonomy slug exactly.
-        if ( taxonomy_exists( $input ) ) {
+        if ( $check_taxonomy( $input ) ) {
             return $input;
         }
 
         // Check if normalized version matches a taxonomy slug.
-        if ( taxonomy_exists( $norm ) ) {
+        if ( $check_taxonomy( $norm ) ) {
             return $norm;
         }
 
-        // Iterate through all registered taxonomies to find a match.
-        foreach ( get_taxonomies( array(), 'objects' ) as $tax ) {
+        // Get all taxonomies, prioritizing those associated with the specified post type.
+        $all_taxonomies       = get_taxonomies( array(), 'objects' );
+        $post_type_taxonomies = array();
+        $other_taxonomies     = array();
+
+        foreach ( $all_taxonomies as $tax ) {
+            // If post_type is specified, separate taxonomies by association.
+            if ( ! empty( $post_type ) ) {
+                $tax_object_types = (array) $tax->object_type;
+                if ( in_array( $post_type, $tax_object_types, true ) ) {
+                    $post_type_taxonomies[] = $tax;
+                } else {
+                    $other_taxonomies[] = $tax;
+                }
+            } else {
+                $post_type_taxonomies[] = $tax;
+            }
+        }
+
+        // Search post-type-specific taxonomies first, then others.
+        $search_order = array_merge( $post_type_taxonomies, $other_taxonomies );
+
+        foreach ( $search_order as $tax ) {
             // Match by slug: compare normalized versions (case and space/underscore insensitive).
             if ( sanitize_key( $tax->name ) === $norm ) {
                 return $tax->name;

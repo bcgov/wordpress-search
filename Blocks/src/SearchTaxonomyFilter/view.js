@@ -55,8 +55,6 @@ window.applyTaxonomyFilters = function () {
 	window.location.href = currentUrl.toString();
 };
 
-
-
 document.addEventListener('DOMContentLoaded', function () {
 	// Initialize any collapsed taxonomy filters
 	const taxonomyFilters = document.querySelectorAll(
