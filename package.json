@@ -29,6 +29,9 @@
   "devDependencies": {
     "@bcgov/wordpress-eslint": "git+https://github.com/bcgov/wordpress-eslint.git#semver:1.x",
     "@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",
+    "@playwright/test": "1.56.1",
+    "@wordpress/e2e-test-utils-playwright": "^1.35.0",
+    "@wordpress/env": "^10.35.0",
     "@wordpress/scripts": "^30.17.0",
     "ajv": "^8.17.1"
   },
@@ -42,7 +45,14 @@
     "fix:css": "wp-scripts lint-style 'src/**/*.scss' --fix --allow-empty-input",
     "lint:js": "wp-scripts lint-js 'src/**/*.js'",
     "fix:js": "wp-scripts lint-js 'src/**/*.js' --fix",
-    "test": "npm run test:unit",
-    "test:unit": "wp-scripts test-unit-js --passWithNoTests"
+    "test": "npm run test:unit:js",
+    "test:unit:js": "wp-scripts test-unit-js --passWithNoTests",
+    "test:e2e": "wp-scripts test-playwright",
+    "test:e2e:help": "wp-scripts test-playwright --help",
+    "test:e2e:debug": "wp-scripts test-playwright --debug",
+    "test:e2e:headed": "wp-scripts test-playwright --headed",
+    "test:unit:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run test",
+    "test:unit:php:coverage": "wp-env run tests-cli --env-cwd=wp-content/plugins/wordpress-search composer run coverage",
+    "wp-env": "wp-env"
   }
 }

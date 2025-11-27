@@ -15,7 +15,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Bcgov\\WordpressSearch\\": "src/"
+            "Bcgov\\WordpressSearch\\": "src/",
+            "Bcgov\\WordpressSearch\\Test\\": "tests/php/"
         }
     },
     "scripts": {
@@ -36,11 +37,10 @@
             "Bcgov\\Script\\Standards::phpcbf"
         ],
         "test": [
-            "vendor/bin/phpunit --configuration vendor/bcgov/wordpress-utils/phpunit.xml.dist --testdox "
+            "vendor/bin/phpunit --testdox "
         ],
-        
         "coverage": [
-            "./vendor/bin/phpunit --coverage-html ./coverage/php/"
+            "vendor/bin/phpunit --coverage-html ./coverage/php/"
         ],
         "phpcs-allow-todo": [
             "vendor/bin/phpcs -ps --standard=./vendor/bcgov/wordpress-utils/wordpress.xml  --exclude=Generic.Commenting.Todo --colors --ignore=**/build/** ./"
