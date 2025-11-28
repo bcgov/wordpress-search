@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { CheckboxControl, PanelBody } from '@wordpress/components';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -41,7 +41,7 @@ export default function Edit({ attributes, setAttributes }) {
 		if (selectedTaxonomy && selectedTaxonomies === undefined) {
 			setAttributes({ selectedTaxonomies: [selectedTaxonomy] });
 		}
-	}, [selectedTaxonomy, selectedTaxonomies, setAttributes]); // Include all dependencies
+	}, [selectedTaxonomy, selectedTaxonomies, setAttributes]);
 
 	const { taxonomies } = useSelect((select) => {
 		const { getTaxonomies } = select('core');
@@ -53,57 +53,116 @@ export default function Edit({ attributes, setAttributes }) {
 		};
 	}, []);
 
-	// Format taxonomies for the checkbox controls
-	const taxonomyOptions = (taxonomies || [])
-		.filter((tax) => {
-			if (!tax) {
-				return false;
+	// ──────────────────────────────────────────────────────────────────────
+	// Build a Map of post_type → Set of taxonomy names
+	// ──────────────────────────────────────────────────────────────────────
+	const postTypeTaxMap = useMemo(() => {
+		const map = new Map();
+		for (const t of taxonomies || []) {
+			if (!t?.name) {
+				continue;
 			}
-
-			// Be more permissive - only require the taxonomy to have a name
-			if (!tax.name) {
-				return false;
-			}
-
-			return true;
-		})
-		.map((taxonomy) => {
-			// Handle taxonomies that might not have types properly set
-			if (!taxonomy.types || taxonomy.types.length === 0) {
-				// Try to get object_type as fallback
-				const objectTypes = taxonomy.object_type || [];
-				if (objectTypes.length === 0) {
-					return null;
+			const types = t.types || t.object_type || [];
+			for (const pt of types) {
+				if (!map.has(pt)) {
+					map.set(pt, new Set());
 				}
-				// Use the first object type as fallback
-				taxonomy.types = objectTypes;
+				map.get(pt).add(t.name.toLowerCase());
 			}
+		}
+		return map;
+	}, [taxonomies]);
 
-			// Get a nice label from the taxonomy object
-			const taxonomyLabel =
-				taxonomy.labels?.singular_name ||
-				taxonomy.name ||
-				__('Unknown', 'wordpress-search');
+	// Format taxonomies for the checkbox controls
+	const taxonomyOptions = useMemo(() => {
+		return (taxonomies || [])
+			.filter((tax) => {
+				if (!tax || !tax.name) {
+					return false;
+				}
 
-			// Get the post type label for clarity
-			const postType = taxonomy.types[0];
-			const postTypeLabel =
-				postType.charAt(0).toUpperCase() + postType.slice(1);
+				// Filter out default WordPress taxonomies (category, post_tag) when they're only
+				// associated with the 'post' post type. This prevents confusion when custom post types
+				// have their own category taxonomies (e.g., doc_category).
+				const taxonomyTypes = tax.types || tax.object_type || [];
+				const isDefaultCategory = tax.name === 'category';
+				const isDefaultPostTag = tax.name === 'post_tag';
+				const onlyAssociatedWithPost =
+					taxonomyTypes.length === 1 && taxonomyTypes[0] === 'post';
 
-			// Combine post type and taxonomy name for clarity
-			const label = `${postTypeLabel}: ${
-				taxonomyLabel.charAt(0).toUpperCase() + taxonomyLabel.slice(1)
-			}`;
+				// Exclude default category/post_tag if they're only for the 'post' post type
+				if (
+					(isDefaultCategory || isDefaultPostTag) &&
+					onlyAssociatedWithPost
+				) {
+					return false;
+				}
 
-			// Use the actual taxonomy name without any prefix manipulation
-			const value = `${taxonomy.types[0]}:${taxonomy.name}`;
+				// Also exclude default category if it's associated with a custom post type that has
+				// a custom taxonomy with a similar name (e.g., doc_category for document post type).
+				// This prevents the default category from appearing when a custom one exists.
+				if (isDefaultCategory && taxonomyTypes.length > 0) {
+					// Check each post type this taxonomy is associated with
+					for (const postType of taxonomyTypes) {
+						if (postType !== 'post') {
+							const set = postTypeTaxMap.get(postType);
+							if (set) {
+								const prefix = postType.toLowerCase() + '_';
+								// Fast check: any taxonomy for this post type that starts with prefix OR contains "_category"
+								for (const taxName of set) {
+									if (
+										taxName.startsWith(prefix) ||
+										taxName.includes('_category')
+									) {
+										return false; // custom alternative exists → hide default category
+									}
+								}
+							}
+						}
+					}
+				}
 
-			return {
-				label,
-				value,
-			};
-		})
-		.filter(Boolean); // Remove any null entries from map
+				return true;
+			})
+			.map((taxonomy) => {
+				// Handle taxonomies that might not have types properly set
+				if (!taxonomy.types || taxonomy.types.length === 0) {
+					// Try to get object_type as fallback
+					const objectTypes = taxonomy.object_type || [];
+					if (objectTypes.length === 0) {
+						return null;
+					}
+					// Use the first object type as fallback
+					taxonomy.types = objectTypes;
+				}
+
+				// Get a nice label from the taxonomy object
+				const taxonomyLabel =
+					taxonomy.labels?.singular_name ||
+					taxonomy.name ||
+					__('Unknown', 'wordpress-search');
+
+				// Get the post type label for clarity
+				const postType = taxonomy.types[0];
+				const postTypeLabel =
+					postType.charAt(0).toUpperCase() + postType.slice(1);
+
+				// Combine post type and taxonomy name for clarity
+				const label = `${postTypeLabel}: ${
+					taxonomyLabel.charAt(0).toUpperCase() +
+					taxonomyLabel.slice(1)
+				}`;
+
+				// Use the actual taxonomy name without any prefix manipulation
+				const value = `${taxonomy.types[0]}:${taxonomy.name}`;
+
+				return {
+					label,
+					value,
+				};
+			})
+			.filter(Boolean); // Remove any null entries from map
+	}, [taxonomies, postTypeTaxMap]);
 
 	// Handle taxonomy selection/deselection
 	const handleTaxonomyChange = (taxonomyValue, isChecked) => {
@@ -182,6 +241,7 @@ export default function Edit({ attributes, setAttributes }) {
 							{currentSelectedTaxonomies &&
 							currentSelectedTaxonomies.length > 0
 								? __('Selected:', 'wordpress-search') +
+								  ' ' +
 								  getSelectedTaxonomiesLabels()
 								: __(
 										'Configure taxonomies in the block settings →',
