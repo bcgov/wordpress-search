@@ -42,6 +42,7 @@ $excluded_fields = [
     'document_file_name',
     'document_file_size',
     'document_file_type',
+    'document_file_versions',
     'inpage_nav', // Exclude internal navigation control property.
     'show_inpage_nav', // Exclude Design System in-page navigation control property.
 ];
