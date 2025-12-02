@@ -37,9 +37,17 @@ npm run test:e2e:debug
 ```
 These are very useful when writing tests. See [Playwright debugging documentation](https://playwright.dev/docs/running-tests#debugging-tests) for usage.
 
+## Screenshot testing
+Playwright is also used for screenshot testing to check for visual regressions.
+
+### Running locally
+```bash
+npm run test:screenshot
+```
+
 ### Updating screenshots
 Playwright compares screenshots against stored baselines.
 If you've intentionally made changes to a block and need to update snapshots:
 ```bash
-npx playwright test --update-snapshots
+npm run test:screenshot:update
 ```
