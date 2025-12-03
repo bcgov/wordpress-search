@@ -378,54 +378,100 @@ class MetadataTaxonomySearch {
         $weights = apply_filters(
             'wordpress_search_relevance_weights',
             array(
-                'title_match'          => 10,
-                'title_exact'          => 5,
-                'content_match'        => 3,
-                'excerpt_match'        => 3,
-                'metadata_match'       => 1,
-                'taxonomy_match'       => 1,
-                'title_taxonomy_bonus' => 15, // Bonus for keyword in BOTH title AND taxonomy.
+                'term_match_base'       => 10,  // Base points for each unique term that matches (anywhere).
+                'title_match'           => 15,  // Bonus if term appears in title.
+                'title_exact'           => 10,  // Extra bonus for exact title match.
+                'content_match'         => 5,   // Bonus if term appears in content.
+                'excerpt_match'         => 5,   // Bonus if term appears in excerpt.
+                'metadata_match'        => 3,   // Bonus if term appears in metadata.
+                'taxonomy_match'        => 3,   // Bonus if term appears in taxonomy.
+                'title_taxonomy_bonus'  => 10,  // Extra bonus for term in BOTH title AND taxonomy.
+                'all_terms_bonus'       => 50,  // Large bonus if document matches ALL search terms.
             )
         );
 
+        $total_terms = count( $terms );
         $score_parts = array();
+
+        // Build conditions to check if each term matches anywhere in the document.
+        $term_match_conditions = array();
+        $all_terms_match_conditions = array();
 
         foreach ( $terms as $term ) {
             $term      = $wpdb->esc_like( $term );
             $like_term = '%' . $term . '%';
 
-            // Title matches get highest weight.
+            // Build condition to check if this term matches anywhere.
+            $term_anywhere = array();
+
+            // Check title.
+            $term_anywhere[] = $wpdb->prepare( "$wpdb->posts.post_title LIKE %s", $like_term );
+
+            // Check content.
+            $term_anywhere[] = $wpdb->prepare( "$wpdb->posts.post_content LIKE %s", $like_term );
+
+            // Check excerpt.
+            $term_anywhere[] = $wpdb->prepare( "$wpdb->posts.post_excerpt LIKE %s", $like_term );
+
+            // Check metadata.
+            $all_meta_keys = $this->get_all_metadata_keys();
+            if ( ! empty( $all_meta_keys ) ) {
+                foreach ( $all_meta_keys as $key_slug ) {
+                    $term_anywhere[] = $wpdb->prepare(
+                        '(espm.meta_key = %s AND espm.meta_value LIKE %s)',
+                        $key_slug,
+                        $like_term
+                    );
+                }
+            }
+
+            // Check taxonomy.
+            $all_taxonomies = $this->get_all_searchable_taxonomies();
+            if ( ! empty( $all_taxonomies ) ) {
+                foreach ( $all_taxonomies as $tax ) {
+                    $term_anywhere[] = $wpdb->prepare(
+                        '(estt.taxonomy = %s AND est.name LIKE %s)',
+                        $tax,
+                        $like_term
+                    );
+                }
+            }
+
+            // If term matches anywhere, give base points (counts unique terms, not frequency).
+            $term_match_condition = '(' . implode( ' OR ', $term_anywhere ) . ')';
+            $term_match_conditions[] = $term_match_condition;
+            $all_terms_match_conditions[] = $term_match_condition;
+
+            // Now add location-specific bonuses (these are bonuses, not the base score).
+            // Title match bonus.
             $score_parts[] = $wpdb->prepare(
                 "(CASE WHEN $wpdb->posts.post_title LIKE %s THEN %d ELSE 0 END)",
                 $like_term,
                 absint( $weights['title_match'] )
             );
 
-            // Exact title match gets bonus.
+            // Exact title match bonus.
             $score_parts[] = $wpdb->prepare(
                 "(CASE WHEN $wpdb->posts.post_title = %s THEN %d ELSE 0 END)",
                 $term,
                 absint( $weights['title_exact'] )
             );
 
-            // Content matches get medium weight.
+            // Content match bonus.
             $score_parts[] = $wpdb->prepare(
                 "(CASE WHEN $wpdb->posts.post_content LIKE %s THEN %d ELSE 0 END)",
                 $like_term,
                 absint( $weights['content_match'] )
             );
 
-            // Excerpt matches get medium weight.
+            // Excerpt match bonus.
             $score_parts[] = $wpdb->prepare(
                 "(CASE WHEN $wpdb->posts.post_excerpt LIKE %s THEN %d ELSE 0 END)",
                 $like_term,
                 absint( $weights['excerpt_match'] )
             );
 
-            // Metadata matches get lower weight.
-            // Note: With DISTINCT, if multiple metadata entries match, this will still work correctly
-            // as the score is calculated per row and DISTINCT will collapse duplicates.
-            $all_meta_keys = $this->get_all_metadata_keys();
+            // Metadata match bonus.
             if ( ! empty( $all_meta_keys ) ) {
                 $meta_conditions = array();
                 foreach ( $all_meta_keys as $key_slug ) {
@@ -443,12 +489,9 @@ class MetadataTaxonomySearch {
                 }
             }
 
-            // Taxonomy matches get lower weight.
-            // Note: With DISTINCT, if multiple taxonomy entries match, this will still work correctly
-            // as the score is calculated per row and DISTINCT will collapse duplicates.
-            $all_taxonomies = $this->get_all_searchable_taxonomies();
-            $tax_conditions = array();
+            // Taxonomy match bonus.
             if ( ! empty( $all_taxonomies ) ) {
+                $tax_conditions = array();
                 foreach ( $all_taxonomies as $tax ) {
                     $tax_conditions[] = $wpdb->prepare(
                         '(estt.taxonomy = %s AND est.name LIKE %s)',
@@ -463,8 +506,7 @@ class MetadataTaxonomySearch {
                         absint( $weights['taxonomy_match'] )
                     );
 
-                    // Bonus for keyword appearing in BOTH title AND taxonomy.
-                    // This prioritizes documents with multiple keyword matches across fields.
+                    // Bonus for term in BOTH title AND taxonomy.
                     $score_parts[] = $wpdb->prepare(
                         "(CASE WHEN ($wpdb->posts.post_title LIKE %s AND ($tax_conditions_sql)) THEN %d ELSE 0 END)",
                         $like_term,
@@ -472,6 +514,26 @@ class MetadataTaxonomySearch {
                     );
                 }
             }
+        }
+
+        // Base score: Points for each unique term that matches (regardless of how many times).
+        // This ensures documents matching MORE terms rank higher than documents matching FEWER terms.
+        foreach ( $term_match_conditions as $condition ) {
+            $score_parts[] = $wpdb->prepare(
+                "(CASE WHEN $condition THEN %d ELSE 0 END)",
+                absint( $weights['term_match_base'] )
+            );
+        }
+
+        // Large bonus if document matches ALL search terms.
+        // This is the key: documents with "chicken 2023 fair" all matching rank much higher
+        // than documents with just "chicken" repeated 50 times.
+        if ( $total_terms > 1 ) {
+            $all_terms_condition = '(' . implode( ' AND ', $all_terms_match_conditions ) . ')';
+            $score_parts[] = $wpdb->prepare(
+                "(CASE WHEN $all_terms_condition THEN %d ELSE 0 END)",
+                absint( $weights['all_terms_bonus'] )
+            );
         }
 
         if ( empty( $score_parts ) ) {
