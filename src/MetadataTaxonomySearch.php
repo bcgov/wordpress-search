@@ -50,7 +50,8 @@ class MetadataTaxonomySearch {
         add_filter( 'posts_search', array( $this, 'custom_search_query' ), 10, 2 );
 
         // Add relevance-based ordering when no explicit sort is set.
-        add_filter( 'posts_orderby', array( $this, 'apply_relevance_ordering' ), 10, 2 );
+        // Use priority 30 to run after SearchResultsSort (which uses priority 20).
+        add_filter( 'posts_orderby', array( $this, 'apply_relevance_ordering' ), 30, 2 );
         add_filter( 'posts_fields', array( $this, 'add_relevance_fields' ), 10, 2 );
 
         // Clear cache when metadata changes.
@@ -249,10 +250,8 @@ class MetadataTaxonomySearch {
             return $fields;
         }
 
-        // Skip if explicit sorting is set (let SearchResultsSort handle it).
-        if ( $this->has_explicit_sorting( $wp_query ) ) {
-            return $fields;
-        }
+        // Always add relevance fields for search queries (even if sorting is set).
+        // Relevance will be primary sort, explicit sorts will be secondary.
 
         // Ensure table joins are available for relevance calculation.
         $this->add_search_hooks();
@@ -294,17 +293,45 @@ class MetadataTaxonomySearch {
             return $orderby;
         }
 
-        // Skip if explicit sorting is set (let SearchResultsSort handle it).
-        if ( $this->has_explicit_sorting( $wp_query ) ) {
+        global $wpdb;
+
+        // Check if relevance_score was added to fields.
+        $fields = $wp_query->get( 'fields' );
+        if ( ! empty( $fields ) && 'ids' === $fields ) {
             return $orderby;
         }
 
-        // Only apply if we have a relevance_score field.
+        // Check what sort option is selected.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+        $sort_param = isset( $_GET['sort'] ) ? sanitize_text_field( $_GET['sort'] ) : 'relevance';
+        
+        // If user explicitly chose something other than relevance, respect that choice.
+        // But if they chose relevance (or nothing, which defaults to relevance), use relevance ranking.
+        if ( 'relevance' !== $sort_param ) {
+            // User chose title sorting - still use relevance as primary, title as secondary.
+            if ( 'title_asc' === $sort_param || 'title_desc' === $sort_param ) {
+                if ( strpos( $orderby, 'relevance_score' ) === false ) {
+                    $title_order = ( 'title_asc' === $sort_param ) ? 'ASC' : 'DESC';
+                    $orderby = 'relevance_score DESC, ' . $wpdb->posts . '.post_title ' . $title_order;
+                }
+                return $orderby;
+            }
+            
+            // User chose metadata sorting - let SearchResultsSort handle it completely.
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+            if ( isset( $_GET['meta_sort'] ) || isset( $_GET['sort_meta'] ) ) {
+                return $orderby;
+            }
+        }
+        
+        // Default behavior: Use relevance ranking (this is what users expect from search).
+        // Apply relevance ordering - relevance is the primary sort.
         if ( strpos( $orderby, 'relevance_score' ) === false ) {
-            // Check if relevance_score was added to fields.
-            $fields = $wp_query->get( 'fields' );
-            if ( empty( $fields ) || 'ids' !== $fields ) {
-                // Apply relevance ordering.
+            // Default: relevance first, then existing orderby (usually date).
+            $existing_orderby = trim( $orderby );
+            if ( empty( $existing_orderby ) ) {
+                $orderby = 'relevance_score DESC, ' . $wpdb->posts . '.post_date DESC';
+            } else {
                 $orderby = 'relevance_score DESC, ' . $orderby;
             }
         }

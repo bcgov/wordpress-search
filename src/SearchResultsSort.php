@@ -35,11 +35,18 @@ class SearchResultsSort {
 			return;
 		}
 
-		// Check for title sorting.
+		// Check for sorting parameter.
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
 		if ( isset( $_GET['sort'] ) ) {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
 			$sort_param = sanitize_text_field( $_GET['sort'] );
+			
+			// If relevance is selected, don't override - let MetadataTaxonomySearch handle it.
+			if ( 'relevance' === $sort_param ) {
+				return;
+			}
+			
+			// Apply title sorting if selected.
 			if ( in_array( $sort_param, array( 'title_asc', 'title_desc' ), true ) ) {
 				$this->apply_title_sorting( $query, $sort_param );
 				return;
