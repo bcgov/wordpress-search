@@ -49,6 +49,10 @@ class MetadataTaxonomySearch {
         // Add auto-discovery search functionality.
         add_filter( 'posts_search', array( $this, 'custom_search_query' ), 10, 2 );
 
+        // Add relevance-based ordering when no explicit sort is set.
+        add_filter( 'posts_orderby', array( $this, 'apply_relevance_ordering' ), 10, 2 );
+        add_filter( 'posts_fields', array( $this, 'add_relevance_fields' ), 10, 2 );
+
         // Clear cache when metadata changes.
         add_action( 'added_post_meta', array( $this, 'clear_meta_cache' ) );
         add_action( 'updated_post_meta', array( $this, 'clear_meta_cache' ) );
@@ -225,6 +229,231 @@ class MetadataTaxonomySearch {
      */
     public function search_distinct() {
         return 'DISTINCT';
+    }
+
+    /**
+     * Add relevance score fields to the SELECT clause.
+     *
+     * @param string    $fields The SELECT clause.
+     * @param \WP_Query $wp_query The WordPress query object.
+     * @return string Modified SELECT clause.
+     */
+    public function add_relevance_fields( $fields, $wp_query ) {
+        // Only modify search queries and skip admin/ajax requests.
+        if ( ! $wp_query->is_search() || is_admin() || wp_doing_ajax() ) {
+            return $fields;
+        }
+
+        // Skip if search query is empty.
+        if ( empty( $wp_query->query_vars['s'] ) ) {
+            return $fields;
+        }
+
+        // Skip if explicit sorting is set (let SearchResultsSort handle it).
+        if ( $this->has_explicit_sorting( $wp_query ) ) {
+            return $fields;
+        }
+
+        // Ensure table joins are available for relevance calculation.
+        $this->add_search_hooks();
+
+        global $wpdb;
+
+        $search_terms = $wp_query->query_vars['s'];
+        $terms        = array_filter( array_map( 'trim', explode( ' ', $search_terms ) ) );
+
+        if ( empty( $terms ) ) {
+            return $fields;
+        }
+
+        // Build relevance score calculation.
+        $relevance_score = $this->build_relevance_score( $terms );
+
+        if ( ! empty( $relevance_score ) ) {
+            $fields .= ', ' . $relevance_score . ' AS relevance_score';
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Apply relevance-based ordering to search results.
+     *
+     * @param string    $orderby The ORDER BY clause.
+     * @param \WP_Query $wp_query The WordPress query object.
+     * @return string Modified ORDER BY clause.
+     */
+    public function apply_relevance_ordering( $orderby, $wp_query ) {
+        // Only modify search queries and skip admin/ajax requests.
+        if ( ! $wp_query->is_search() || is_admin() || wp_doing_ajax() ) {
+            return $orderby;
+        }
+
+        // Skip if search query is empty.
+        if ( empty( $wp_query->query_vars['s'] ) ) {
+            return $orderby;
+        }
+
+        // Skip if explicit sorting is set (let SearchResultsSort handle it).
+        if ( $this->has_explicit_sorting( $wp_query ) ) {
+            return $orderby;
+        }
+
+        // Only apply if we have a relevance_score field.
+        if ( strpos( $orderby, 'relevance_score' ) === false ) {
+            // Check if relevance_score was added to fields.
+            $fields = $wp_query->get( 'fields' );
+            if ( empty( $fields ) || 'ids' !== $fields ) {
+                // Apply relevance ordering.
+                $orderby = 'relevance_score DESC, ' . $orderby;
+            }
+        }
+
+        return $orderby;
+    }
+
+    /**
+     * Check if explicit sorting is set via URL parameters.
+     *
+     * @param \WP_Query $wp_query The WordPress query object.
+     * @return bool True if explicit sorting is set, false otherwise.
+     */
+    private function has_explicit_sorting( $wp_query ) {
+        // Check for sort or meta_sort parameters.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+        if ( isset( $_GET['sort'] ) || isset( $_GET['meta_sort'] ) || isset( $_GET['sort_meta'] ) ) {
+            return true;
+        }
+
+        // Check if orderby is explicitly set in query vars.
+        $orderby = $wp_query->get( 'orderby' );
+        if ( ! empty( $orderby ) && 'relevance' !== $orderby && 'date' !== $orderby && 'post_date' !== $orderby ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Build SQL expression for calculating relevance score.
+     *
+     * @param array $terms Array of search terms.
+     * @return string SQL expression for relevance score.
+     */
+    private function build_relevance_score( $terms ) {
+        global $wpdb;
+
+        if ( empty( $terms ) ) {
+            return '';
+        }
+
+        // Allow filtering of relevance weights.
+        $weights = apply_filters(
+            'wordpress_search_relevance_weights',
+            array(
+                'title_match'           => 10,
+                'title_exact'           => 5,
+                'content_match'         => 3,
+                'excerpt_match'         => 3,
+                'metadata_match'        => 1,
+                'taxonomy_match'        => 1,
+                'title_taxonomy_bonus'  => 15, // Bonus for keyword in BOTH title AND taxonomy.
+            )
+        );
+
+        $score_parts = array();
+
+        foreach ( $terms as $term ) {
+            $term      = $wpdb->esc_like( $term );
+            $like_term = '%' . $term . '%';
+
+            // Title matches get highest weight.
+            $score_parts[] = $wpdb->prepare(
+                "(CASE WHEN $wpdb->posts.post_title LIKE %s THEN %d ELSE 0 END)",
+                $like_term,
+                absint( $weights['title_match'] )
+            );
+
+            // Exact title match gets bonus.
+            $score_parts[] = $wpdb->prepare(
+                "(CASE WHEN $wpdb->posts.post_title = %s THEN %d ELSE 0 END)",
+                $term,
+                absint( $weights['title_exact'] )
+            );
+
+            // Content matches get medium weight.
+            $score_parts[] = $wpdb->prepare(
+                "(CASE WHEN $wpdb->posts.post_content LIKE %s THEN %d ELSE 0 END)",
+                $like_term,
+                absint( $weights['content_match'] )
+            );
+
+            // Excerpt matches get medium weight.
+            $score_parts[] = $wpdb->prepare(
+                "(CASE WHEN $wpdb->posts.post_excerpt LIKE %s THEN %d ELSE 0 END)",
+                $like_term,
+                absint( $weights['excerpt_match'] )
+            );
+
+            // Metadata matches get lower weight.
+            // Note: With DISTINCT, if multiple metadata entries match, this will still work correctly
+            // as the score is calculated per row and DISTINCT will collapse duplicates.
+            $all_meta_keys = $this->get_all_metadata_keys();
+            if ( ! empty( $all_meta_keys ) ) {
+                $meta_conditions = array();
+                foreach ( $all_meta_keys as $key_slug ) {
+                    $meta_conditions[] = $wpdb->prepare(
+                        '(espm.meta_key = %s AND espm.meta_value LIKE %s)',
+                        $key_slug,
+                        $like_term
+                    );
+                }
+                if ( ! empty( $meta_conditions ) ) {
+                    $score_parts[] = $wpdb->prepare(
+                        "(CASE WHEN (" . implode( ' OR ', $meta_conditions ) . ") THEN %d ELSE 0 END)",
+                        absint( $weights['metadata_match'] )
+                    );
+                }
+            }
+
+            // Taxonomy matches get lower weight.
+            // Note: With DISTINCT, if multiple taxonomy entries match, this will still work correctly
+            // as the score is calculated per row and DISTINCT will collapse duplicates.
+            $all_taxonomies = $this->get_all_searchable_taxonomies();
+            $tax_conditions = array();
+            if ( ! empty( $all_taxonomies ) ) {
+                foreach ( $all_taxonomies as $tax ) {
+                    $tax_conditions[] = $wpdb->prepare(
+                        '(estt.taxonomy = %s AND est.name LIKE %s)',
+                        $tax,
+                        $like_term
+                    );
+                }
+                if ( ! empty( $tax_conditions ) ) {
+                    $tax_conditions_sql = implode( ' OR ', $tax_conditions );
+                    $score_parts[]      = $wpdb->prepare(
+                        "(CASE WHEN ($tax_conditions_sql) THEN %d ELSE 0 END)",
+                        absint( $weights['taxonomy_match'] )
+                    );
+
+                    // Bonus for keyword appearing in BOTH title AND taxonomy.
+                    // This prioritizes documents with multiple keyword matches across fields.
+                    $score_parts[] = $wpdb->prepare(
+                        "(CASE WHEN ($wpdb->posts.post_title LIKE %s AND ($tax_conditions_sql)) THEN %d ELSE 0 END)",
+                        $like_term,
+                        absint( $weights['title_taxonomy_bonus'] )
+                    );
+                }
+            }
+        }
+
+        if ( empty( $score_parts ) ) {
+            return '';
+        }
+
+        // Sum all score parts to get total relevance score.
+        // Note: We'll need to use GROUP BY in the query for MAX() to work properly.
+        return '(' . implode( ' + ', $score_parts ) . ')';
     }
 
     /**
