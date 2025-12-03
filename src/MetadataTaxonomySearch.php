@@ -351,13 +351,13 @@ class MetadataTaxonomySearch {
         $weights = apply_filters(
             'wordpress_search_relevance_weights',
             array(
-                'title_match'           => 10,
-                'title_exact'           => 5,
-                'content_match'         => 3,
-                'excerpt_match'         => 3,
-                'metadata_match'        => 1,
-                'taxonomy_match'        => 1,
-                'title_taxonomy_bonus'  => 15, // Bonus for keyword in BOTH title AND taxonomy.
+                'title_match'          => 10,
+                'title_exact'          => 5,
+                'content_match'        => 3,
+                'excerpt_match'        => 3,
+                'metadata_match'       => 1,
+                'taxonomy_match'       => 1,
+                'title_taxonomy_bonus' => 15, // Bonus for keyword in BOTH title AND taxonomy.
             )
         );
 
@@ -410,7 +410,7 @@ class MetadataTaxonomySearch {
                 }
                 if ( ! empty( $meta_conditions ) ) {
                     $score_parts[] = $wpdb->prepare(
-                        "(CASE WHEN (" . implode( ' OR ', $meta_conditions ) . ") THEN %d ELSE 0 END)",
+                        '(CASE WHEN (' . implode( ' OR ', $meta_conditions ) . ') THEN %d ELSE 0 END)',
                         absint( $weights['metadata_match'] )
                     );
                 }
