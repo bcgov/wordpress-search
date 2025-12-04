@@ -257,11 +257,9 @@ class MetadataTaxonomySearch {
         // This ensures each post appears only once, even if it has multiple matching taxonomy terms.
         if ( empty( $groupby ) ) {
             $groupby = "{$wpdb->posts}.ID";
-        } else {
+        } elseif ( strpos( $groupby, "{$wpdb->posts}.ID" ) === false ) {
             // If GROUP BY already exists, ensure post ID is included.
-            if ( strpos( $groupby, "{$wpdb->posts}.ID" ) === false ) {
-                $groupby = "{$wpdb->posts}.ID, " . $groupby;
-            }
+            $groupby = "{$wpdb->posts}.ID, " . $groupby;
         }
 
         return $groupby;
@@ -278,15 +276,83 @@ class MetadataTaxonomySearch {
         $stop_words = apply_filters(
             'wordpress_search_stop_words',
             array(
-                'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-                'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'or', 'that', 'the',
-                'to', 'was', 'were', 'will', 'with', 'this', 'but', 'they',
-                'have', 'had', 'what', 'said', 'each', 'which', 'their', 'time',
-                'if', 'up', 'out', 'many', 'then', 'them', 'these', 'so', 'some',
-                'her', 'would', 'make', 'like', 'into', 'him', 'has', 'two', 'more',
-                'go', 'no', 'way', 'could', 'my', 'than', 'first', 'been', 'call',
-                'who', 'oil', 'sit', 'now', 'find', 'down', 'day', 'did', 'get',
-                'come', 'made', 'may', 'part',
+                'a',
+				'an',
+				'and',
+				'are',
+				'as',
+				'at',
+				'be',
+				'by',
+				'for',
+				'from',
+                'has',
+				'he',
+				'in',
+				'is',
+				'it',
+				'its',
+				'of',
+				'on',
+				'or',
+				'that',
+				'the',
+                'to',
+				'was',
+				'were',
+				'will',
+				'with',
+				'this',
+				'but',
+				'they',
+                'have',
+				'had',
+				'what',
+				'said',
+				'each',
+				'which',
+				'their',
+				'time',
+                'if',
+				'up',
+				'out',
+				'many',
+				'then',
+				'them',
+				'these',
+				'so',
+				'some',
+                'her',
+				'would',
+				'make',
+				'like',
+				'into',
+				'him',
+				'has',
+				'two',
+				'more',
+                'go',
+				'no',
+				'way',
+				'could',
+				'my',
+				'than',
+				'first',
+				'been',
+				'call',
+                'who',
+				'oil',
+				'sit',
+				'now',
+				'find',
+				'down',
+				'day',
+				'did',
+				'get',
+                'come',
+				'made',
+				'may',
+				'part',
             )
         );
 
@@ -294,7 +360,7 @@ class MetadataTaxonomySearch {
         $stop_words = array_map( 'strtolower', $stop_words );
 
         // Split search string into terms and filter.
-        $terms = array_filter( array_map( 'trim', explode( ' ', $search_string ) ) );
+        $terms          = array_filter( array_map( 'trim', explode( ' ', $search_string ) ) );
         $filtered_terms = array();
 
         foreach ( $terms as $term ) {
@@ -380,7 +446,7 @@ class MetadataTaxonomySearch {
         // Check what sort option is selected.
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
         $sort_param = isset( $_GET['sort'] ) ? sanitize_text_field( $_GET['sort'] ) : 'relevance';
-        
+
         // If user explicitly chose something other than relevance, respect that choice.
         // But if they chose relevance (or nothing, which defaults to relevance), use relevance ranking.
         if ( 'relevance' !== $sort_param ) {
@@ -388,18 +454,18 @@ class MetadataTaxonomySearch {
             if ( 'title_asc' === $sort_param || 'title_desc' === $sort_param ) {
                 if ( strpos( $orderby, 'relevance_score' ) === false ) {
                     $title_order = ( 'title_asc' === $sort_param ) ? 'ASC' : 'DESC';
-                    $orderby = 'relevance_score DESC, ' . $wpdb->posts . '.post_title ' . $title_order;
+                    $orderby     = 'relevance_score DESC, ' . $wpdb->posts . '.post_title ' . $title_order;
                 }
                 return $orderby;
             }
-            
+
             // User chose metadata sorting - let SearchResultsSort handle it completely.
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
             if ( isset( $_GET['meta_sort'] ) || isset( $_GET['sort_meta'] ) ) {
                 return $orderby;
             }
         }
-        
+
         // Default behavior: Use relevance ranking (this is what users expect from search).
         // Apply relevance ordering - relevance is the primary sort.
         if ( strpos( $orderby, 'relevance_score' ) === false ) {
@@ -454,15 +520,15 @@ class MetadataTaxonomySearch {
         $weights = apply_filters(
             'wordpress_search_relevance_weights',
             array(
-                'term_match_base'       => 10,  // Base points for each unique term that matches (anywhere).
-                'title_match'           => 15,  // Bonus if term appears in title.
-                'title_exact'           => 10,  // Extra bonus for exact title match.
-                'content_match'         => 5,   // Bonus if term appears in content.
-                'excerpt_match'         => 5,   // Bonus if term appears in excerpt.
-                'metadata_match'        => 3,   // Bonus if term appears in metadata.
-                'taxonomy_match'        => 3,   // Bonus if term appears in taxonomy.
-                'title_taxonomy_bonus'  => 10,  // Extra bonus for term in BOTH title AND taxonomy.
-                'all_terms_bonus'       => 50,  // Large bonus if document matches ALL search terms.
+                'term_match_base'      => 10,  // Base points for each unique term that matches (anywhere).
+                'title_match'          => 15,  // Bonus if term appears in title.
+                'title_exact'          => 10,  // Extra bonus for exact title match.
+                'content_match'        => 5,   // Bonus if term appears in content.
+                'excerpt_match'        => 5,   // Bonus if term appears in excerpt.
+                'metadata_match'       => 3,   // Bonus if term appears in metadata.
+                'taxonomy_match'       => 3,   // Bonus if term appears in taxonomy.
+                'title_taxonomy_bonus' => 10,  // Extra bonus for term in BOTH title AND taxonomy.
+                'all_terms_bonus'      => 50,  // Large bonus if document matches ALL search terms.
             )
         );
 
@@ -470,7 +536,7 @@ class MetadataTaxonomySearch {
         $score_parts = array();
 
         // Build conditions to check if each term matches anywhere in the document.
-        $term_match_conditions = array();
+        $term_match_conditions      = array();
         $all_terms_match_conditions = array();
 
         foreach ( $terms as $term ) {
@@ -514,8 +580,8 @@ class MetadataTaxonomySearch {
             }
 
             // If term matches anywhere, give base points (counts unique terms, not frequency).
-            $term_match_condition = '(' . implode( ' OR ', $term_anywhere ) . ')';
-            $term_match_conditions[] = $term_match_condition;
+            $term_match_condition         = '(' . implode( ' OR ', $term_anywhere ) . ')';
+            $term_match_conditions[]      = $term_match_condition;
             $all_terms_match_conditions[] = $term_match_condition;
 
             // Now add location-specific bonuses (these are bonuses, not the base score).
@@ -550,17 +616,20 @@ class MetadataTaxonomySearch {
             // Metadata match bonus.
             if ( ! empty( $all_meta_keys ) ) {
                 $meta_conditions = array();
+                $meta_values     = array();
                 foreach ( $all_meta_keys as $key_slug ) {
-                    $meta_conditions[] = $wpdb->prepare(
-                        '(espm.meta_key = %s AND espm.meta_value LIKE %s)',
-                        $key_slug,
-                        $like_term
-                    );
+                    $meta_conditions[] = '(espm.meta_key = %s AND espm.meta_value LIKE %s)';
+                    $meta_values[]     = $key_slug;
+                    $meta_values[]     = $like_term;
                 }
                 if ( ! empty( $meta_conditions ) ) {
-                    $score_parts[] = $wpdb->prepare(
-                        '(CASE WHEN (' . implode( ' OR ', $meta_conditions ) . ') THEN %d ELSE 0 END)',
-                        absint( $weights['metadata_match'] )
+                    $meta_values[] = absint( $weights['metadata_match'] );
+                    $score_parts[] = call_user_func_array(
+                        array( $wpdb, 'prepare' ),
+                        array_merge(
+                            array( '(CASE WHEN (' . implode( ' OR ', $meta_conditions ) . ') THEN %d ELSE 0 END)' ),
+                            $meta_values
+                        )
                     );
                 }
             }
@@ -568,25 +637,34 @@ class MetadataTaxonomySearch {
             // Taxonomy match bonus.
             if ( ! empty( $all_taxonomies ) ) {
                 $tax_conditions = array();
+                $tax_values     = array();
                 foreach ( $all_taxonomies as $tax ) {
-                    $tax_conditions[] = $wpdb->prepare(
-                        '(estt.taxonomy = %s AND est.name LIKE %s)',
-                        $tax,
-                        $like_term
-                    );
+                    $tax_conditions[] = '(estt.taxonomy = %s AND est.name LIKE %s)';
+                    $tax_values[]     = $tax;
+                    $tax_values[]     = $like_term;
                 }
                 if ( ! empty( $tax_conditions ) ) {
-                    $tax_conditions_sql = implode( ' OR ', $tax_conditions );
-                    $score_parts[]      = $wpdb->prepare(
-                        "(CASE WHEN ($tax_conditions_sql) THEN %d ELSE 0 END)",
-                        absint( $weights['taxonomy_match'] )
+                    // Taxonomy match bonus.
+                    $tax_values_copy   = $tax_values;
+                    $tax_values_copy[] = absint( $weights['taxonomy_match'] );
+                    $score_parts[]     = call_user_func_array(
+                        array( $wpdb, 'prepare' ),
+                        array_merge(
+                            array( '(CASE WHEN (' . implode( ' OR ', $tax_conditions ) . ') THEN %d ELSE 0 END)' ),
+                            $tax_values_copy
+                        )
                     );
 
                     // Bonus for term in BOTH title AND taxonomy.
-                    $score_parts[] = $wpdb->prepare(
-                        "(CASE WHEN ($wpdb->posts.post_title LIKE %s AND ($tax_conditions_sql)) THEN %d ELSE 0 END)",
-                        $like_term,
-                        absint( $weights['title_taxonomy_bonus'] )
+                    $tax_values_copy2 = $tax_values;
+                    array_unshift( $tax_values_copy2, $like_term );
+                    $tax_values_copy2[] = absint( $weights['title_taxonomy_bonus'] );
+                    $score_parts[]      = call_user_func_array(
+                        array( $wpdb, 'prepare' ),
+                        array_merge(
+                            array( "(CASE WHEN ($wpdb->posts.post_title LIKE %s AND (" . implode( ' OR ', $tax_conditions ) . ')) THEN %d ELSE 0 END)' ),
+                            $tax_values_copy2
+                        )
                     );
                 }
             }
@@ -595,10 +673,8 @@ class MetadataTaxonomySearch {
         // Base score: Points for each unique term that matches (regardless of how many times).
         // This ensures documents matching MORE terms rank higher than documents matching FEWER terms.
         foreach ( $term_match_conditions as $condition ) {
-            $score_parts[] = $wpdb->prepare(
-                "(CASE WHEN $condition THEN %d ELSE 0 END)",
-                absint( $weights['term_match_base'] )
-            );
+            // $condition contains already-prepared SQL fragments, so we build the CASE WHEN directly
+            $score_parts[] = "(CASE WHEN $condition THEN " . absint( $weights['term_match_base'] ) . ' ELSE 0 END)';
         }
 
         // Large bonus if document matches ALL search terms.
@@ -606,10 +682,8 @@ class MetadataTaxonomySearch {
         // than documents with just "chicken" repeated 50 times.
         if ( $total_terms > 1 ) {
             $all_terms_condition = '(' . implode( ' AND ', $all_terms_match_conditions ) . ')';
-            $score_parts[] = $wpdb->prepare(
-                "(CASE WHEN $all_terms_condition THEN %d ELSE 0 END)",
-                absint( $weights['all_terms_bonus'] )
-            );
+            // $all_terms_condition contains already-prepared SQL fragments, so we build the CASE WHEN directly
+            $score_parts[] = "(CASE WHEN $all_terms_condition THEN " . absint( $weights['all_terms_bonus'] ) . ' ELSE 0 END)';
         }
 
         if ( empty( $score_parts ) ) {
