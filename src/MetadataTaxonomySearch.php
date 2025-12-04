@@ -53,6 +53,7 @@ class MetadataTaxonomySearch {
         // Use priority 30 to run after SearchResultsSort (which uses priority 20).
         add_filter( 'posts_orderby', array( $this, 'apply_relevance_ordering' ), 30, 2 );
         add_filter( 'posts_fields', array( $this, 'add_relevance_fields' ), 10, 2 );
+        add_filter( 'posts_groupby', array( $this, 'add_groupby_for_relevance' ), 10, 2 );
 
         // Clear cache when metadata changes.
         add_action( 'added_post_meta', array( $this, 'clear_meta_cache' ) );
@@ -83,8 +84,8 @@ class MetadataTaxonomySearch {
         $search_terms        = $wp_query->query_vars['s'];
         $terms_relation_type = apply_filters( 'wordpress_search_terms_relation_type', 'OR' );
 
-        // Clean and prepare search terms.
-        $terms = array_filter( array_map( 'trim', explode( ' ', $search_terms ) ) );
+        // Clean and prepare search terms, filtering out stop words.
+        $terms = $this->filter_stop_words( $search_terms );
         if ( empty( $terms ) ) {
             return $search;
         }
@@ -233,6 +234,81 @@ class MetadataTaxonomySearch {
     }
 
     /**
+     * Add GROUP BY clause to prevent duplicate results when multiple taxonomy/metadata matches exist.
+     *
+     * @param string    $groupby The GROUP BY clause.
+     * @param \WP_Query $wp_query The WordPress query object.
+     * @return string Modified GROUP BY clause.
+     */
+    public function add_groupby_for_relevance( $groupby, $wp_query ) {
+        // Only modify search queries and skip admin/ajax requests.
+        if ( ! $wp_query->is_search() || is_admin() || wp_doing_ajax() ) {
+            return $groupby;
+        }
+
+        // Skip if search query is empty.
+        if ( empty( $wp_query->query_vars['s'] ) ) {
+            return $groupby;
+        }
+
+        global $wpdb;
+
+        // Group by post ID to prevent duplicates when multiple taxonomy/metadata rows match.
+        // This ensures each post appears only once, even if it has multiple matching taxonomy terms.
+        if ( empty( $groupby ) ) {
+            $groupby = "{$wpdb->posts}.ID";
+        } else {
+            // If GROUP BY already exists, ensure post ID is included.
+            if ( strpos( $groupby, "{$wpdb->posts}.ID" ) === false ) {
+                $groupby = "{$wpdb->posts}.ID, " . $groupby;
+            }
+        }
+
+        return $groupby;
+    }
+
+    /**
+     * Filter out common stop words from search terms.
+     *
+     * @param string $search_string The search string to filter.
+     * @return array Array of filtered search terms.
+     */
+    private function filter_stop_words( $search_string ) {
+        // Common English stop words that shouldn't affect search ranking.
+        $stop_words = apply_filters(
+            'wordpress_search_stop_words',
+            array(
+                'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
+                'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'or', 'that', 'the',
+                'to', 'was', 'were', 'will', 'with', 'this', 'but', 'they',
+                'have', 'had', 'what', 'said', 'each', 'which', 'their', 'time',
+                'if', 'up', 'out', 'many', 'then', 'them', 'these', 'so', 'some',
+                'her', 'would', 'make', 'like', 'into', 'him', 'has', 'two', 'more',
+                'go', 'no', 'way', 'could', 'my', 'than', 'first', 'been', 'call',
+                'who', 'oil', 'sit', 'now', 'find', 'down', 'day', 'did', 'get',
+                'come', 'made', 'may', 'part',
+            )
+        );
+
+        // Convert to lowercase for case-insensitive matching.
+        $stop_words = array_map( 'strtolower', $stop_words );
+
+        // Split search string into terms and filter.
+        $terms = array_filter( array_map( 'trim', explode( ' ', $search_string ) ) );
+        $filtered_terms = array();
+
+        foreach ( $terms as $term ) {
+            $term_lower = strtolower( trim( $term ) );
+            // Only include terms that are not stop words and have at least 2 characters.
+            if ( ! in_array( $term_lower, $stop_words, true ) && strlen( $term_lower ) >= 2 ) {
+                $filtered_terms[] = $term;
+            }
+        }
+
+        return $filtered_terms;
+    }
+
+    /**
      * Add relevance score fields to the SELECT clause.
      *
      * @param string    $fields The SELECT clause.
@@ -259,7 +335,7 @@ class MetadataTaxonomySearch {
         global $wpdb;
 
         $search_terms = $wp_query->query_vars['s'];
-        $terms        = array_filter( array_map( 'trim', explode( ' ', $search_terms ) ) );
+        $terms        = $this->filter_stop_words( $search_terms );
 
         if ( empty( $terms ) ) {
             return $fields;
@@ -541,8 +617,10 @@ class MetadataTaxonomySearch {
         }
 
         // Sum all score parts to get total relevance score.
-        // Note: We'll need to use GROUP BY in the query for MAX() to work properly.
-        return '(' . implode( ' + ', $score_parts ) . ')';
+        // Use MAX() to ensure consistent score per post when GROUP BY is used.
+        // This prevents duplicate results when multiple taxonomy/metadata rows match.
+        $score_expression = '(' . implode( ' + ', $score_parts ) . ')';
+        return "MAX($score_expression)";
     }
 
     /**
