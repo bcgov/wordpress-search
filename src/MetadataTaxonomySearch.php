@@ -48,17 +48,15 @@ class MetadataTaxonomySearch {
         // Add auto-discovery search functionality.
         add_filter( 'posts_search', array( $this, 'custom_search_query' ), 10, 2 );
 
-<<<<<<< Updated upstream
+        // Always add join hooks for search queries so table aliases are available.
+        add_filter( 'posts_join', array( $this, 'search_join_tables' ), 10, 2 );
+        add_filter( 'posts_distinct', array( $this, 'search_distinct' ) );
+
         // Add relevance-based ordering when no explicit sort is set.
         // Use priority 30 to run after SearchResultsSort (which uses priority 20).
         add_filter( 'posts_orderby', array( $this, 'apply_relevance_ordering' ), 30, 2 );
         add_filter( 'posts_fields', array( $this, 'add_relevance_fields' ), 10, 2 );
         add_filter( 'posts_groupby', array( $this, 'add_groupby_for_relevance' ), 10, 2 );
-=======
-        // Always add join hooks for search queries so table aliases are available.
-        add_filter( 'posts_join', array( $this, 'search_join_tables' ), 10, 2 );
-        add_filter( 'posts_distinct', array( $this, 'search_distinct' ) );
->>>>>>> Stashed changes
 
         // Clear cache when metadata changes.
         add_action( 'added_post_meta', array( $this, 'clear_meta_cache' ) );
@@ -94,7 +92,6 @@ class MetadataTaxonomySearch {
         if ( empty( $terms ) ) {
             return $search;
         }
-
 
         $search_clauses = array();
 
@@ -195,7 +192,8 @@ class MetadataTaxonomySearch {
     /**
      * Join necessary tables for metadata and taxonomy search.
      *
-     * @param string $join The JOIN clause of the query.
+     * @param string    $join The JOIN clause of the query.
+     * @param \WP_Query $wp_query The WordPress query object.
      * @return string Modified JOIN clause.
      */
     public function search_join_tables( $join, $wp_query ) {
@@ -397,9 +395,6 @@ class MetadataTaxonomySearch {
 
         // Always add relevance fields for search queries (even if sorting is set).
         // Relevance will be primary sort, explicit sorts will be secondary.
-
-        // Ensure table joins are available for relevance calculation.
-        $this->add_search_hooks();
 
         global $wpdb;
 
