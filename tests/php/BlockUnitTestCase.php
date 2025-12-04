@@ -6,7 +6,7 @@ namespace Bcgov\WordpressSearch\Test;
  * Test case class mainly for testing a custom WP block's render function
  * for blocks that use server-side rendering.
  */
-class BlockUnitTestCase extends \WP_UnitTestCase {
+abstract class BlockUnitTestCase extends \WP_UnitTestCase {
 
     /**
      * Block name, eg. "wordpress-search/search-post-filter".
