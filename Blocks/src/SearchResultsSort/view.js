@@ -13,13 +13,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Build new URL with sort parameters while preserving all other filters
 			let newUrl = currentUrl;
+			const url = new URL(newUrl, window.location.origin);
+			const searchParams = new URLSearchParams(url.search);
 			
-			if (sortValue.startsWith('title_')) {
-				// Handle title sorting
-				const direction = sortValue === 'title_asc' ? 'asc' : 'desc';
-				const url = new URL(newUrl, window.location.origin);
-				const searchParams = new URLSearchParams(url.search);
+			if (sortValue === 'relevance') {
+				// Handle relevance sorting (default behavior)
+				// Remove all sort parameters to use default relevance ranking
+				searchParams.delete('sort');
+				searchParams.delete('meta_sort');
+				searchParams.delete('meta_field');
 				
+				newUrl = url.pathname + '?' + searchParams.toString();
+			} else if (sortValue.startsWith('title_')) {
+				// Handle title sorting
 				// Remove existing sort parameters
 				searchParams.delete('sort');
 				searchParams.delete('meta_sort');
@@ -32,8 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			} else if (sortValue.startsWith('meta_')) {
 				// Handle metadata sorting
 				const direction = sortValue.replace('meta_', '');
-				const url = new URL(newUrl, window.location.origin);
-				const searchParams = new URLSearchParams(url.search);
 				
 				// Remove existing sort parameters
 				searchParams.delete('sort');
