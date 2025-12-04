@@ -8,7 +8,7 @@ Enables filtering search results by WordPress taxonomies (categories, tags, cust
 - Hierarchical taxonomy support
 
 ## Settings
-- **Taxonomies**: Select which taxonomies to allow filtering
+- **Taxonomies**: Select which taxonomies users can filter by.
 
 ## Usage
 1. Add the Search Taxonomy Filter block to your search results area.
