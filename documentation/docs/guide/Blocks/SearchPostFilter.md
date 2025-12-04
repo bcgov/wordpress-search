@@ -8,8 +8,8 @@ Enables filtering search results by post type and custom metadata.
 - Dynamic filter options
 
 ## Settings
-- **Post Types**: Select which post types to allow filtering
-- **Underline Color**: Choose color for filter underline
+- **Post Types**: Select which post types users can filter by.
+- **Underline Color**: Choose the color for the underline indicating the active filter.
 
 ## Usage
 1. Add the Search Post Filter block to your search results area.
