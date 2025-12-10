@@ -28,15 +28,23 @@ $meta_fields     = $meta_fields_api->get_meta_fields_data();
 // Sorting public search results is a read-only operation similar to taxonomy filtering.
 // The $_GET parameters are properly sanitized below.
 
-// Get current selection from URL.
-$current_sort = 'title_asc'; // Default to title alphabetical.
+// Get search query to determine default sort.
+$search_query = get_query_var( 's' );
+$has_keyword  = ! empty( $search_query ) && trim( $search_query ) !== '';
 
-// Check for title sorting.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+// Determine default sort based on whether there's a search keyword.
+// If there's a keyword, default to relevance. If no keyword, default to title alphabetical.
+$default_sort = $has_keyword ? 'relevance' : 'title_asc';
+
+// Get current selection from URL.
+$current_sort = $default_sort;
+
+// Check for sorting parameters.
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
 if ( isset( $_GET['sort'] ) ) {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting. 
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
     $sort_param = sanitize_text_field( $_GET['sort'] );
-    if ( in_array( $sort_param, [ 'title_asc', 'title_desc' ], true ) ) {
+    if ( in_array( $sort_param, [ 'relevance', 'title_asc', 'title_desc' ], true ) ) {
         $current_sort = $sort_param;
     }
 }
@@ -97,11 +105,17 @@ function format_field_label( $field_value ) {
     return $formatted;
 }
 
-// Build sort options - title options are always available.
-$sort_options = [
-    'title_asc'  => __( 'Title (Alphabetical)', 'wordpress-search' ),
-    'title_desc' => __( 'Title (Reverse Alphabetical)', 'wordpress-search' ),
-];
+// Build sort options - relevance only shows when there's a keyword.
+$sort_options = [];
+
+// Only include relevance option when there's a search keyword.
+if ( $has_keyword ) {
+    $sort_options['relevance'] = __( 'Relevance (Best Match)', 'wordpress-search' );
+}
+
+// Title sorting options are always available.
+$sort_options['title_asc']  = __( 'Title (Alphabetical)', 'wordpress-search' );
+$sort_options['title_desc'] = __( 'Title (Reverse Alphabetical)', 'wordpress-search' );
 
 // Add metadata options if configured.
 if ( $selected_meta_field ) {
