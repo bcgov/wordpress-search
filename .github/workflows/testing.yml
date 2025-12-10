@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.16.0"
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install Composer dependencies
         run: composer install
@@ -45,6 +45,6 @@ jobs:
 
       - name: Run PHP unit tests
         run: npm run test:unit:php
-          
+
       - name: Run JS unit tests
         run: npm run test:unit:js
