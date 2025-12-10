@@ -21,10 +21,10 @@ jobs:
         run: composer install
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install Blocks npm dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./Blocks
 
       - name: Install Playwright Browsers

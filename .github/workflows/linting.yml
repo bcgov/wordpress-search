@@ -20,8 +20,8 @@ jobs:
       - name: Install dependencies
         run: |
           composer install
-          npm ci
-          cd Blocks && npm ci && cd ..
+          npm install
+          cd Blocks && npm install && cd ..
 
       - name: Validate Composer configuration
         run: |
