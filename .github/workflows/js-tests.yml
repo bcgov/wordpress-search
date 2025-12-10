@@ -1,4 +1,4 @@
-name: Testing
+name: JS Tests
 
 permissions:
   contents: read
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  js-testing:
+  js-tests:
     uses: bcgov/des-git-workflows/.github/workflows/js-tests.yml@feature/DESCW-3254-wp-env
     with:
       node_version: 22
