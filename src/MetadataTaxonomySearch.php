@@ -428,8 +428,10 @@ class MetadataTaxonomySearch {
             return $orderby;
         }
 
-        // Skip if search query is empty.
-        if ( empty( $wp_query->query_vars['s'] ) ) {
+        // Skip if search query is empty - let title sorting handle it instead.
+        $search_query = $wp_query->query_vars['s'];
+        $has_keyword  = ! empty( $search_query ) && trim( $search_query ) !== '';
+        if ( ! $has_keyword ) {
             return $orderby;
         }
 
@@ -442,8 +444,14 @@ class MetadataTaxonomySearch {
         }
 
         // Check what sort option is selected.
+        // Default to relevance only if there's a search keyword.
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
         $sort_param = isset( $_GET['sort'] ) ? sanitize_text_field( $_GET['sort'] ) : 'relevance';
+
+        // If no sort parameter and no keyword, don't apply relevance - let title sorting handle it.
+        if ( null === $sort_param ) {
+            return $orderby;
+        }
 
         // If user explicitly chose something other than relevance, respect that choice.
         // But if they chose relevance (or nothing, which defaults to relevance), use relevance ranking.

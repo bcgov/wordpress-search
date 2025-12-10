@@ -53,6 +53,15 @@ class SearchResultsSort {
 			}
 		}
 
+		// If no sort parameter is set, check if we should default to title sorting.
+		// Default to title_asc when there's no search keyword.
+		$search_query = $query->get( 's' );
+		if ( empty( $search_query ) || trim( $search_query ) === '' ) {
+			// No keyword search - default to alphabetical title sorting.
+			$this->apply_title_sorting( $query, 'title_asc' );
+			return;
+		}
+
 		// Check for metadata sorting.
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
 		if ( isset( $_GET['meta_sort'] ) && isset( $_GET['meta_field'] ) ) {
