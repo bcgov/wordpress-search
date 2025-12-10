@@ -1,4 +1,4 @@
-import {defineConfig} from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import baseConfig from '@wordpress/scripts/config/playwright.config.js';
 
 const config = defineConfig({
