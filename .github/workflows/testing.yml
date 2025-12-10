@@ -9,6 +9,6 @@ on:
 
 jobs:
   js-testing:
-    uses: bcgov/des-git-workflows/.github/workflows/js-tests.yml@691401899380da4f8c329f5d213c7fe6de1e1944
+    uses: bcgov/des-git-workflows/.github/workflows/js-tests.yml@feature/DESCW-3254-wp-env
     with:
       node_version: 22
