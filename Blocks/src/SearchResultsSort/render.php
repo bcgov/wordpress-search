@@ -29,14 +29,15 @@ $meta_fields     = $meta_fields_api->get_meta_fields_data();
 // The $_GET parameters are properly sanitized below.
 
 // Get current selection from URL.
-$current_sort = 'title_asc'; // Default to title alphabetical.
+// Default to relevance - this is what users expect from search.
+$current_sort = 'relevance';
 
-// Check for title sorting.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+// Check for sorting parameters.
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
 if ( isset( $_GET['sort'] ) ) {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting. 
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
     $sort_param = sanitize_text_field( $_GET['sort'] );
-    if ( in_array( $sort_param, [ 'title_asc', 'title_desc' ], true ) ) {
+    if ( in_array( $sort_param, [ 'relevance', 'title_asc', 'title_desc' ], true ) ) {
         $current_sort = $sort_param;
     }
 }
@@ -97,8 +98,9 @@ function format_field_label( $field_value ) {
     return $formatted;
 }
 
-// Build sort options - title options are always available.
+// Build sort options - relevance is the default and most important option.
 $sort_options = [
+    'relevance'  => __( 'Relevance (Best Match)', 'wordpress-search' ),
     'title_asc'  => __( 'Title (Alphabetical)', 'wordpress-search' ),
     'title_desc' => __( 'Title (Reverse Alphabetical)', 'wordpress-search' ),
 ];

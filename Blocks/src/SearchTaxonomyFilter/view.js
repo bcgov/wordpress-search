@@ -1,76 +1,52 @@
-/* global sessionStorage, requestAnimationFrame, history */
-
 import './view.scss';
 
-// Toggle function for taxonomy filter.
-window.toggleTaxonomyFilter = function (header) {
-	const content = header.nextElementSibling;
-	const toggle = header.querySelector('.taxonomy-filter__toggle');
-
-	if (content.classList.contains('collapsed')) {
-		content.classList.remove('collapsed');
-		toggle.classList.remove('collapsed');
-	} else {
-		content.classList.add('collapsed');
-		toggle.classList.add('collapsed');
-	}
-};
-
-// Apply taxonomy filters function.
 window.applyTaxonomyFilters = function () {
-	// Get current URL
-	const currentUrl = new URL(window.location.href);
-	const params = currentUrl.searchParams;
+    const currentUrl = new URL(window.location.href);
+    const params = currentUrl.searchParams;
 
-	// Remove ALL existing taxonomy parameters first.
-	Array.from(params.keys())
-		.filter((key) => key.startsWith('taxonomy_'))
-		.forEach((key) => params.delete(key));
+    // Preserve sort parameters before clearing filters
+    const sortParam = params.get('sort');
+    const metaSortParam = params.get('meta_sort');
+    const metaFieldParam = params.get('meta_field');
 
-	// Now collect ALL currently checked checkboxes and add them as new parameters
-	document
-		.querySelectorAll('.taxonomy-filter__checkbox:checked')
-		.forEach((checkbox) => {
-			const name = checkbox.getAttribute('name');
-			const value = checkbox.value;
+    // Clear old taxonomy filters and pagination
+    Array.from(params.keys())
+        .filter(key => key.startsWith('taxonomy_') || key === 'paged')
+        .forEach(key => params.delete(key));
 
-			if (name && value) {
-				// Remove the [] suffix for the URL parameter name
-				const paramName = name.endsWith('[]')
-					? name.slice(0, -2)
-					: name;
+    // Restore sort parameters if they existed
+    if (sortParam) {
+        params.set('sort', sortParam);
+    }
+    if (metaSortParam) {
+        params.set('meta_sort', metaSortParam);
+    }
+    if (metaFieldParam) {
+        params.set('meta_field', metaFieldParam);
+    }
 
-				// If this taxonomy already has values, append to it (comma-separated)
-				if (params.has(paramName)) {
-					const existingValue = params.get(paramName);
-					params.set(paramName, existingValue + ',' + value);
-				} else {
-					// First value for this taxonomy
-					params.set(paramName, value);
-				}
-			}
-		});
+    // Remove /page/2/ from path (robust version)
+    currentUrl.pathname = currentUrl.pathname
+        .replace(/\/page\/\d+\/?/g, '/')
+        .replace(/\/+/g, '/')
+        .replace(/\/$/, '') || '/';  // Remove trailing slash except for root
 
-	// Navigate to the new URL with all the new filters and preserved parameters
-	window.location.href = currentUrl.toString();
+    // If original URL had trailing slash on non-page paths, restore it?
+    // Usually not needed — WordPress treats both as same
+
+    // Rebuild taxonomy params
+    document.querySelectorAll('.taxonomy-filter__checkbox:checked').forEach(checkbox => {
+        let name = checkbox.name.replace('[]', '');
+        let value = checkbox.value;
+
+        if (params.has(name)) {
+            params.set(name, params.get(name) + ',' + value);
+        } else {
+            params.set(name, value);
+        }
+    });
+
+    // Use replaceState for instant feel (optional, if you want no reload)
+    // Or just: window.location.href = currentUrl.toString();
+    window.location.href = currentUrl.toString();
 };
-
-document.addEventListener('DOMContentLoaded', function () {
-	// Initialize any collapsed taxonomy filters
-	const taxonomyFilters = document.querySelectorAll(
-		'.taxonomy-filter__content'
-	);
-	taxonomyFilters.forEach((filter) => {
-		// Check if there are any checked checkboxes in this filter
-		const checkedBoxes = filter.querySelectorAll(
-			'.taxonomy-filter__checkbox:checked'
-		);
-		if (checkedBoxes.length > 0) {
-			// If there are checked boxes, ensure the filter is expanded
-			const header = filter.previousElementSibling;
-			const toggle = header.querySelector('.taxonomy-filter__toggle');
-			filter.classList.remove('collapsed');
-			toggle.classList.remove('collapsed');
-		}
-	});
-});

@@ -1,0 +1,14 @@
+name: PHP Tests
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  php-tests:
+    uses: bcgov/des-git-workflows/.github/workflows/wordpress-php-tests.yml@feature/DESCW-3254-wp-env
+    with:
+      node_version: 22
