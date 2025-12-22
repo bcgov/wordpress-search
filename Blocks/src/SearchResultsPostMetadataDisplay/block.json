@@ -1,0 +1,34 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wordpress-search/search-results-post-metadata-display",
+	"version": "1.0.0",
+	"title": "Search Results Post Metadata Display",
+	"category": "search",
+	"icon": "admin-settings",
+	"description": "Dynamically displays all metadata for the current post in search results or query loops",
+	"keywords": ["metadata", "custom fields", "search", "query loop"],
+	"usesContext": ["postId", "postType", "queryId"],
+	"attributes": {
+		"fontSize": {
+			"type": "string",
+			"default": "medium"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": ["left", "center", "right", "wide", "full"],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"viewStyle": "file:./view.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

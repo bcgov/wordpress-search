@@ -1,0 +1,36 @@
+.wp-block-wordpress-search-search-results-post-metadata-display {
+
+	.post-metadata {
+		font-size: 0.875rem;
+		color: #4a5568;
+		line-height: 1.4;
+		margin: 0.5rem 0;
+	}
+
+	.metadata-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.metadata-item {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.4;
+		font-size: inherit;
+		color: inherit;
+	}
+
+	.metadata-label {
+		font-weight: 600;
+		color: inherit;
+		margin-bottom: 0.125rem;
+	}
+
+	.metadata-value {
+		color: inherit;
+		font-weight: 400;
+		word-break: break-word;
+		text-indent: 0;
+	}
+}

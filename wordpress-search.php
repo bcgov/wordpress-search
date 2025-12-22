@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/bcgov/wordpress-search
  * Author: govwordpress@gov.bc.ca
  * Author URI: https://citz-gdx.atlassian.net/browse/DSWP-114
- * Description: WordPress wordpress-search plugin is a plugin that adds custom functionality to your WordPress site.
+ * Description: WordPress wordpress-search plugin is a plugin that adds custom functionality to your WordPress site dev1.0.1.
  * Requires at least: 6.4.4
  * Tested up to: 6.5
  * Requires PHP: 7.4
@@ -23,63 +23,60 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Autoload classes using Composer.
-if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataFilter' ) ) {
-    $local_composer  = __DIR__ . '/vendor/autoload.php';
-    $server_composer = __DIR__ . '/../../../../vendor/autoload.php';
-    if ( file_exists( $local_composer ) || file_exists( $server_composer ) ) {
-        if ( file_exists( $server_composer ) ) {
-            require_once $server_composer;
-        }
-        if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataFilter' ) ) {
-            require_once $local_composer;
-        }
-    }
+$local_composer = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $local_composer ) ) {
+    require_once $local_composer;
 }
 
-/**
- * Render callback for SearchMetadataFilter block
- *
- * @param array    $attributes Block attributes.
- * @param string   $content    Block content.
- * @param WP_Block $block      Block instance.
- * @return string Rendered block output.
- */
-function wordpress_search_render_metadata_filter_block( $attributes, $content, $block ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-    // Start output buffering.
-    ob_start();
-
-    // Include the render template. The $attributes, $content, and $block variables
-    // are automatically available in the included file's scope.
-    include plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchMetadataFilter/render.php';
-
-    // Return the buffered output.
-    return ob_get_clean();
+// Check if the required classes exist.
+if ( ! class_exists( 'Bcgov\\WordpressSearch\\TaxonomyFilter' ) ) {
+    wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\TaxonomyFilter could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
 }
 
-/**
- * The function wordpress_search_register_blocks registers block types from metadata in block.json files
- * found in subdirectories of the Blocks/build folder.
- */
-function wordpress_search_register_blocks() {
-    // Define the path to the build directory.
-    $build_dir = plugin_dir_path( __FILE__ ) . 'Blocks/build/';
-
-    // Use glob to find all block.json files in the subdirectories of the build folder.
-    $block_files = glob( $build_dir . '*/block.json' );
-
-    // Loop through each block.json file.
-    foreach ( $block_files as $block_file ) {
-        // Register the block type from the metadata in block.json.
-        $block_type = register_block_type_from_metadata( $block_file );
-
-        // Override render callback for SearchMetadataFilter to inject dependencies.
-        if ( 'wordpress-search/search-metadata-filter' === $block_type->name ) {
-            $block_type->render_callback = 'wordpress_search_render_metadata_filter_block';
-        }
-    }
+if ( ! class_exists( 'Bcgov\\WordpressSearch\\MetadataTaxonomySearch' ) ) {
+    wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\MetadataTaxonomySearch could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
 }
-// Hook the function into the 'init' action.
-add_action( 'init', 'wordpress_search_register_blocks' );
+
+if ( ! class_exists( 'Bcgov\\WordpressSearch\\SearchHighlight' ) ) {
+    wp_die( 'WordPress Search Plugin Error: The required class Bcgov\\WordpressSearch\\SearchHighlight could not be found. Please ensure the plugin is properly installed and all dependencies are loaded.' );
+}
+	/**
+	 * Initialize the plugin
+	 *
+	 * This function is called when the plugin is loaded.
+	 * It registers blocks and initializes the filter functionality.
+	 */
+function wordpress_search_init() {
+	// Register blocks.
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/Search' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchPostFilter' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsPostMetadataDisplay' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchTaxonomyFilter' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchActiveFilters' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultCount' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchResultsSort' );
+	register_block_type( plugin_dir_path( __FILE__ ) . 'Blocks/build/SearchModal' );
+
+	// Initialize filter functionality.
+	$wordpress_search_taxonomy_filter = new \Bcgov\WordpressSearch\TaxonomyFilter();
+	$wordpress_search_taxonomy_filter->init();
+
+	// Initialize metadata and taxonomy search functionality.
+	$wordpress_search_metadata_taxonomy_search = new \Bcgov\WordpressSearch\MetadataTaxonomySearch();
+	$wordpress_search_metadata_taxonomy_search->init();
+	// Initialize enhanced search highlight functionality.
+	$wordpress_search_highlight = new \Bcgov\WordpressSearch\SearchHighlight();
+	$wordpress_search_highlight->init();
+
+	// Initialize meta fields API.
+	$wordpress_search_meta_fields_api = new \Bcgov\WordpressSearch\MetaFieldsAPI();
+	$wordpress_search_meta_fields_api->init();
+
+	// Initialize search results sorting.
+	$wordpress_search_results_sort = new \Bcgov\WordpressSearch\SearchResultsSort();
+	$wordpress_search_results_sort->init();
+}
+add_action( 'init', 'wordpress_search_init' );
 
 /**
  * Register custom block category for search blocks.
@@ -88,19 +85,15 @@ add_action( 'init', 'wordpress_search_register_blocks' );
  * @return array Modified array of block categories.
  */
 function wordpress_search_register_block_category( $categories ) {
-    return array_merge(
-        array(
-            array(
-                'slug'  => 'search',
-                'title' => __( 'Search', 'wordpress-search' ),
-                'icon'  => 'search',
-            ),
-        ),
-        $categories
-    );
+	return array_merge(
+		array(
+			array(
+				'slug'  => 'search',
+				'title' => __( 'Search', 'wordpress-search' ),
+				'icon'  => 'search',
+			),
+		),
+		$categories
+	);
 }
-add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );
-
-// Initialize the metadata filter functionality.
-$wordpress_search_metadata_filter = new \Bcgov\WordpressSearch\MetadataFilter();
-$wordpress_search_metadata_filter->init();
+	add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );

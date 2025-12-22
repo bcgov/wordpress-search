@@ -77,7 +77,7 @@ class SearchBlockRenderingTest extends WP_UnitTestCase {
         $this->assertStringContainsString( 'name="s"', $output, 'Should use WordPress standard search parameter' );
         $this->assertStringContainsString( 'placeholder="Search term"', $output, 'Should contain placeholder text' );
         $this->assertStringContainsString( 'class="dswp-search-bar__input"', $output, 'Should contain input class' );
-        $this->assertStringContainsString( 'required', $output, 'Should have required attribute' );
+        $this->assertStringNotContainsString( 'required', $output, 'Should not have required attribute to allow empty searches' );
 
         // Should contain submit button.
         $this->assertStringContainsString( 'type="submit"', $output, 'Should contain submit button' );

@@ -2,8 +2,6 @@ name: Linting
 
 on:
   pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -11,18 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Install Node.js 20
-        uses: actions/setup-node@v3
+      - name: Install Node.js 22
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22.16.0"
+          cache: 'npm'
 
       - name: Install dependencies
         run: |
           composer install
           npm install
-          npm install @wordpress/scripts --save-dev
+          cd Blocks && npm install && cd ..
 
       - name: Validate Composer configuration
         run: |

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "wordpress-search/search-taxonomy-filter",
+  "version": "1.0.0",
+  "title": "Taxonomy Filter",
+  "category": "search",
+  "icon": "filter",
+  "description": "A modular search taxonomy filter block that connects to the search page template",
+  "attributes": {
+    "selectedTaxonomies": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "viewStyle": "file:./view.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php",
+  "style": "file:./view.css",
+  "dependencies": [
+    "wp-api-fetch",
+    "wp-url",
+    "wp-components",
+    "wp-element",
+    "wp-i18n"
+  ]
+}
