@@ -7,22 +7,6 @@ permissions:
 
 jobs:
   js-css-linting:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint JavaScript
-        run: npm run lint:js
-
-      - name: Lint CSS
-        run: npm run lint:css
+    uses: bcgov/des-git-workflows/.github/workflows/js-css-lint.yml@1.1.0
+    with:
+      node_version: '22'
