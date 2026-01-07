@@ -97,8 +97,8 @@ class MetaFieldsAPI {
             foreach ( $all_results as $row ) {
                 $key = $row->post_type . ':' . $row->meta_key;
                 if ( ! isset( $seen_keys[ $key ] ) ) {
-                    $seen_keys[ $key ]      = true;
-                    $unique_results[] = $row;
+                    $seen_keys[ $key ] = true;
+                    $unique_results[]  = $row;
                 }
             }
 

@@ -455,7 +455,7 @@ class MetadataTaxonomySearch {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
         $sort_param = isset( $_GET['sort'] ) ? sanitize_text_field( $_GET['sort'] ) : 'relevance';
 
-        // Handle explicit sort choices
+        // Handle explicit sort choices.
         if ( 'title_asc' === $sort_param || 'title_desc' === $sort_param ) {
             // User chose title sorting - use relevance as primary, title as secondary.
             if ( strpos( $orderby, 'relevance_score' ) === false ) {
@@ -476,7 +476,7 @@ class MetadataTaxonomySearch {
         if ( strpos( $orderby, 'relevance_score' ) === false ) {
             $orderby = 'relevance_score DESC' . ( empty( trim( $orderby ) ) ? ', ' . $wpdb->posts . '.post_date DESC' : ', ' . trim( $orderby ) );
         } elseif ( strpos( $orderby, 'relevance_score DESC' ) !== 0 ) {
-            // Remove existing relevance_score and put it first
+            // Remove existing relevance_score and put it first.
             $orderby = preg_replace( '/\brelevance_score\s+DESC,?\s*/i', '', $orderby );
             $orderby = 'relevance_score DESC, ' . trim( $orderby );
         }
@@ -549,8 +549,8 @@ class MetadataTaxonomySearch {
             $search_phrase = trim( $search_phrase );
 
             // Put this FIRST in score_parts so it's evaluated first and gets highest priority.
-            $exact_bonus = absint( $weights['title_phrase_exact'] );
-            $search_lower = strtolower( $search_phrase );
+            $exact_bonus   = absint( $weights['title_phrase_exact'] );
+            $search_lower  = strtolower( $search_phrase );
             $search_length = strlen( $search_lower );
 
             // Simple and efficient: exact match gets bonus, starts-with also gets bonus (for titles with extensions).

@@ -37,10 +37,8 @@ class SearchResultsSort {
 		}
 
 		// Check for sorting parameter.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-		if ( isset( $_GET['sort'] ) ) {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-			$sort_param = sanitize_text_field( $_GET['sort'] );
+		$sort_param = filter_input( INPUT_GET, 'sort', FILTER_SANITIZE_STRING );
+		if ( ! empty( $sort_param ) ) {
 
 			// If relevance is selected, don't override - let MetadataTaxonomySearch handle it.
 			if ( 'relevance' === $sort_param ) {
@@ -56,12 +54,10 @@ class SearchResultsSort {
 
 		// Check for metadata sorting BEFORE defaulting to title sorting.
 		// This allows metadata sorting to work even when there's no search keyword.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-		if ( isset( $_GET['meta_sort'] ) && isset( $_GET['meta_field'] ) ) {
-                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-			$meta_sort_param = sanitize_text_field( $_GET['meta_sort'] );
-                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-			$meta_field = sanitize_text_field( $_GET['meta_field'] );
+		$meta_sort_param = filter_input( INPUT_GET, 'meta_sort', FILTER_SANITIZE_STRING );
+		$meta_field      = filter_input( INPUT_GET, 'meta_field', FILTER_SANITIZE_STRING );
+
+		if ( ! empty( $meta_sort_param ) && ! empty( $meta_field ) ) {
 
 			if ( in_array( $meta_sort_param, array( 'asc', 'desc' ), true ) && ! empty( $meta_field ) ) {
 				// Extract the field name if it's in posttype:fieldname format.
@@ -77,10 +73,13 @@ class SearchResultsSort {
 
 		// If no URL parameters are set, check for block configuration.
 		// This applies the default sort from block settings on initial page load.
-		$has_url_sort = isset( $_GET['sort'] ) || isset( $_GET['meta_sort'] ) || isset( $_GET['sort_meta'] );
+		$sort_param    = filter_input( INPUT_GET, 'sort', FILTER_SANITIZE_STRING );
+		$meta_sort_get = filter_input( INPUT_GET, 'meta_sort', FILTER_SANITIZE_STRING );
+		$sort_meta_get = filter_input( INPUT_GET, 'sort_meta', FILTER_SANITIZE_STRING );
+		$has_url_sort  = ! empty( $sort_param ) || ! empty( $meta_sort_get ) || ! empty( $sort_meta_get );
 		if ( ! $has_url_sort ) {
 			// Check if there's a search query - if so, let relevance sorting handle it.
-			$search_query = $query->get( 's' );
+			$search_query        = $query->get( 's' );
 			$has_search_keywords = ! empty( $search_query ) && trim( $search_query ) !== '';
 
 			if ( ! $has_search_keywords ) {
@@ -121,12 +120,10 @@ class SearchResultsSort {
 	 */
 	private function handle_legacy_sorting( $query ) {
 		// Check for old format: sort_meta_field=document:new_date&sort_meta=asc.
-                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-		if ( isset( $_GET['sort_meta'] ) && isset( $_GET['sort_meta_field'] ) ) {
-                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-			$sort_meta = sanitize_text_field( $_GET['sort_meta'] );
-                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-			$sort_meta_field = sanitize_text_field( $_GET['sort_meta_field'] );
+		$sort_meta       = filter_input( INPUT_GET, 'sort_meta', FILTER_SANITIZE_STRING );
+		$sort_meta_field = filter_input( INPUT_GET, 'sort_meta_field', FILTER_SANITIZE_STRING );
+
+		if ( ! empty( $sort_meta ) && ! empty( $sort_meta_field ) ) {
 
 			if ( in_array( $sort_meta, array( 'asc', 'desc' ), true ) && ! empty( $sort_meta_field ) ) {
 				// Extract the meta field name if it's in posttype:fieldname format.

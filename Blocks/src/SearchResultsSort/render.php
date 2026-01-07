@@ -47,7 +47,7 @@ $search_query = get_query_var( 's' );
 $has_keyword  = ! empty( $search_query ) && trim( $search_query ) !== '';
 
 // Determine default sort based on whether there's a search keyword.
-// If keyword exists → relevance, otherwise use block config or title_asc
+// If keyword exists → relevance, otherwise use block config or title_asc.
 $default_sort = 'title_asc';
 if ( $has_keyword ) {
     $default_sort = 'relevance';
@@ -59,21 +59,19 @@ if ( $has_keyword ) {
 $current_sort = $default_sort;
 
 // Check for standard sorting parameters.
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-if ( isset( $_GET['sort'] ) ) {
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-    $sort_param = sanitize_text_field( $_GET['sort'] );
+if ( ! empty( $sort_param ) ) {
     if ( in_array( $sort_param, [ 'relevance', 'title_asc', 'title_desc' ], true ) ) {
         $current_sort = $sort_param;
     }
 }
 
 // Check for metadata sorting.
-if ( $selected_meta_field && isset( $_GET['meta_sort'] ) ) {
+$meta_sort_param = filter_input( INPUT_GET, 'meta_sort', FILTER_SANITIZE_STRING );
+$sort_param      = filter_input( INPUT_GET, 'sort', FILTER_SANITIZE_STRING );
+
+if ( $selected_meta_field && ! empty( $meta_sort_param ) ) {
     // Respect meta_sort parameter unless there's a keyword and a sort parameter (meaning user chose relevance).
-    if ( ! $has_keyword || ! isset( $_GET['sort'] ) ) {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting, parameters sanitized below.
-        $meta_sort_param = sanitize_text_field( $_GET['meta_sort'] );
+    if ( ! $has_keyword || empty( $sort_param ) ) {
         if ( in_array( $meta_sort_param, [ 'asc', 'desc' ], true ) ) {
             $current_sort = 'meta_' . $meta_sort_param;
         }
