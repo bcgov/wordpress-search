@@ -406,7 +406,7 @@ class MetadataTaxonomySearch {
         }
 
         // Build relevance score calculation.
-        $relevance_score = $this->build_relevance_score( $terms );
+        $relevance_score = $this->build_relevance_score( $terms, $search_terms );
 
         if ( ! empty( $relevance_score ) ) {
             $fields .= ', ' . $relevance_score . ' AS relevance_score';
@@ -435,6 +435,13 @@ class MetadataTaxonomySearch {
             return $orderby;
         }
 
+        // Skip if meta sorting was already applied by SearchResultsSort AND there's no search query.
+        // If there's a search query, we still want relevance ordering to take precedence.
+        $has_search_keywords = ! empty( $search_query ) && trim( $search_query ) !== '';
+        if ( ! empty( $wp_query->get( 'wordpress_search_meta_sort_applied' ) ) && ! $has_search_keywords ) {
+            return $orderby;
+        }
+
         global $wpdb;
 
         // Check if relevance_score was added to fields.
@@ -444,44 +451,34 @@ class MetadataTaxonomySearch {
         }
 
         // Check what sort option is selected.
-        // Default to relevance only if there's a search keyword.
+        // Default to relevance when searching with keywords.
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
         $sort_param = isset( $_GET['sort'] ) ? sanitize_text_field( $_GET['sort'] ) : 'relevance';
 
-        // If no sort parameter and no keyword, don't apply relevance - let title sorting handle it.
-        if ( null === $sort_param ) {
+        // Handle explicit sort choices
+        if ( 'title_asc' === $sort_param || 'title_desc' === $sort_param ) {
+            // User chose title sorting - use relevance as primary, title as secondary.
+            if ( strpos( $orderby, 'relevance_score' ) === false ) {
+                $title_order = ( 'title_asc' === $sort_param ) ? 'ASC' : 'DESC';
+                $orderby     = 'relevance_score DESC, ' . $wpdb->posts . '.post_title ' . $title_order;
+            }
             return $orderby;
         }
 
-        // If user explicitly chose something other than relevance, respect that choice.
-        // But if they chose relevance (or nothing, which defaults to relevance), use relevance ranking.
-        if ( 'relevance' !== $sort_param ) {
-            // User chose title sorting - still use relevance as primary, title as secondary.
-            if ( 'title_asc' === $sort_param || 'title_desc' === $sort_param ) {
-                if ( strpos( $orderby, 'relevance_score' ) === false ) {
-                    $title_order = ( 'title_asc' === $sort_param ) ? 'ASC' : 'DESC';
-                    $orderby     = 'relevance_score DESC, ' . $wpdb->posts . '.post_title ' . $title_order;
-                }
-                return $orderby;
-            }
-
-            // User chose metadata sorting - let SearchResultsSort handle it completely.
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-            if ( isset( $_GET['meta_sort'] ) || isset( $_GET['sort_meta'] ) ) {
-                return $orderby;
-            }
+        // If user chose metadata sorting, let SearchResultsSort handle it completely.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
+        if ( isset( $_GET['meta_sort'] ) || isset( $_GET['sort_meta'] ) ) {
+            return $orderby;
         }
 
         // Default behavior: Use relevance ranking (this is what users expect from search).
-        // Apply relevance ordering - relevance is the primary sort.
+        // Ensure relevance_score is ALWAYS first in ORDER BY to prioritize exact matches.
         if ( strpos( $orderby, 'relevance_score' ) === false ) {
-            // Default: relevance first, then existing orderby (usually date).
-            $existing_orderby = trim( $orderby );
-            if ( empty( $existing_orderby ) ) {
-                $orderby = 'relevance_score DESC, ' . $wpdb->posts . '.post_date DESC';
-            } else {
-                $orderby = 'relevance_score DESC, ' . $orderby;
-            }
+            $orderby = 'relevance_score DESC' . ( empty( trim( $orderby ) ) ? ', ' . $wpdb->posts . '.post_date DESC' : ', ' . trim( $orderby ) );
+        } elseif ( strpos( $orderby, 'relevance_score DESC' ) !== 0 ) {
+            // Remove existing relevance_score and put it first
+            $orderby = preg_replace( '/\brelevance_score\s+DESC,?\s*/i', '', $orderby );
+            $orderby = 'relevance_score DESC, ' . trim( $orderby );
         }
 
         return $orderby;
@@ -512,10 +509,11 @@ class MetadataTaxonomySearch {
     /**
      * Build SQL expression for calculating relevance score.
      *
-     * @param array $terms Array of search terms.
+     * @param array  $terms Array of search terms.
+     * @param string $original_search The original search string before filtering.
      * @return string SQL expression for relevance score.
      */
-    private function build_relevance_score( $terms ) {
+    private function build_relevance_score( $terms, $original_search = '' ) {
         global $wpdb;
 
         if ( empty( $terms ) ) {
@@ -529,6 +527,7 @@ class MetadataTaxonomySearch {
                 'term_match_base'      => 10,  // Base points for each unique term that matches (anywhere).
                 'title_match'          => 15,  // Bonus if term appears in title.
                 'title_exact'          => 10,  // Extra bonus for exact title match.
+                'title_phrase_exact'   => 10000, // Very large bonus for exact phrase match in title (case-insensitive).
                 'content_match'        => 5,   // Bonus if term appears in content.
                 'excerpt_match'        => 5,   // Bonus if term appears in excerpt.
                 'metadata_match'       => 3,   // Bonus if term appears in metadata.
@@ -540,6 +539,31 @@ class MetadataTaxonomySearch {
 
         $total_terms = count( $terms );
         $score_parts = array();
+
+        // Add very large bonus for exact phrase match in title (highest priority, case-insensitive).
+        // This ensures exact matches always rank first, regardless of other scoring factors.
+        if ( ! empty( $original_search ) ) {
+            // Normalize the search string for comparison.
+            $search_phrase = trim( urldecode( $original_search ) );
+            $search_phrase = str_replace( '+', ' ', $search_phrase );
+            $search_phrase = trim( $search_phrase );
+
+            // Put this FIRST in score_parts so it's evaluated first and gets highest priority.
+            $exact_bonus = absint( $weights['title_phrase_exact'] );
+            $search_lower = strtolower( $search_phrase );
+            $search_length = strlen( $search_lower );
+
+            // Simple and efficient: exact match gets bonus, starts-with also gets bonus (for titles with extensions).
+            $exact_match_sql = "(CASE
+                WHEN LOWER(TRIM($wpdb->posts.post_title)) = " . $wpdb->prepare( '%s', $search_lower ) . " THEN $exact_bonus
+                WHEN LEFT(LOWER(TRIM($wpdb->posts.post_title)), $search_length) = " . $wpdb->prepare( '%s', $search_lower ) . " THEN $exact_bonus
+                ELSE 0
+            END)";
+
+            // Insert at the VERY BEGINNING of score_parts array so it's evaluated first.
+            // This ensures exact matches get the highest priority in scoring.
+            array_unshift( $score_parts, $exact_match_sql );
+        }
 
         // Build conditions to check if each term matches anywhere in the document.
         $term_match_conditions      = array();
