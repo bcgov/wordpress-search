@@ -9,7 +9,21 @@ namespace Bcgov\WordpressSearch\SearchResultsSort;
 
 // Get selected meta field and sort order from block attributes.
 $selected_meta_field = $attributes['selectedMetaField'] ?? '';
-$sort_order          = $attributes['sortOrder'] ?? 'newest';
+$sort_order          = $attributes['sortOrder'] ?? 'asc';
+
+// Store this block's configuration for the query handler to use.
+// This is stored in an option so it persists across requests.
+if ( ! empty( $selected_meta_field ) ) {
+	$config = array(
+		'selectedMetaField' => $selected_meta_field,
+		'sortOrder'         => $sort_order,
+	);
+	// Store in a WordPress option that persists across requests.
+	update_option( 'wordpress_search_sort_block_config', $config );
+
+	// Also allow filter to override.
+	$config = apply_filters( 'wordpress_search_sort_block_config', $config, $attributes );
+}
 
 // Only render on search pages or when there's a search query.
 if ( ! is_search() && empty( get_query_var( 's' ) ) ) {
@@ -32,29 +46,32 @@ $meta_fields     = $meta_fields_api->get_meta_fields_data();
 $search_query = get_query_var( 's' );
 $has_keyword  = ! empty( $search_query ) && trim( $search_query ) !== '';
 
-// Determine default sort based on whether there's a search keyword.
-// If there's a keyword, default to relevance. If no keyword, default to title alphabetical.
-$default_sort = $has_keyword ? 'relevance' : 'title_asc';
+// Get URL parameters first.
+$sort_param      = filter_input( INPUT_GET, 'sort', FILTER_SANITIZE_STRING );
+$meta_sort_param = filter_input( INPUT_GET, 'meta_sort', FILTER_SANITIZE_STRING );
 
-// Get current selection from URL.
+// Determine default sort based on whether there's a search keyword.
+// If keyword exists → relevance, otherwise use block config or title_asc.
+$default_sort = 'title_asc';
+if ( $has_keyword ) {
+    $default_sort = 'relevance';
+} elseif ( $selected_meta_field ) {
+    $default_sort = 'meta_' . $sort_order;
+}
+
+// Get current selection from URL - URL parameters take priority.
 $current_sort = $default_sort;
 
-// Check for sorting parameters.
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-if ( isset( $_GET['sort'] ) ) {
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-    $sort_param = sanitize_text_field( $_GET['sort'] );
+// Check for standard sorting parameters (title and relevance).
+if ( ! empty( $sort_param ) ) {
     if ( in_array( $sort_param, [ 'relevance', 'title_asc', 'title_desc' ], true ) ) {
         $current_sort = $sort_param;
     }
 }
 
-// Check for metadata sorting.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting.
-if ( $selected_meta_field && isset( $_GET['meta_sort'] ) ) {
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only operation for public search result sorting, parameters sanitized below.
-    $meta_sort_param = sanitize_text_field( $_GET['meta_sort'] );
-    if ( in_array( $meta_sort_param, [ 'newest', 'oldest', 'asc', 'desc' ], true ) ) {
+// Check for metadata sorting - only if no standard sort parameter is set.
+if ( $selected_meta_field && ! empty( $meta_sort_param ) && empty( $sort_param ) ) {
+    if ( in_array( $meta_sort_param, [ 'asc', 'desc' ], true ) ) {
         $current_sort = 'meta_' . $meta_sort_param;
     }
 }
@@ -121,13 +138,9 @@ $sort_options['title_desc'] = __( 'Title (Reverse Alphabetical)', 'wordpress-sea
 if ( $selected_meta_field ) {
     $field_label = format_field_label( $selected_meta_field );
 
-    if ( 'newest' === $sort_order || 'oldest' === $sort_order ) {
-        $sort_options['meta_newest'] = $field_label . ' (' . __( 'Newest', 'wordpress-search' ) . ')';
-        $sort_options['meta_oldest'] = $field_label . ' (' . __( 'Oldest', 'wordpress-search' ) . ')';
-    } else {
-        $sort_options['meta_asc']  = $field_label . ' (' . __( 'Asc', 'wordpress-search' ) . ')';
-        $sort_options['meta_desc'] = $field_label . ' (' . __( 'Desc', 'wordpress-search' ) . ')';
-    }
+    // Always add both asc and desc options for any metadata field.
+    $sort_options['meta_asc']  = $field_label . ' (' . __( 'Ascending', 'wordpress-search' ) . ')';
+    $sort_options['meta_desc'] = $field_label . ' (' . __( 'Descending', 'wordpress-search' ) . ')';
 }
 
 // Styles are provided via block.json view/style and compiled SCSS. Avoid inline CSS here.
@@ -171,4 +184,3 @@ if ( $selected_meta_field ) {
         </div>
     </div>
 </div>
-
