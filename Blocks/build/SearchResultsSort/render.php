@@ -46,6 +46,10 @@ $meta_fields     = $meta_fields_api->get_meta_fields_data();
 $search_query = get_query_var( 's' );
 $has_keyword  = ! empty( $search_query ) && trim( $search_query ) !== '';
 
+// Get URL parameters first.
+$sort_param      = filter_input( INPUT_GET, 'sort', FILTER_SANITIZE_STRING );
+$meta_sort_param = filter_input( INPUT_GET, 'meta_sort', FILTER_SANITIZE_STRING );
+
 // Determine default sort based on whether there's a search keyword.
 // If keyword exists → relevance, otherwise use block config or title_asc.
 $default_sort = 'title_asc';
@@ -58,23 +62,17 @@ if ( $has_keyword ) {
 // Get current selection from URL - URL parameters take priority.
 $current_sort = $default_sort;
 
-// Check for standard sorting parameters.
+// Check for standard sorting parameters (title and relevance).
 if ( ! empty( $sort_param ) ) {
     if ( in_array( $sort_param, [ 'relevance', 'title_asc', 'title_desc' ], true ) ) {
         $current_sort = $sort_param;
     }
 }
 
-// Check for metadata sorting.
-$meta_sort_param = filter_input( INPUT_GET, 'meta_sort', FILTER_SANITIZE_STRING );
-$sort_param      = filter_input( INPUT_GET, 'sort', FILTER_SANITIZE_STRING );
-
-if ( $selected_meta_field && ! empty( $meta_sort_param ) ) {
-    // Respect meta_sort parameter unless there's a keyword and a sort parameter (meaning user chose relevance).
-    if ( ! $has_keyword || empty( $sort_param ) ) {
-        if ( in_array( $meta_sort_param, [ 'asc', 'desc' ], true ) ) {
-            $current_sort = 'meta_' . $meta_sort_param;
-        }
+// Check for metadata sorting - only if no standard sort parameter is set.
+if ( $selected_meta_field && ! empty( $meta_sort_param ) && empty( $sort_param ) ) {
+    if ( in_array( $meta_sort_param, [ 'asc', 'desc' ], true ) ) {
+        $current_sort = 'meta_' . $meta_sort_param;
     }
 }
 
