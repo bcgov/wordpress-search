@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { PanelBody, RadioControl, SelectControl } from '@wordpress/components';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import apiFetch from '@wordpress/api-fetch';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,23 +20,57 @@ import './editor.scss';
  * @param {Function} props.setAttributes Function to set block attributes.
  * @return {JSX.Element} Element to render.
  */
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit({ attributes, setAttributes }) {
 	const { selectedMetaField, sortOrder } = attributes;
-	const [ availableMetaFields, setAvailableMetaFields ] = useState( [] );
-	const [ isLoading, setIsLoading ] = useState( true );
+	const [availableMetaFields, setAvailableMetaFields] = useState([]);
+	const [isLoading, setIsLoading] = useState(true);
+
+	// Function to check if a field should be excluded from sorting options
+	const shouldExcludeField = useCallback((field) => {
+		// Get the meta key (field name without post type prefix)
+		let metaKey = field.metaKey || field.value;
+		if (metaKey.includes(':')) {
+			const parts = metaKey.split(':');
+			metaKey = parts[parts.length - 1];
+		}
+
+		// Convert to lowercase for case-insensitive matching
+		const metaKeyLower = metaKey.toLowerCase();
+
+		// Fields to exclude
+		const excludedPatterns = [
+			'file_name',
+			'file_size',
+			'file_type',
+			'file_url',
+			'file_versions',
+			'file_id',
+			'document_file_name',
+			'document_file_size',
+			'document_file_type',
+			'document_file_url',
+			'document_file_versions',
+			'document_file_id',
+		];
+
+		// Check if the meta key matches any excluded pattern
+		return excludedPatterns.some((pattern) =>
+			metaKeyLower.includes(pattern.toLowerCase())
+		);
+	}, []);
 
 	// Function to format field labels for display
-	const formatFieldLabel = ( fieldValue ) => {
+	const formatFieldLabel = useCallback((fieldValue) => {
 		// Extract just the field name (remove post type prefix)
 		let fieldName = fieldValue;
-		if ( fieldValue.includes( ':' ) ) {
-			const parts = fieldValue.split( ':' );
-			fieldName = parts[ parts.length - 1 ];
+		if (fieldValue.includes(':')) {
+			const parts = fieldValue.split(':');
+			fieldName = parts[parts.length - 1];
 		}
 
 		// Convert underscores to spaces and title case
-		let formatted = fieldName.replace( /_/g, ' ' );
-		formatted = formatted.replace( /\b\w/g, ( l ) => l.toUpperCase() );
+		let formatted = fieldName.replace(/_/g, ' ');
+		formatted = formatted.replace(/\b\w/g, (l) => l.toUpperCase());
 
 		// Handle common field name patterns
 		const replacements = {
@@ -50,133 +84,135 @@ export default function Edit( { attributes, setAttributes } ) {
 			This2: 'This 2',
 		};
 
-		if ( replacements[ formatted ] ) {
-			return replacements[ formatted ];
+		if (replacements[formatted]) {
+			return replacements[formatted];
 		}
 
 		return formatted;
-	};
+	}, []);
 
 	// Fetch available metadata fields - this runs automatically
-	const fetchMetaFields = async () => {
-		setIsLoading( true );
+	const fetchMetaFields = useCallback(async () => {
+		setIsLoading(true);
 		try {
 			// Fetch data - server handles caching efficiently
-			const metaFieldsResponse = await apiFetch( {
+			const metaFieldsResponse = await apiFetch({
 				path: '/wordpress-search/v1/meta-fields',
 				method: 'GET',
-			} );
+			});
 
-			if ( metaFieldsResponse && metaFieldsResponse.length > 0 ) {
-				setAvailableMetaFields( metaFieldsResponse );
+			if (metaFieldsResponse && metaFieldsResponse.length > 0) {
+				// Filter out excluded fields
+				const filteredFields = metaFieldsResponse.filter(
+					(field) => !shouldExcludeField(field)
+				);
+				setAvailableMetaFields(filteredFields);
 			} else {
-				setAvailableMetaFields( [] );
+				setAvailableMetaFields([]);
 			}
-		} catch ( error ) {
-			setAvailableMetaFields( [] );
+		} catch (error) {
+			setAvailableMetaFields([]);
 		} finally {
-			setIsLoading( false );
+			setIsLoading(false);
 		}
-	};
+	}, [shouldExcludeField]);
 
 	// Auto-fetch when component mounts
-	useEffect( () => {
+	useEffect(() => {
 		fetchMetaFields();
-	}, [] );
+	}, [fetchMetaFields]);
 
 	// Refresh when selected fields change (for when user makes changes)
-	useEffect( () => {
+	useEffect(() => {
 		// Only fetch if we don't have any available fields yet
-		if ( availableMetaFields.length === 0 ) {
+		if (availableMetaFields.length === 0) {
 			fetchMetaFields();
 		}
-	}, [ selectedMetaField, availableMetaFields.length ] );
+	}, [selectedMetaField, availableMetaFields.length, fetchMetaFields]);
 
 	// Handle radio button change for metadata field
-	const handleMetaFieldChange = ( fieldValue ) => {
-		setAttributes( { selectedMetaField: fieldValue } );
+	const handleMetaFieldChange = (fieldValue) => {
+		setAttributes({ selectedMetaField: fieldValue });
 	};
 
 	// Handle sort order change
-	const handleSortOrderChange = ( newSortOrder ) => {
-		setAttributes( { sortOrder: newSortOrder } );
+	const handleSortOrderChange = (newSortOrder) => {
+		setAttributes({ sortOrder: newSortOrder });
 	};
 
 	// Create options for the sort order selector
 	const sortOrderOptions = [
-		{ label: __( 'Newest first', 'wordpress-search' ), value: 'newest' },
-		{ label: __( 'Oldest first', 'wordpress-search' ), value: 'oldest' },
-		{ label: __( 'Ascending (A-Z)', 'wordpress-search' ), value: 'asc' },
-		{ label: __( 'Descending (Z-A)', 'wordpress-search' ), value: 'desc' },
+		{ label: __('Ascending', 'wordpress-search'), value: 'asc' },
+		{ label: __('Descending', 'wordpress-search'), value: 'desc' },
 	];
 
 	// Create options for metadata fields with radio buttons
-	const metaFieldOptions = availableMetaFields.map( ( field ) => ( {
-		label: formatFieldLabel( field.value ),
+	const metaFieldOptions = availableMetaFields.map((field) => ({
+		label: formatFieldLabel(field.value),
 		value: field.value,
-	} ) );
+	}));
 
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={ __( 'Sort Configuration', 'wordpress-search' ) }
-					initialOpen={ true }
+					title={__('Sort Configuration', 'wordpress-search')}
+					initialOpen={true}
 				>
 					<p className="components-base-control__help">
-						{ __(
+						{__(
 							'Configure the default sorting behavior for this block.',
 							'wordpress-search'
-						) }
+						)}
 					</p>
 
-					{ ! isLoading && availableMetaFields.length === 0 && (
+					{!isLoading && availableMetaFields.length === 0 && (
 						<div
-							style={ {
+							style={{
 								padding: '12px',
 								background: '#f0f0f0',
 								borderRadius: '4px',
 								marginBottom: '8px',
 								textAlign: 'center',
-							} }
+							}}
 						>
 							<p
-								style={ {
+								style={{
 									margin: 0,
 									fontSize: '14px',
 									color: '#666',
-								} }
+								}}
 							>
-								{ __(
+								{__(
 									'No metadata fields found. Check that your posts have custom metadata.',
 									'wordpress-search'
-								) }
+								)}
 							</p>
 						</div>
-					) }
+					)}
 
-					{ isLoading && (
+					{isLoading && (
 						<p>
-							{ __(
+							{__(
 								'Loading available fields…',
 								'wordpress-search'
-							) }
+							)}
 						</p>
-					) }
+					)}
 
-					{ ! isLoading && availableMetaFields.length > 0 && (
+					{!isLoading && availableMetaFields.length > 0 && (
 						<>
 							<RadioControl
-								label={ __(
+								label={__(
 									'Default Metadata Field for Sorting',
 									'wordpress-search'
-								) }
-								help={ __(
+								)}
+								help={__(
 									'Select which metadata field should be used as the default sort option. Leave empty to show only title sorting options.',
 									'wordpress-search'
-								) }
-								selected={ selectedMetaField }
-								options={ [
+								)}
+								selected={selectedMetaField}
+								options={[
 									{
 										label: __(
 											'None (Title sorting only)',
@@ -185,31 +221,31 @@ export default function Edit( { attributes, setAttributes } ) {
 										value: '',
 									},
 									...metaFieldOptions,
-								] }
-								onChange={ handleMetaFieldChange }
+								]}
+								onChange={handleMetaFieldChange}
 							/>
 
-							{ selectedMetaField && (
+							{selectedMetaField && (
 								<SelectControl
-									label={ __(
+									label={__(
 										'Default Sort Order for Metadata',
 										'wordpress-search'
-									) }
-									help={ __(
+									)}
+									help={__(
 										'Choose the default sort order when the metadata field is selected.',
 										'wordpress-search'
-									) }
-									value={ sortOrder }
-									options={ sortOrderOptions }
-									onChange={ handleSortOrderChange }
+									)}
+									value={sortOrder}
+									options={sortOrderOptions}
+									onChange={handleSortOrderChange}
 								/>
-							) }
+							)}
 						</>
-					) }
+					)}
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...useBlockProps() }>
+			<div {...useBlockProps()}>
 				<div className="wp-block-wordpress-search-searchresultssort">
 					<div className="search-results-sort">
 						<div className="search-results-sort__controls">
@@ -223,7 +259,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									xmlns="http://www.w3.org/2000/svg"
 									aria-hidden="true"
 								>
-									{ /* Arrow line */ }
+									{/* Arrow line */}
 									<line
 										x1="6"
 										y1="4"
@@ -232,7 +268,7 @@ export default function Edit( { attributes, setAttributes } ) {
 										stroke="currentColor"
 										strokeWidth="2"
 									/>
-									{ /* Arrow head */ }
+									{/* Arrow head */}
 									<polyline
 										points="3,17 6,20 9,17"
 										fill="none"
@@ -240,7 +276,7 @@ export default function Edit( { attributes, setAttributes } ) {
 										strokeWidth="2"
 									/>
 
-									{ /* Horizontal bars (representing sort levels) */ }
+									{/* Horizontal bars (representing sort levels) */}
 									<line
 										x1="12"
 										y1="6"
@@ -271,44 +307,51 @@ export default function Edit( { attributes, setAttributes } ) {
 									className="search-results-sort__label"
 									htmlFor="preview-sort-select"
 								>
-									{ __( 'Sort by:', 'wordpress-search' ) }
+									{__('Sort by:', 'wordpress-search')}
 								</label>
 
 								<select
 									id="preview-sort-select"
 									className="search-results-sort__sort-select"
 									disabled
-									style={ { opacity: 0.7 } }
+									style={{ opacity: 0.7 }}
 								>
 									<option>
-										{ __(
+										{__(
 											'Title (Alphabetical)',
 											'wordpress-search'
-										) }
+										)}
 									</option>
 									<option>
-										{ __(
+										{__(
 											'Title (Reverse Alphabetical)',
 											'wordpress-search'
-										) }
+										)}
 									</option>
-									{ selectedMetaField && (
+									{selectedMetaField && (
 										<>
-											<option>
-												{ `${ formatFieldLabel(
+											<option
+												selected={sortOrder === 'asc'}
+											>
+												{`${formatFieldLabel(
 													selectedMetaField
-												) } (${
-													sortOrder === 'newest'
-														? 'Newest'
-														: sortOrder === 'oldest'
-														? 'Oldest'
-														: sortOrder === 'asc'
-														? 'Asc'
-														: 'Desc'
-												})` }
+												)} (${__(
+													'Ascending',
+													'wordpress-search'
+												)})`}
+											</option>
+											<option
+												selected={sortOrder === 'desc'}
+											>
+												{`${formatFieldLabel(
+													selectedMetaField
+												)} (${__(
+													'Descending',
+													'wordpress-search'
+												)})`}
 											</option>
 										</>
-									) }
+									)}
 								</select>
 							</div>
 						</div>
