@@ -45,16 +45,16 @@
 	"devDependencies": {
 		"@bcgov/wordpress-eslint": "git+https://github.com/bcgov/wordpress-eslint.git#semver:1.x",
 		"@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",
-		"@wordpress/scripts": "^30.3.0",
+		"@wordpress/scripts": "^31.2.0",
 		"ajv": "^8.17.1",
 		"ajv-keywords": "^5.1.0",
 		"prettier": "^2.2.0"
 	},
 	"dependencies": {
-		"@wordpress/base-styles": "^6.10.0",
-		"@wordpress/block-editor": "^14.5.0",
-		"@wordpress/blocks": "^13.10.0",
-		"@wordpress/components": "^28.10.0",
+		"@wordpress/base-styles": "^6.13.0",
+		"@wordpress/block-editor": "^15.0.0",
+		"@wordpress/blocks": "^15.10.0",
+		"@wordpress/components": "^31.0.0",
 		"@wordpress/core-data": "",
 		"@wordpress/data": "",
 		"@wordpress/element": "",
