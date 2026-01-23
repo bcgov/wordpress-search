@@ -151,15 +151,15 @@ $hidden_params = array_filter(
                         <div class="taxonomy-filter__content">
                             <div class="taxonomy-filter__options" id="taxonomy-filter-<?php echo esc_attr( $actual_taxonomy ); ?>-options">
                                 <?php
-                                $terms_count = count( $terms );
+                                $terms_count   = count( $terms );
                                 $show_view_all = $terms_count > 5;
                                 $display_limit = 5;
-                                $term_index = 0;
+                                $term_index    = 0;
                                 foreach ( $terms as $taxonomy_term ) :
-                                    $term_index++;
-                                    $checkbox_id = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy . '_' . $taxonomy_term->term_id;
-                                    $is_checked  = in_array( strval( $taxonomy_term->term_id ), $current_terms, true );
-                                    $is_hidden = $show_view_all && $term_index > $display_limit;
+                                    ++$term_index;
+                                    $checkbox_id  = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy . '_' . $taxonomy_term->term_id;
+                                    $is_checked   = in_array( strval( $taxonomy_term->term_id ), $current_terms, true );
+                                    $is_hidden    = $show_view_all && $term_index > $display_limit;
                                     $option_class = 'components-checkbox-control taxonomy-filter__option';
                                     if ( $is_hidden ) {
                                         $option_class .= ' taxonomy-filter__option--hidden';
@@ -186,7 +186,8 @@ $hidden_params = array_filter(
                                             class="taxonomy-filter__view-all-link"
                                             aria-expanded="false"
                                             aria-controls="taxonomy-filter-<?php echo esc_attr( $actual_taxonomy ); ?>-options"
-                                            aria-label="<?php echo esc_attr( sprintf( __( 'View all %d %s options', 'wordpress-search' ), $terms_count, $taxonomy_label ) ); ?>"
+                                            <?php /* translators: 1: number of terms, 2: taxonomy label */ ?>
+                                            aria-label="<?php echo esc_attr( sprintf( __( 'View all %1$d %2$s options', 'wordpress-search' ), $terms_count, $taxonomy_label ) ); ?>"
                                             data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>"
                                         >
                                             <span class="taxonomy-filter__view-all-text"><?php echo esc_html__( 'View all', 'wordpress-search' ); ?></span>
