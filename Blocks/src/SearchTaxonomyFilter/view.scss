@@ -77,6 +77,13 @@
 		margin-bottom: 1rem;
 	}
 
+	.taxonomy-filter__option--hidden,
+	.components-checkbox-control.taxonomy-filter__option--hidden {
+		display: none !important;
+		opacity: 0;
+		transition: opacity 0.2s ease, display 0.2s ease;
+	}
+
 	.taxonomy-filter__option {
 		display: flex;
 		align-items: center;
@@ -150,6 +157,48 @@
 			cursor: pointer;
 			accent-color: #2271b1;
 		}
+	}
+
+	.taxonomy-filter__view-all-wrapper {
+		margin-top: 0.5rem;
+		padding-top: 0.5rem;
+		border-top: 1px solid #f0f0f0;
+	}
+
+	.taxonomy-filter__view-all-link {
+		background: none;
+		border: none;
+		color: #2271b1;
+		cursor: pointer;
+		font-size: 0.875rem;
+		padding: 0.5rem 0;
+		text-align: left;
+		text-decoration: underline;
+		transition: color 0.2s ease;
+
+		&:hover {
+			color: #135e96;
+		}
+
+		&:focus {
+			outline: 2px solid #007cba;
+			outline-offset: 2px;
+			border-radius: 2px;
+		}
+
+		&:focus-visible {
+			outline: 2px solid #007cba;
+			outline-offset: 2px;
+			border-radius: 2px;
+		}
+	}
+
+	.taxonomy-filter__view-all-text {
+		text-decoration: underline;
+	}
+
+	.taxonomy-filter__view-all-count {
+		margin-left: 0.25rem;
 	}
 }
 

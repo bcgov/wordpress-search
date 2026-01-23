@@ -149,13 +149,23 @@ $hidden_params = array_filter(
                         </div>
                         
                         <div class="taxonomy-filter__content">
-                            <div class="taxonomy-filter__options">
-                                <?php foreach ( $terms as $taxonomy_term ) : ?>
-                                    <?php
-                                    $checkbox_id = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy . '_' . $taxonomy_term->term_id;
-                                    $is_checked  = in_array( strval( $taxonomy_term->term_id ), $current_terms, true );
+                            <div class="taxonomy-filter__options" id="taxonomy-filter-<?php echo esc_attr( $actual_taxonomy ); ?>-options">
+                                <?php
+                                $terms_count   = count( $terms );
+                                $show_view_all = $terms_count > 5;
+                                $display_limit = 5;
+                                $term_index    = 0;
+                                foreach ( $terms as $taxonomy_term ) :
+                                    ++$term_index;
+                                    $checkbox_id  = TaxonomyFilter::TAXONOMY_PREFIX . $actual_taxonomy . '_' . $taxonomy_term->term_id;
+                                    $is_checked   = in_array( strval( $taxonomy_term->term_id ), $current_terms, true );
+                                    $is_hidden    = $show_view_all && $term_index > $display_limit;
+                                    $option_class = 'components-checkbox-control taxonomy-filter__option';
+                                    if ( $is_hidden ) {
+                                        $option_class .= ' taxonomy-filter__option--hidden';
+                                    }
                                     ?>
-                                    <div class="components-checkbox-control taxonomy-filter__option">
+                                    <div class="<?php echo esc_attr( $option_class ); ?>">
                                         <input 
                                             type="checkbox" 
                                             id="<?php echo esc_attr( $checkbox_id ); ?>"
@@ -169,6 +179,22 @@ $hidden_params = array_filter(
                                         </label>
                                     </div>
                                 <?php endforeach; ?>
+                                <?php if ( $show_view_all ) : ?>
+                                    <div class="taxonomy-filter__view-all-wrapper">
+                                        <button 
+                                            type="button"
+                                            class="taxonomy-filter__view-all-link"
+                                            aria-expanded="false"
+                                            aria-controls="taxonomy-filter-<?php echo esc_attr( $actual_taxonomy ); ?>-options"
+                                            <?php /* translators: 1: number of terms, 2: taxonomy label */ ?>
+                                            aria-label="<?php echo esc_attr( sprintf( __( 'View all %1$d %2$s options', 'wordpress-search' ), $terms_count, $taxonomy_label ) ); ?>"
+                                            data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>"
+                                        >
+                                            <span class="taxonomy-filter__view-all-text"><?php echo esc_html__( 'View all', 'wordpress-search' ); ?></span>
+                                            <span class="taxonomy-filter__view-all-count" aria-hidden="true">(<?php echo esc_html( $terms_count - $display_limit ); ?>)</span>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </fieldset>
