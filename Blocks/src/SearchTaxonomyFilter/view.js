@@ -1,5 +1,19 @@
 import './view.scss';
 
+/**
+ * Toggle the taxonomy filter accordion
+ * @param {HTMLElement} headerElement - The header element that was clicked
+ */
+window.toggleTaxonomyFilter = function (headerElement) {
+    const section = headerElement.closest('.taxonomy-filter-section');
+    const content = section.querySelector('.taxonomy-filter__content');
+    const toggle = section.querySelector('.taxonomy-filter__toggle');
+
+    // Toggle the collapsed state
+    content.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed');
+};
+
 window.applyTaxonomyFilters = function () {
 	const currentUrl = new URL( window.location.href );
 	const params = currentUrl.searchParams;
