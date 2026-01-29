@@ -99,24 +99,20 @@ function wordpress_search_register_block_category( $categories ) {
 	add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );
 
 /**
- * Register block templates for WordPress Search plugin.
+ * Register block template for WordPress Search plugin.
  *
- * When the search plugin is enabled, this registers a plugin template that uses
- * the 'search-with-search-plugin' template part. The theme's template registration
- * is handled by the theme itself, which checks if the plugin is active before registering.
- *
- * Note: Templates registered via code are not editable in the Site Editor UI.
- * All search templates must be kept with the theme for filter configurations.
+ * Registers the plugin's search-content template so it appears in the Site Editor.
+ * Note: Templates registered via code are not editable in the Site Editor UI,
+ * but they are visible and can be selected. The actual template parts are editable
+ * via theme.json registration.
  *
  * @since 1.0.0
  */
 function wordpress_search_register_templates() {
-	// Only register if WordPress 6.7+ template API is available
 	if ( ! function_exists( 'register_block_template' ) ) {
 		return;
 	}
 
-	// Register the plugin's search-content template
 	register_block_template(
 		'wordpress-search//search-content',
 		array(
@@ -129,29 +125,33 @@ function wordpress_search_register_templates() {
 add_action( 'init', 'wordpress_search_register_templates', 20 );
 
 /**
- * Filter template part block data to use plugin's search template when plugin is active.
+ * Filter template part block to use plugin's enhanced search template.
  *
- * This filter dynamically swaps template-part blocks with slug 'search' to use
- * 'search-with-search-plugin' when rendering on search pages. This ensures the
- * frontend uses the correct template part when the plugin is active.
+ * When the WordPress Search plugin is active, this filter automatically swaps
+ * template-part blocks with slug 'search' to use 'search-with-search-plugin'
+ * when rendering on search pages. This ensures the frontend uses the enhanced
+ * search template with plugin functionality.
  *
- * The filter works by modifying the block attributes before rendering, which is
- * more reliable than template registration alone since templates registered via
- * code may not work properly on the frontend.
+ * Performance: Early returns prevent unnecessary processing of non-template-part blocks.
  *
  * @param array $parsed_block The parsed block data.
  * @return array The modified block data.
  * @since 1.0.0
  */
 function wordpress_search_filter_template_part_block( $parsed_block ) {
-	// Only process template-part blocks
+	// Early return for non-template-part blocks
 	if ( ! isset( $parsed_block['blockName'] ) || 'core/template-part' !== $parsed_block['blockName'] ) {
 		return $parsed_block;
 	}
 
-	// Only modify blocks with slug 'search' on search pages
+	// Early return if not on a search page
+	if ( ! is_search() ) {
+		return $parsed_block;
+	}
+
+	// Swap 'search' template part to 'search-with-search-plugin' on search pages
 	$slug = $parsed_block['attrs']['slug'] ?? '';
-	if ( 'search' === $slug && is_search() ) {
+	if ( 'search' === $slug ) {
 		$parsed_block['attrs']['slug'] = 'search-with-search-plugin';
 	}
 
