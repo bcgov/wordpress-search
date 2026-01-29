@@ -101,39 +101,30 @@ function wordpress_search_register_block_category( $categories ) {
 /**
  * Register block templates for WordPress Search plugin.
  *
- * When the search plugin is enabled, this unregisters the theme's
- * 'design-system-wordpress-theme//search-content' template and registers
- * a plugin template that uses the 'search-with-search-plugin' template part.
+ * When the search plugin is enabled, this registers a plugin template that uses
+ * the 'search-with-search-plugin' template part. The theme's template registration
+ * is handled by the theme itself, which checks if the plugin is active before registering.
  *
  * Note: Templates registered via code are not editable in the Site Editor UI.
  * All search templates must be kept with the theme for filter configurations.
+ *
+ * @since 1.0.0
  */
 function wordpress_search_register_templates() {
-	// Note: The theme's design_system_register_templates() function checks if the plugin
-	// is active and only registers the theme template if the plugin is NOT active.
-	// Therefore, the theme template typically won't be registered when the plugin is active.
-	// We attempt to unregister it here as a safety measure in case it was registered elsewhere.
-	// We suppress any notices/warnings since WordPress may trigger them if the template doesn't exist.
-	if ( function_exists( 'unregister_block_template' ) ) {
-		$template_name = 'design-system-wordpress-theme//search-content';
-		
-		// Attempt to unregister, suppressing any notices if template doesn't exist
-		// This is safe because unregister_block_template() handles non-existent templates gracefully
-		// in WordPress 6.7+, but may still trigger notices in some cases
-		@unregister_block_template( $template_name );
+	// Only register if WordPress 6.7+ template API is available
+	if ( ! function_exists( 'register_block_template' ) ) {
+		return;
 	}
 
 	// Register the plugin's search-content template
-	if ( function_exists( 'register_block_template' ) ) {
-		register_block_template(
-			'wordpress-search//search-content',
-			array(
-				'title'       => __( 'WordPress Search Plugin Template', 'wordpress-search' ),
-				'description' => __( 'Search results', 'wordpress-search' ),
-				'content'     => '<!-- wp:template-part {"slug":"search-with-search-plugin","area":"uncategorized"} /-->',
-			)
-		);
-	}
+	register_block_template(
+		'wordpress-search//search-content',
+		array(
+			'title'       => __( 'WordPress Search Plugin Template', 'wordpress-search' ),
+			'description' => __( 'Search results template with enhanced search functionality', 'wordpress-search' ),
+			'content'     => '<!-- wp:template-part {"slug":"search-with-search-plugin","area":"uncategorized"} /-->',
+		)
+	);
 }
 add_action( 'init', 'wordpress_search_register_templates', 20 );
 
@@ -144,21 +135,26 @@ add_action( 'init', 'wordpress_search_register_templates', 20 );
  * 'search-with-search-plugin' when rendering on search pages. This ensures the
  * frontend uses the correct template part when the plugin is active.
  *
+ * The filter works by modifying the block attributes before rendering, which is
+ * more reliable than template registration alone since templates registered via
+ * code may not work properly on the frontend.
+ *
  * @param array $parsed_block The parsed block data.
  * @return array The modified block data.
+ * @since 1.0.0
  */
 function wordpress_search_filter_template_part_block( $parsed_block ) {
-	// Only modify template-part blocks
-	if ( isset( $parsed_block['blockName'] ) && 'core/template-part' === $parsed_block['blockName'] ) {
-		// Check if this template-part block has slug 'search' and we're on a search page
-		if ( isset( $parsed_block['attrs']['slug'] ) && 'search' === $parsed_block['attrs']['slug'] ) {
-			// Check if we're on a search results page
-			if ( is_search() ) {
-				// Replace with the plugin's template part
-				$parsed_block['attrs']['slug'] = 'search-with-search-plugin';
-			}
-		}
+	// Only process template-part blocks
+	if ( ! isset( $parsed_block['blockName'] ) || 'core/template-part' !== $parsed_block['blockName'] ) {
+		return $parsed_block;
 	}
+
+	// Only modify blocks with slug 'search' on search pages
+	$slug = $parsed_block['attrs']['slug'] ?? '';
+	if ( 'search' === $slug && is_search() ) {
+		$parsed_block['attrs']['slug'] = 'search-with-search-plugin';
+	}
+
 	return $parsed_block;
 }
 add_filter( 'render_block_data', 'wordpress_search_filter_template_part_block', 10, 1 );
