@@ -97,3 +97,27 @@ function wordpress_search_register_block_category( $categories ) {
 	);
 }
 	add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );
+
+
+// Wordpress-search plugin
+// When the search plugin is enabled, the 'design-system-wordpress-theme//search-content' is unregister,
+// and updates it with plugin which calls the search-with-search-plugin template part.
+// for now this will have to be part of the theme, so it can be overwritten for the filter configurations.
+add_action( 'init', 'wordpress_search_register_templates', 99 );
+/**
+ * Registers the WordPress Search plugin template.
+ *
+ * Unregisters the default design system search template and registers
+ * the plugin's search template that uses the search-with-search-plugin template part.
+ */
+function wordpress_search_register_templates() {
+	unregister_block_template( 'design-system-wordpress-theme//search-content' );
+	register_block_template(
+		'wordpress-search//search-content',
+		[
+			'title'       => __( 'WordPress Search Plugin Template', 'wordpress-search' ),
+			'description' => __( 'Search results', 'wordpress-search' ),
+			'content'     => '<!-- wp:template-part {"slug":"search-with-search-plugin","area":"uncategorized"} /-->',
+		],
+	);
+}
