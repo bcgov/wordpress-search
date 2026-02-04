@@ -94,20 +94,20 @@ export async function deleteTestPosts(
 	requestUtils: RequestUtils,
 	testData: TestPostsData | undefined
 ): Promise<void> {
-
-	// Note: We need to fetch first to get IDs (REST API requires IDs to delete)
+	// In a test environment, we can delete all posts and categories
+	// This is simpler and ensures a clean slate
 	
-	// Fetch all posts and categories with higher limit for test environments
+	// Fetch all posts and categories
 	const [ categoriesResult, postsResult ] = await Promise.allSettled( [
 		requestUtils.rest( {
 			method: 'GET',
 			path: '/wp/v2/categories',
-			params: { per_page: 100 }, 
+			params: { per_page: 100 },
 		} ) as Promise<Array<{ id: number; name: string }>>,
 		requestUtils.rest( {
 			method: 'GET',
 			path: '/wp/v2/posts',
-			params: { status: 'any', per_page: 100 }, 
+			params: { status: 'any', per_page: 100 },
 		} ) as Promise<Array<{ id: number; title: { rendered: string } }>>,
 	] );
 

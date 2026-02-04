@@ -15,31 +15,34 @@ test.describe('Search Taxonomy Filter Block', () => {
 		await deleteTestPosts(requestUtils, testData);
 	});
 
-	test.beforeEach(async ({ admin, editor }) => {
-		// Edit the first test post instead of creating a new one
-		await admin.visitAdminPage( 'post.php', `post=${testData.postIds[0]}&action=edit` );
-		// Wait for the editor to be ready
-		await editor.canvas.locator('body').waitFor();
+	test.beforeEach(async ({ admin }) => {
+		// Create a new post before each test
+		await admin.createNewPost();
 	});
 
-	test('should display newly created categories taxonomy in the block editor', async ({ editor }) => {
+	test('should display newly created categories taxonomy in the block editor', async ({ editor, page }) => {
 		await editor.insertBlock({ name: BLOCK_NAME });
 
 		// Wait for the block to be inserted and visible
 		const block = editor.canvas.locator(`[data-type="${BLOCK_NAME}"]`);
 		await expect(block).toBeVisible();
 
-		// Wait for taxonomies to load in the inspector panel
+		// Select the block to ensure inspector panel shows block settings
+		await block.click();
+
 		// The block shows taxonomies in the inspector panel with format "PostType: Taxonomy"
-		// Look for a checkbox containing "Category" in its label
-		const categoryCheckbox = editor.page.getByRole('checkbox', { name: /Category/i });
+		// The label is "Post: Categories" (plural, with post type prefix)
+		const categoryCheckbox = page.getByRole('checkbox', { name: /Post: Categories/i });
 		
 		// Wait for the category checkbox to appear (with timeout for API fetch)
-		await expect(categoryCheckbox).toBeVisible({ timeout: 10000 });
+		// This will wait for the taxonomy API call to complete and render the checkboxes
+		await expect(categoryCheckbox).toBeVisible({ timeout: 15000 });
 		await expect(categoryCheckbox).toBeEnabled();
 
-		// Select the Category taxonomy
-		await categoryCheckbox.click();
+		// Select the Category taxonomy (if not already selected)
+		if ( !(await categoryCheckbox.isChecked()) ) {
+			await categoryCheckbox.click();
+		}
 
 		// Verify the checkbox is checked (this also waits for the state to update)
 		await expect(categoryCheckbox).toBeChecked();
