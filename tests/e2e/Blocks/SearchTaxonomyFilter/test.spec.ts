@@ -15,41 +15,34 @@ test.describe('Search Taxonomy Filter Block', () => {
 		await deleteTestPosts(requestUtils, testData);
 	});
 
-	test.beforeEach(async ({ admin }) => {
-		// Create a new post before each test
-		await admin.createNewPost();
+	test.beforeEach(async ({ admin, editor }) => {
+		// Edit the first test post instead of creating a new one
+		await admin.visitAdminPage( 'post.php', `post=${testData.postIds[0]}&action=edit` );
+		// Wait for the editor to be ready
+		await editor.canvas.locator('body').waitFor();
 	});
 
 	test('should display newly created categories taxonomy in the block editor', async ({ editor }) => {
 		await editor.insertBlock({ name: BLOCK_NAME });
 
-		// Wait for the block to load and taxonomies to be fetched
-		await editor.page.waitForTimeout( 2000 );
+		// Wait for the block to be inserted and visible
+		const block = editor.canvas.locator(`[data-type="${BLOCK_NAME}"]`);
+		await expect(block).toBeVisible();
 
+		// Wait for taxonomies to load in the inspector panel
 		// The block shows taxonomies in the inspector panel with format "PostType: Taxonomy"
 		// Look for a checkbox containing "Category" in its label
-		// Note: The block may filter out default category, but let's check what's available
 		const categoryCheckbox = editor.page.getByRole('checkbox', { name: /Category/i });
 		
-		// If category checkbox exists, verify it's visible and can be selected
-		if ( await categoryCheckbox.isVisible().catch(() => false) ) {
-			await expect(categoryCheckbox).toBeVisible();
-			await expect(categoryCheckbox).toBeEnabled();
+		// Wait for the category checkbox to appear (with timeout for API fetch)
+		await expect(categoryCheckbox).toBeVisible({ timeout: 10000 });
+		await expect(categoryCheckbox).toBeEnabled();
 
-			// Select the Category taxonomy
-			await categoryCheckbox.click();
+		// Select the Category taxonomy
+		await categoryCheckbox.click();
 
-			// Wait for the block to update
-			await editor.page.waitForTimeout( 1000 );
-
-			// Verify the checkbox is checked
-			await expect(categoryCheckbox).toBeChecked();
-		} else {
-			// If category is filtered out, at least verify the block loaded and shows some taxonomies
-			const taxonomyCheckboxes = editor.page.locator('input[type="checkbox"]');
-			const count = await taxonomyCheckboxes.count();
-			expect(count).toBeGreaterThan(0);
-		}
+		// Verify the checkbox is checked (this also waits for the state to update)
+		await expect(categoryCheckbox).toBeChecked();
 
 		// Note: Individual category terms (Test Category A, B, C) are not shown in the editor,
 		// they only appear on the frontend. The editor just shows which taxonomies are selected.
