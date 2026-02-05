@@ -15,39 +15,87 @@ test.describe('Search Taxonomy Filter Block', () => {
 		await deleteTestPosts(requestUtils, testData);
 	});
 
-	test.beforeEach(async ({ admin }) => {
-		// Create a new post before each test
-		await admin.createNewPost();
-	});
+	let postId: number | null;
 
-	test('should display newly created categories taxonomy in the block editor', async ({ editor, page }) => {
+	test.beforeEach(async ({ admin, editor, page }) => {
+		// Create a new post with the Search Taxonomy Filter block for each test
+		await admin.createNewPost();
 		await editor.insertBlock({ name: BLOCK_NAME });
 
-		// Wait for the block to be inserted and visible
 		const block = editor.canvas.locator(`[data-type="${BLOCK_NAME}"]`);
 		await expect(block).toBeVisible();
 
-		// Select the block to ensure inspector panel shows block settings
+		// Select the block and verify editor functionality
 		await block.click();
-
-		// The block shows taxonomies in the inspector panel with format "PostType: Taxonomy"
-		// The label is "Post: Categories" (plural, with post type prefix)
 		const categoryCheckbox = page.getByRole('checkbox', { name: /Post: Categories/i });
-		
-		// Wait for the category checkbox to appear (with timeout for API fetch)
-		// This will wait for the taxonomy API call to complete and render the checkboxes
 		await expect(categoryCheckbox).toBeVisible({ timeout: 15000 });
 		await expect(categoryCheckbox).toBeEnabled();
 
-		// Select the Category taxonomy (if not already selected)
-		if ( !(await categoryCheckbox.isChecked()) ) {
+		// Select the Category taxonomy if not already selected
+		if (!(await categoryCheckbox.isChecked())) {
 			await categoryCheckbox.click();
 		}
 
-		// Verify the checkbox is checked (this also waits for the state to update)
+		// Verify the checkbox is checked
 		await expect(categoryCheckbox).toBeChecked();
 
-		// Note: Individual category terms (Test Category A, B, C) are not shown in the editor,
-		// they only appear on the frontend. The editor just shows which taxonomies are selected.
+		// A race condition can occur because the block attributes are not set until
+		// the taxonomy API fetch finishes. Double clicking ensures state is set
+		// before saving.
+		await categoryCheckbox.click();
+		await categoryCheckbox.click();
+
+		// Publish the post
+		postId = await editor.publishPost();
+		expect(postId).not.toBeNull();
+	});
+
+	test('complete taxonomy filter workflow - full user journey', async ({ page }) => {
+		expect(postId).not.toBeNull();
+
+		// Navigate to frontend
+		await page.goto(`/?p=${postId}`);
+
+		// Wait for checkboxes to be visible
+		const categoryCheckboxes = page.locator('input[name="taxonomy_category[]"]');
+		await expect(categoryCheckboxes.first()).toBeVisible({ timeout: 10000 });
+
+		// Get the first checkbox and its term ID
+		const firstCheckbox = categoryCheckboxes.first();
+		const termId = await firstCheckbox.getAttribute('value');
+		expect(termId).toBeTruthy();
+
+		// Check the checkbox and apply filter
+		await firstCheckbox.check();
+		const applyButton = page.locator('.taxonomy-filter-apply__button');
+		await Promise.all([
+			page.waitForURL((url) => {
+				const urlObj = new URL(url);
+				return urlObj.searchParams.has('taxonomy_category');
+			}),
+			applyButton.click(),
+		]);
+
+		// Verify URL contains the filter parameter
+		const url = page.url();
+		const urlParams = new URL(url).searchParams;
+		expect(urlParams.get('taxonomy_category')).toBe(termId);
+
+		// Uncheck the checkbox and apply filter
+		const checkedCheckbox = page.locator(`input[name="taxonomy_category[]"][value="${termId}"]`);
+		await expect(checkedCheckbox).toBeChecked();
+		await checkedCheckbox.uncheck();
+
+		await Promise.all([
+			page.waitForURL((url) => {
+				const urlObj = new URL(url);
+				return !urlObj.searchParams.has('taxonomy_category');
+			}),
+			applyButton.click(),
+		]);
+
+		// Verify filter parameter is removed from URL
+		const finalUrlParams = new URL(page.url()).searchParams;
+		expect(finalUrlParams.has('taxonomy_category')).toBeFalsy();
 	});
 });
