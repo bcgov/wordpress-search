@@ -30,6 +30,7 @@ test.describe('Search Results Sort Block', () => {
 		}
 
 		// Try to add the SearchResultsSort block to the search template using REST API
+		// Note: This may return 404 if template doesn't exist, which is handled gracefully
 		try {
 			// Get the search template
 			const template = await requestUtils.rest({
