@@ -63,8 +63,8 @@ test.describe('Search Modal Block', () => {
 		
 		// Try to access inspector controls, but don't fail if they're not accessible
 		try {
-			// Open settings panel
-			const settingsButton = page.getByRole('button', { name: /Settings/i });
+			// Open settings panel - use first() to get the open button, not the close button
+			const settingsButton = page.getByRole('button', { name: /Settings/i }).first();
 			if (await settingsButton.isVisible({ timeout: 2000 })) {
 				await settingsButton.click();
 
