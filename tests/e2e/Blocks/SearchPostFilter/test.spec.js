@@ -41,8 +41,7 @@ test.describe('Block', () => {
     test('should set underline color', async ({ editor }) => {
         await editor.insertBlock({ name: BLOCK_NAME });
         await editor.page.getByRole('button', { name: 'Active Filter Underline Color' }).click();
-        // Use first() to get the exact "Contrast" option (not "Contrast / Two" or "Contrast / Three")
-        await editor.page.getByRole('option', { name: 'Contrast' }).first().click();
+        await editor.page.getByRole('option', { name: 'Contrast' }).click();
         expect(await editor.getEditedPostContent()).toMatchSnapshot();
     });
 });
