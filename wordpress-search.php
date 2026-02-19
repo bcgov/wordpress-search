@@ -100,22 +100,16 @@ function wordpress_search_register_block_category( $categories ) {
 
 
 // Wordpress-search plugin
-// When the search plugin is enabled, the 'design-system-wordpress-theme//search-content' is unregister,
-// and updates it with plugin which calls the search-with-search-plugin template part.
-// Also handles header template registration if Design System Plugin is active.
-// for now this will have to be part of the theme, so it can be overwritten for the filter configurations.
-add_action( 'init', 'wordpress_search_register_templates', 100 );
+// Search: unregister theme's search template and register plugin's (block template - this works).
+// Header: template parts cannot be unregistered; use render_block_data filter to swap slug.
+add_action( 'init', 'wordpress_search_register_templates', 99 );
 /**
- * Registers the WordPress Search plugin templates.
+ * Registers the WordPress Search plugin search template.
  *
  * Unregisters the default design system search template and registers
- * the plugin's search template. Also handles header template if Design System Plugin is active.
+ * the plugin's search template that uses the search-with-search-plugin template part.
  */
 function wordpress_search_register_templates() {
-	$block_registry = \WP_Block_Type_Registry::get_instance();
-	$design_system_plugin_active = $block_registry->is_registered( 'design-system-wordpress-plugin/navigation' );
-	
-	// Handle search template
 	unregister_block_template( 'design-system-wordpress-theme//search-content' );
 	register_block_template(
 		'wordpress-search//search-content',
@@ -125,38 +119,23 @@ function wordpress_search_register_templates() {
 			'content'     => '<!-- wp:template-part {"slug":"search-with-search-plugin","area":"uncategorized"} /-->',
 		],
 	);
-	
-	// Handle header template
-	$template_registry = \WP_Block_Templates_Registry::get_instance();
-	$all_templates = $template_registry->get_all_registered();
-	
-	if ( $design_system_plugin_active ) {
-		// Design System Plugin already registered header - unregister it and register combined one
-		$template_id = 'design-system-wordpress-plugin//header-content';
-		if ( isset( $all_templates[ $template_id ] ) ) {
-			unregister_block_template( $template_id );
-		}
-		register_block_template(
-			'wordpress-search//header-content',
-			[
-				'title'       => __( 'Header with Both Plugins', 'wordpress-search' ),
-				'description' => __( 'Header content', 'wordpress-search' ),
-				'content'     => '<!-- wp:template-part {"slug":"header-with-both-plugins","area":"header"} /-->',
-			],
-		);
-	} else {
-		// Only Search Plugin active - unregister theme's header and register header with search only
-		$template_id = 'design-system-wordpress-theme//header-content';
-		if ( isset( $all_templates[ $template_id ] ) ) {
-			unregister_block_template( $template_id );
-		}
-		register_block_template(
-			'wordpress-search//header-content',
-			[
-				'title'       => __( 'Header with Search Plugin', 'wordpress-search' ),
-				'description' => __( 'Header content', 'wordpress-search' ),
-				'content'     => '<!-- wp:template-part {"slug":"header-with-search-plugin","area":"header"} /-->',
-			],
-		);
-	}
 }
+
+/**
+ * Swaps the header template part to header-with-search-plugin when the plugin is active.
+ * (Header is a template part, not a block template, so unregister/register cannot be used.)
+ */
+add_filter(
+    'render_block_data',
+    function ( $parsed_block ) {
+		if ( 'core/template-part' !== ( $parsed_block['blockName'] ?? '' ) ) {
+			return $parsed_block;
+		}
+		if ( 'header' === ( $parsed_block['attrs']['slug'] ?? '' ) && 'header' === ( $parsed_block['attrs']['area'] ?? '' ) ) {
+			$parsed_block['attrs']['slug'] = 'header-with-search-plugin';
+		}
+		return $parsed_block;
+	},
+    10,
+    1
+);
