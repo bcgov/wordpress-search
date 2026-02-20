@@ -100,12 +100,11 @@ function wordpress_search_register_block_category( $categories ) {
 
 
 // Wordpress-search plugin
-// When the search plugin is enabled, the 'design-system-wordpress-theme//search-content' is unregister,
-// and updates it with plugin which calls the search-with-search-plugin template part.
-// for now this will have to be part of the theme, so it can be overwritten for the filter configurations.
+// Search: unregister theme's search template and register plugin's (block template - this works).
+// Header: template parts cannot be unregistered; use render_block_data filter to swap slug.
 add_action( 'init', 'wordpress_search_register_templates', 99 );
 /**
- * Registers the WordPress Search plugin template.
+ * Registers the WordPress Search plugin search template.
  *
  * Unregisters the default design system search template and registers
  * the plugin's search template that uses the search-with-search-plugin template part.
@@ -121,3 +120,23 @@ function wordpress_search_register_templates() {
 		],
 	);
 }
+
+/**
+ * Swaps the search bar template part to search-bar-with-search-plugin when the plugin is active.
+ * The header contains one template-part block (slug: search-bar); we swap it so the plugin's search bar is used.
+ */
+add_filter(
+    'render_block_data',
+    function ( $parsed_block ) {
+		if ( ( $parsed_block['blockName'] ?? '' ) !== 'core/template-part' ) {
+			return $parsed_block;
+		}
+		$attrs = $parsed_block['attrs'] ?? [];
+		if ( ( $attrs['slug'] ?? '' ) === 'search-bar' && ( $attrs['area'] ?? '' ) === 'uncategorized' ) {
+			$parsed_block['attrs']['slug'] = 'search-bar-with-search-plugin';
+		}
+		return $parsed_block;
+	},
+    10,
+    1
+);
