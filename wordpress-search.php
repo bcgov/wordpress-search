@@ -122,20 +122,16 @@ function wordpress_search_register_templates() {
 }
 
 /**
- * Swaps the header template part to header-with-search-plugin when the plugin is active.
- * (Header is a template part, not a block template, so unregister/register cannot be used.)
+ * Swaps the search bar template part to search-bar-with-search-plugin when the plugin is active.
+ * The header contains one template-part block (slug: search-bar); we swap it so the plugin's search bar is used.
  */
-add_filter(
-    'render_block_data',
-    function ( $parsed_block ) {
-		if ( 'core/template-part' !== ( $parsed_block['blockName'] ?? '' ) ) {
-			return $parsed_block;
-		}
-		if ( 'header' === ( $parsed_block['attrs']['slug'] ?? '' ) && 'header' === ( $parsed_block['attrs']['area'] ?? '' ) ) {
-			$parsed_block['attrs']['slug'] = 'header-with-search-plugin';
-		}
+add_filter( 'render_block_data', function ( $parsed_block ) {
+	if ( ( $parsed_block['blockName'] ?? '' ) !== 'core/template-part' ) {
 		return $parsed_block;
-	},
-    10,
-    1
-);
+	}
+	$attrs = $parsed_block['attrs'] ?? [];
+	if ( ( $attrs['slug'] ?? '' ) === 'search-bar' && ( $attrs['area'] ?? '' ) === 'uncategorized' ) {
+		$parsed_block['attrs']['slug'] = 'search-bar-with-search-plugin';
+	}
+	return $parsed_block;
+}, 10, 1 );
