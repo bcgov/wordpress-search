@@ -108,19 +108,19 @@ function wordpress_search_register_block_category( $categories ) {
 add_filter(
 	'render_block_data',
 	function ( $parsed_block ) {
-		if ( ( $parsed_block['blockName'] ?? '' ) !== 'core/template-part' ) {
+		if ( 'core/template-part' !== ( $parsed_block['blockName'] ?? '' ) ) {
 			return $parsed_block;
 		}
 		$attrs = $parsed_block['attrs'] ?? [];
 		$slug  = $attrs['slug'] ?? '';
 		$area  = $attrs['area'] ?? '';
-		if ( $area !== 'uncategorized' ) {
+		if ( 'uncategorized' !== $area ) {
 			return $parsed_block;
 		}
-		if ( $slug === 'search-bar' ) {
+		if ( 'search-bar' === $slug ) {
 			$parsed_block['attrs']['slug'] = 'search-bar-with-search-plugin';
 		}
-		if ( $slug === 'search' ) {
+		if ( 'search' === $slug ) {
 			$parsed_block['attrs']['slug'] = 'search-with-search-plugin';
 		}
 		return $parsed_block;
