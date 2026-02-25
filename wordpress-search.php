@@ -99,44 +99,32 @@ function wordpress_search_register_block_category( $categories ) {
 	add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );
 
 
-// Wordpress-search plugin
-// Search: unregister theme's search template and register plugin's (block template - this works).
-// Header: template parts cannot be unregistered; use render_block_data filter to swap slug.
-add_action( 'init', 'wordpress_search_register_templates', 99 );
+// Wordpress-search plugin: use render_block_data to swap template parts when the plugin is active.
 /**
- * Registers the WordPress Search plugin search template.
- *
- * Unregisters the default design system search template and registers
- * the plugin's search template that uses the search-with-search-plugin template part.
- */
-function wordpress_search_register_templates() {
-	unregister_block_template( 'design-system-wordpress-theme//search-content' );
-	register_block_template(
-		'wordpress-search//search-content',
-		[
-			'title'       => __( 'WordPress Search Plugin Template', 'wordpress-search' ),
-			'description' => __( 'Search results', 'wordpress-search' ),
-			'content'     => '<!-- wp:template-part {"slug":"search-with-search-plugin","area":"uncategorized"} /-->',
-		],
-	);
-}
-
-/**
- * Swaps the search bar template part to search-bar-with-search-plugin when the plugin is active.
- * The header contains one template-part block (slug: search-bar); we swap it so the plugin's search bar is used.
+ * Swaps template parts to the plugin versions when the plugin is active.
+ * - Search bar: slug search-bar → search-bar-with-search-plugin (in header).
+ * - Search content: slug search → search-with-search-plugin (in search-content template).
  */
 add_filter(
-    'render_block_data',
-    function ( $parsed_block ) {
-		if ( ( $parsed_block['blockName'] ?? '' ) !== 'core/template-part' ) {
+	'render_block_data',
+	function ( $parsed_block ) {
+		if ( 'core/template-part' !== ( $parsed_block['blockName'] ?? '' ) ) {
 			return $parsed_block;
 		}
 		$attrs = $parsed_block['attrs'] ?? [];
-		if ( ( $attrs['slug'] ?? '' ) === 'search-bar' && ( $attrs['area'] ?? '' ) === 'uncategorized' ) {
+		$slug  = $attrs['slug'] ?? '';
+		$area  = $attrs['area'] ?? '';
+		if ( 'uncategorized' !== $area ) {
+			return $parsed_block;
+		}
+		if ( 'search-bar' === $slug ) {
 			$parsed_block['attrs']['slug'] = 'search-bar-with-search-plugin';
+		}
+		if ( 'search' === $slug ) {
+			$parsed_block['attrs']['slug'] = 'search-with-search-plugin';
 		}
 		return $parsed_block;
 	},
-    10,
-    1
+	10,
+	1
 );
