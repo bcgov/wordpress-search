@@ -12,7 +12,7 @@
 		/* Active/selected button state */
 		&--active {
 			color: #333; /* Dark charcoal gray */
-			font-weight: 700;
+			font-weight: bold;
 
 			/* Orange underline for active state - only as wide as text */
 			.dswp-search-post-type-filter__text::after {

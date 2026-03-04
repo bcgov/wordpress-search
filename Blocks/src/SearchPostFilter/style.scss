@@ -18,7 +18,7 @@
 		cursor: pointer;
 		text-decoration: none;
 		color: #666; /* Light gray for inactive state */
-		font-weight: 400;
+		font-weight: normal;
 		position: relative;
 		transition: color 0.2s ease;
 		margin-right: 2rem; /* Even spacing between items */
@@ -40,7 +40,7 @@
 		/* Active/selected state */
 		&--active {
 			color: #333; /* Dark charcoal gray */
-			font-weight: 700;
+			font-weight: bold;
 
 			/* Orange underline for active state - only as wide as text */
 			.dswp-search-post-type-filter__text::after {

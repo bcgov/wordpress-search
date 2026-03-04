@@ -38,10 +38,10 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			const clearAndSearch = () => {
 				// Clear the search input
 				input.value = '';
-				
+
 				// Hide the clear button
 				toggleClearButton();
-				
+
 				// Submit the form - PHP backend handles filter persistence
 				form.submit();
 			};
