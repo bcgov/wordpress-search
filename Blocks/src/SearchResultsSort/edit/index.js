@@ -57,6 +57,16 @@ export default function Edit( { attributes, setAttributes } ) {
 		return formatted;
 	};
 
+	const getSortOrderLabel = ( order ) => {
+		const labels = {
+			newest: 'Newest',
+			oldest: 'Oldest',
+			asc: 'Asc',
+			desc: 'Desc',
+		};
+		return labels[ order ] ?? 'Desc';
+	};
+
 	// Fetch available metadata fields - this runs automatically
 	const fetchMetaFields = async () => {
 		setIsLoading( true );
@@ -297,15 +307,9 @@ export default function Edit( { attributes, setAttributes } ) {
 											<option>
 												{ `${ formatFieldLabel(
 													selectedMetaField
-												) } (${
-													sortOrder === 'newest'
-														? 'Newest'
-														: sortOrder === 'oldest'
-														? 'Oldest'
-														: sortOrder === 'asc'
-														? 'Asc'
-														: 'Desc'
-												})` }
+												) } (${ getSortOrderLabel(
+													sortOrder
+												) })` }
 											</option>
 										</>
 									) }
