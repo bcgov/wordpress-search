@@ -18,14 +18,14 @@ import '../editor.scss';
  * This is a static preview of how the search-bar block will appear on the frontend.
  * The form elements are intentionally disabled as they are for display purposes only.
  *
- * @return {JSX.Element} The editor interface for the search-bar block
+ * @return {import('react').ReactElement} The editor interface for the search-bar block
  */
 export default function Edit() {
 	// Get the block props which include the necessary editor attributes and classes
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<div className="dswp-search-bar__container">
 				<form
 					role="search"
