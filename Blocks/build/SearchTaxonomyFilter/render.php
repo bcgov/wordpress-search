@@ -205,7 +205,7 @@ $hidden_params = array_filter(
         <!-- Apply Button -->
         <div class="taxonomy-filter-apply">
             <button type="button" class="taxonomy-filter-apply__button" onclick="applyTaxonomyFilters()">
-                <?php echo esc_html__( 'Apply Filters', 'wordpress-search' ); ?>
+                <?php echo esc_html__( 'Show results', 'wordpress-search' ); ?>
             </button>
         </div>
     </div>
