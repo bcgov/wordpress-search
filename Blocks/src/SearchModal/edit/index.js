@@ -30,7 +30,7 @@ import './editor.scss';
  * @param {Function} props.setAttributes - Function to update block attributes
  * @return {import('react').ReactElement} The editor interface for the block.
  */
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit( { attributes, setAttributes } ) {
 	const {
 		buttonText,
 		buttonStyle,
@@ -39,9 +39,9 @@ export default function Edit({ attributes, setAttributes }) {
 		mobileBreakpoint,
 	} = attributes;
 
-	const blockProps = useBlockProps({
+	const blockProps = useBlockProps( {
 		className: 'wp-block-wordpress-search-search-modal',
-	});
+	} );
 
 	const INNER_BLOCKS_TEMPLATE = [];
 
@@ -49,26 +49,26 @@ export default function Edit({ attributes, setAttributes }) {
 	const buttonPreviewStyle = {};
 	let normalizedStyle = buttonStyle || 'primary';
 	// Support legacy styles that were previously stored as fill/outline.
-	if ('fill' === buttonStyle) {
+	if ( 'fill' === buttonStyle ) {
 		normalizedStyle = 'primary';
-	} else if ('outline' === buttonStyle) {
+	} else if ( 'outline' === buttonStyle ) {
 		normalizedStyle = 'secondary';
 	}
 
-	if (buttonBackgroundColor) {
+	if ( buttonBackgroundColor ) {
 		buttonPreviewStyle.backgroundColor = buttonBackgroundColor;
 	}
-	if (buttonTextColor) {
+	if ( buttonTextColor ) {
 		buttonPreviewStyle.color = buttonTextColor;
 	}
 
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={__('Modal Settings', 'wordpress-search')}>
+				<PanelBody title={ __( 'Modal Settings', 'wordpress-search' ) }>
 					<div className="dswp-search-modal__style-control">
 						<p className="dswp-search-modal__style-label">
-							{__('Styles', 'wordpress-search')}
+							{ __( 'Styles', 'wordpress-search' ) }
 						</p>
 						<ButtonGroup>
 							<Button
@@ -77,11 +77,11 @@ export default function Edit({ attributes, setAttributes }) {
 										? 'primary'
 										: 'secondary'
 								}
-								onClick={() =>
-									setAttributes({ buttonStyle: 'primary' })
+								onClick={ () =>
+									setAttributes( { buttonStyle: 'primary' } )
 								}
 							>
-								{__('Primary', 'wordpress-search')}
+								{ __( 'Primary', 'wordpress-search' ) }
 							</Button>
 							<Button
 								variant={
@@ -89,80 +89,88 @@ export default function Edit({ attributes, setAttributes }) {
 										? 'primary'
 										: 'secondary'
 								}
-								onClick={() =>
-									setAttributes({ buttonStyle: 'secondary' })
+								onClick={ () =>
+									setAttributes( {
+										buttonStyle: 'secondary',
+									} )
 								}
 							>
-								{__('Secondary', 'wordpress-search')}
+								{ __( 'Secondary', 'wordpress-search' ) }
 							</Button>
 						</ButtonGroup>
 					</div>
 
 					<RangeControl
-						label={__('Mobile Breakpoint (px)', 'wordpress-search')}
-						value={mobileBreakpoint}
-						onChange={(value) =>
-							setAttributes({ mobileBreakpoint: value })
+						label={ __(
+							'Mobile Breakpoint (px)',
+							'wordpress-search'
+						) }
+						value={ mobileBreakpoint }
+						onChange={ ( value ) =>
+							setAttributes( { mobileBreakpoint: value } )
 						}
-						min={320}
-						max={1200}
-						step={10}
-						help={__(
+						min={ 320 }
+						max={ 1200 }
+						step={ 10 }
+						help={ __(
 							'Screen width below which mobile behavior applies (button shows, content hidden)',
 							'wordpress-search'
-						)}
+						) }
 					/>
 				</PanelBody>
 
 				<PanelColorSettings
-					title={__('Color', 'wordpress-search')}
-					colorSettings={[
+					title={ __( 'Color', 'wordpress-search' ) }
+					colorSettings={ [
 						{
 							value: buttonTextColor,
-							onChange: (value) =>
-								setAttributes({
+							onChange: ( value ) =>
+								setAttributes( {
 									buttonTextColor: value || '',
-								}),
-							label: __('Text', 'wordpress-search'),
+								} ),
+							label: __( 'Text', 'wordpress-search' ),
 						},
 						{
 							value: buttonBackgroundColor,
-							onChange: (value) =>
-								setAttributes({
+							onChange: ( value ) =>
+								setAttributes( {
 									buttonBackgroundColor: value || '',
-								}),
-							label: __('Background', 'wordpress-search'),
+								} ),
+							label: __( 'Background', 'wordpress-search' ),
 						},
-					]}
+					] }
 				/>
 			</InspectorControls>
 
-			<div {...blockProps}>
+			<div { ...blockProps }>
 				<div className="dswp-search-modal__container">
 					<button
 						type="button"
-						className={`dswp-search-modal__trigger dswp-search-modal__trigger--${normalizedStyle}`}
-						style={buttonPreviewStyle}
-						onClick={(e) => e.preventDefault()}
+						className={ `dswp-search-modal__trigger dswp-search-modal__trigger--${ normalizedStyle }` }
+						style={ buttonPreviewStyle }
+						onClick={ ( e ) => e.preventDefault() }
 					>
 						<RichText
 							tagName="span"
-							value={buttonText}
-							onChange={(value) =>
-								setAttributes({ buttonText: value })
+							value={ buttonText }
+							onChange={ ( value ) =>
+								setAttributes( { buttonText: value } )
 							}
-							placeholder={__(
+							placeholder={ __(
 								'Add button text…',
 								'wordpress-search'
-							)}
-							allowedFormats={[]}
-							multiline={false}
-							aria-label={__('Button text', 'wordpress-search')}
+							) }
+							allowedFormats={ [] }
+							multiline={ false }
+							aria-label={ __(
+								'Button text',
+								'wordpress-search'
+							) }
 						/>
 					</button>
 					<div className="dswp-search-modal__content-preview">
 						<div
-							{...useInnerBlocksProps(
+							{ ...useInnerBlocksProps(
 								{ className: 'dswp-search-modal__body' },
 								{
 									template: INNER_BLOCKS_TEMPLATE,
@@ -170,7 +178,7 @@ export default function Edit({ attributes, setAttributes }) {
 									renderAppender:
 										InnerBlocks.ButtonBlockAppender,
 								}
-							)}
+							) }
 						/>
 					</div>
 				</div>
