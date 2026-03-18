@@ -25,7 +25,7 @@ export default function Edit() {
 	const blockProps = useBlockProps();
 
 	return (
-		<div {...blockProps}>
+		<div { ...blockProps }>
 			<div className="dswp-search-bar__container">
 				<form
 					role="search"
