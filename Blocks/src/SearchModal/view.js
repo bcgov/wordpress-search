@@ -7,9 +7,7 @@
  * @package
  */
 
-document.addEventListener('DOMContentLoaded', function (  
-	
-) {
+document.addEventListener('DOMContentLoaded', function () {
 	'use strict';
 
 	let modalCounter = 0;
