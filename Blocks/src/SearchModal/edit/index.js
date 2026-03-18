@@ -26,7 +26,7 @@ import './editor.scss';
  * @param {Object}   props               - Component props
  * @param {Object}   props.attributes    - Block attributes
  * @param {Function} props.setAttributes - Function to update block attributes
- * @return {JSX.Element} The editor interface for the block.
+ * @return {import('react').ReactElement} The editor interface for the block.
  */
 export default function Edit( { attributes, setAttributes } ) {
 	const { buttonText, buttonStyle, mobileBreakpoint } = attributes;

@@ -18,7 +18,7 @@ import './editor.scss';
  * @param {Object}   props               Block props.
  * @param {Object}   props.attributes    Block attributes.
  * @param {Function} props.setAttributes Function to set block attributes.
- * @return {JSX.Element} Element to render.
+ * @return {import('react').ReactElement} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
 	// Handle migration from old selectedTaxonomy to new selectedTaxonomies
