@@ -20,6 +20,14 @@
 			"type": "string",
 			"default": "primary"
 		},
+		"buttonBackgroundColor": {
+			"type": "string",
+			"default": ""
+		},
+		"buttonTextColor": {
+			"type": "string",
+			"default": ""
+		},
 		"mobileBreakpoint": {
 			"type": "number",
 			"default": 768

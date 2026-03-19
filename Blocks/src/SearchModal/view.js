@@ -39,7 +39,16 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 		// Get attributes
 		const buttonText = block.dataset.buttonText || 'Open Modal';
-		const buttonStyle = block.dataset.buttonStyle || 'primary';
+		// Support legacy styles ('fill' / 'outline') by mapping them
+		const rawStyle = block.dataset.buttonStyle || 'primary';
+		let buttonStyle = rawStyle;
+		if ( 'fill' === rawStyle ) {
+			buttonStyle = 'primary';
+		} else if ( 'outline' === rawStyle ) {
+			buttonStyle = 'secondary';
+		}
+		const buttonBackgroundColor = block.dataset.buttonBackgroundColor || '';
+		const buttonTextColor = block.dataset.buttonTextColor || '';
 
 		// Get the InnerBlocks content
 		const innerBlocks = block.querySelector(
@@ -92,6 +101,14 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		trigger.setAttribute( 'aria-controls', modalId );
 		trigger.setAttribute( 'aria-expanded', 'false' );
 		trigger.textContent = buttonText;
+
+		// Apply custom colors as inline styles (override theme defaults)
+		if ( buttonBackgroundColor ) {
+			trigger.style.backgroundColor = buttonBackgroundColor;
+		}
+		if ( buttonTextColor ) {
+			trigger.style.color = buttonTextColor;
+		}
 
 		// Append all elements to block
 		block.appendChild( inlineWrapper );
@@ -148,12 +165,12 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * @param {KeyboardEvent} e - The keyboard event
 	 */
 	function handleKeydown( e ) {
-		if ( e.key === 'Escape' && activeModal ) {
+		if ( 'Escape' === e.key && activeModal ) {
 			closeModal( activeModal.id );
 			return;
 		}
 
-		if ( activeModal && e.key === 'Tab' ) {
+		if ( activeModal && 'Tab' === e.key ) {
 			trapFocus( e, activeModal );
 		}
 	}
