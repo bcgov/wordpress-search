@@ -6,7 +6,8 @@
  */
 
 .wp-block-wordpress-search-search-modal {
-	display: inline-block;
+	display: block;
+	width: 100%;
 
 	// Default fallback breakpoint if CSS variable not set
 	--mobile-breakpoint: 768px;
@@ -14,6 +15,7 @@
 	// Responsive content visibility (controlled by JavaScript)
 	.dswp-search-modal__inline-content {
 		display: none; // Hide inline content by default (mobile/tablet)
+		width: 100%;
 
 		// This class will be added by JavaScript on desktop
 		&.dswp-search-modal--show-desktop {
@@ -24,7 +26,7 @@
 	// Modal Trigger Link (styled as button)
 	.dswp-search-modal__trigger {
 		// Base styles
-		padding: 12px 24px;
+		padding: 0.75rem 1.5rem;
 		border-radius: 6px;
 		border: none;
 		cursor: pointer;
@@ -117,8 +119,7 @@
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 	max-height: 90vh;
 	overflow: hidden;
-	display: flex;
-	flex-direction: column;
+	display: grid;
 
 	// Animation states
 	transform: scale(0.9) translateY(-20px);
@@ -139,7 +140,7 @@
 	z-index: 999999;
 	align-items: center;
 	justify-content: center;
-	padding: 20px;
+	padding: 1.25rem;
 
 	// Hidden by default
 	opacity: 0;
@@ -165,43 +166,36 @@
 
 // Modal Header
 .dswp-search-modal__header {
-	position: relative;
-	padding: 0;
+	grid-area: 1 / 1;
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-start;
+	padding: 1rem 1.625rem 0 1rem;
 	border-bottom: none;
 	background: transparent;
 	flex-shrink: 0;
-	height: 0; // Make header take no space
-}
-
-.dswp-search-modal__title {
-	margin: 0;
-	font-size: 24px;
-	font-weight: 600;
-	color: #333;
-	line-height: 1.2;
+	pointer-events: none;
 }
 
 .dswp-search-modal__close {
-	position: absolute;
-	top: 16px;
-	right: 16px;
-	z-index: 10;
-	background: rgba(255, 255, 255, 0.9);
+	position: relative;
+	background: none;
 	border: none;
 	cursor: pointer;
-	padding: 8px;
-	border-radius: 50%;
+	padding: 0;
+	border-radius: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	transition: all 0.2s ease;
-	color: #6c757d;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	color: #2d2d2d;
+	box-shadow: none;
+	pointer-events: auto;
 
 	&:hover {
-		background: rgba(255, 255, 255, 1);
-		color: #495057;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+		background: none;
+		color: #2d2d2d;
+		box-shadow: none;
 	}
 
 	&:focus {
@@ -210,20 +204,24 @@
 	}
 
 	svg {
-		width: 20px;
-		height: 20px;
+		width: 1.75rem;
+		height: 1.75rem;
 	}
 }
 
 // Modal Body
 .dswp-search-modal__body {
-	padding: 56px 24px 24px 24px; // Extra top padding for close button
+	grid-area: 1 / 1;
+	padding: 3.5rem 1.625rem 1.5rem 1rem; // Extra top padding + visual right-edge compensation
 	overflow-y: auto;
 	flex-grow: 1;
 
 	// Style inner blocks appropriately
 	> * {
-		margin-bottom: 16px;
+		margin-bottom: 1rem;
+		margin-inline: 0;
+		max-width: none;
+		width: 100%;
 
 		&:last-child {
 			margin-bottom: 0;
@@ -239,73 +237,57 @@
 
 	// Handle WordPress block spacing
 	.wp-block {
-		margin-bottom: 16px;
+		margin-bottom: 1rem;
+		margin-inline: 0;
+		max-width: none;
+		width: 100%;
 
 		&:last-child {
 			margin-bottom: 0;
 		}
 	}
 
-	// Allow content to use its natural width and spacing
-	.wp-block-wordpress-search-taxonomy-filter,
-	.wp-block-wordpress-search-search-post-type-filter {
-		width: auto;
+	// Keep taxonomy filters full-width inside modal sidebars.
+	.wp-block-wordpress-search-taxonomy-filter {
+		width: 100%;
 
-		// Reset any forced widths on filter elements
-		.search-taxonomy-filter__container,
-		.dswp-search-post-filter {
-			width: auto;
+		.search-taxonomy-filter__container {
+			width: 100%;
 			max-width: none;
 		}
 
-		// Let select dropdowns use natural width
-		select {
-			width: auto;
-			min-width: 120px; // Ensure readability
+		.taxonomy-filter {
+			min-width: 0;
 		}
 
-		// Let checkboxes maintain natural spacing and layout
 		.taxonomy-filter__options {
 			display: flex;
-			flex-wrap: wrap;
-			gap: 12px 16px; // 12px vertical, 16px horizontal spacing
+			flex-direction: column;
+			flex-wrap: nowrap;
+			gap: 1rem;
+			padding: 1rem 0;
 		}
 
 		.taxonomy-filter__option,
 		.components-checkbox-control {
-			width: auto;
-			flex: 0 0 auto; // Don't grow or shrink, use natural size
-			margin: 0; // Reset any default margins since we're using gap
-		}
-
-		// Ensure proper checkbox and label alignment
-		.components-checkbox-control {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-		}
-
-		.taxonomy-filter__checkbox {
+			width: 100%;
+			flex: 0 0 auto;
 			margin: 0;
 		}
 
-		.taxonomy-filter__option-label {
-			margin: 0;
-			white-space: nowrap; // Prevent label text from wrapping
+		.taxonomy-filter__view-all-link {
+			padding-inline-start: 1rem;
 		}
 	}
-}
 
-// Modal Footer
-.dswp-search-modal__footer {
-	padding: 16px 24px;
-	border-top: 1px solid #e9ecef;
-	background: #f8f9fa;
-	flex-shrink: 0;
+	// Keep post type filter behavior as previously configured.
+	.wp-block-wordpress-search-search-post-type-filter {
+		width: auto;
 
-	// Hide if empty
-	&:empty {
-		display: none;
+		.dswp-search-post-filter {
+			width: auto;
+			max-width: none;
+		}
 	}
 }
 
@@ -317,24 +299,11 @@ body.dswp-search-modal-open {
 	padding-right: var(--scrollbar-width, 0);
 }
 
-// Screen reader only text
-.sr-only {
-	position: absolute !important;
-	width: 1px !important;
-	height: 1px !important;
-	padding: 0 !important;
-	margin: -1px !important;
-	overflow: hidden !important;
-	clip: rect(0, 0, 0, 0) !important;
-	white-space: nowrap !important;
-	border: 0 !important;
-}
-
 // Responsive Design
 @media (max-width: 768px) {
 
 	.dswp-search-modal__overlay {
-		padding: 10px;
+		padding: 0.625rem;
 	}
 
 	.dswp-search-modal__container {
@@ -346,23 +315,16 @@ body.dswp-search-modal-open {
 		max-height: 95vh;
 	}
 
-	.dswp-search-modal__header {
-		padding: 20px;
-	}
-
-	.dswp-search-modal__title {
-		font-size: 20px;
-	}
-
 	.dswp-search-modal__body {
-		padding: 20px;
+		padding: 1rem 1.625rem 1rem 1rem;
 
 		// On mobile, stack checkboxes vertically for better touch targets
 		.wp-block-wordpress-search-taxonomy-filter {
 
 			.taxonomy-filter__options {
 				flex-direction: column;
-				gap: 12px; // Larger gap for touch targets
+				gap: 1rem;
+				padding: 1rem 0;
 			}
 
 			.taxonomy-filter__option,
@@ -378,27 +340,12 @@ body.dswp-search-modal-open {
 		}
 	}
 
-	.dswp-search-modal__footer {
-		padding: 16px 20px;
-	}
 }
 
 @media (max-width: 480px) {
 
-	.dswp-search-modal__header {
-		padding: 16px;
-	}
-
-	.dswp-search-modal__title {
-		font-size: 18px;
-	}
-
 	.dswp-search-modal__body {
-		padding: 16px;
-	}
-
-	.dswp-search-modal__footer {
-		padding: 12px 16px;
+		padding: 1rem 1.625rem 1rem 1rem;
 	}
 }
 

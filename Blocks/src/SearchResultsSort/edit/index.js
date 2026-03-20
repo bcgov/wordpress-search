@@ -59,12 +59,12 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	const getSortOrderLabel = ( order ) => {
 		const labels = {
-			newest: 'Newest',
-			oldest: 'Oldest',
-			asc: 'Asc',
-			desc: 'Desc',
+			newest: __( 'Newest', 'wordpress-search' ),
+			oldest: __( 'Oldest', 'wordpress-search' ),
+			asc: __( 'Asc', 'wordpress-search' ),
+			desc: __( 'Desc', 'wordpress-search' ),
 		};
-		return labels[ order ] ?? 'Desc';
+		return labels[ order ] ?? __( 'Desc', 'wordpress-search' );
 	};
 
 	// Fetch available metadata fields - this runs automatically
@@ -126,6 +126,30 @@ export default function Edit( { attributes, setAttributes } ) {
 		value: field.value,
 	} ) );
 
+	const previewSortOptions = [
+		{
+			label: __( 'Best match', 'wordpress-search' ),
+			value: 'relevance',
+		},
+		{
+			label: __( 'Alphabetical (A-Z)', 'wordpress-search' ),
+			value: 'title_asc',
+		},
+		{
+			label: __( 'Alphabetical (Z-A)', 'wordpress-search' ),
+			value: 'title_desc',
+		},
+	];
+
+	if ( selectedMetaField ) {
+		previewSortOptions.push( {
+			label: `${ formatFieldLabel(
+				selectedMetaField
+			) } (${ getSortOrderLabel( sortOrder ) })`,
+			value: 'meta_sort',
+		} );
+	}
+
 	return (
 		<>
 			<InspectorControls>
@@ -143,10 +167,10 @@ export default function Edit( { attributes, setAttributes } ) {
 					{ ! isLoading && availableMetaFields.length === 0 && (
 						<div
 							style={ {
-								padding: '12px',
+								padding: '0.75rem',
 								background: '#f0f0f0',
 								borderRadius: '4px',
-								marginBottom: '8px',
+								marginBottom: '0.5rem',
 								textAlign: 'center',
 							} }
 						>
@@ -222,98 +246,48 @@ export default function Edit( { attributes, setAttributes } ) {
 			<div { ...useBlockProps() }>
 				<div className="wp-block-wordpress-search-searchresultssort">
 					<div className="search-results-sort">
-						<div className="search-results-sort__controls">
-							<div className="search-results-sort__field-group">
-								<svg
-									className="search-results-sort__icon"
-									width="24"
-									height="24"
-									viewBox="0 0 24 24"
-									fill="none"
-									xmlns="http://www.w3.org/2000/svg"
+						<div className="search-results-sort__accordion">
+							<button
+								type="button"
+								className="search-results-sort__header"
+								aria-expanded="true"
+								onClick={ ( event ) => event.preventDefault() }
+							>
+								<span className="search-results-sort__title">
+									{ __( 'Sort by', 'wordpress-search' ) }
+								</span>
+								<span
+									className="search-results-sort__toggle"
 									aria-hidden="true"
-								>
-									{ /* Arrow line */ }
-									<line
-										x1="6"
-										y1="4"
-										x2="6"
-										y2="20"
-										stroke="currentColor"
-										strokeWidth="2"
-									/>
-									{ /* Arrow head */ }
-									<polyline
-										points="3,17 6,20 9,17"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2"
-									/>
-
-									{ /* Horizontal bars (representing sort levels) */ }
-									<line
-										x1="12"
-										y1="6"
-										x2="20"
-										y2="6"
-										stroke="currentColor"
-										strokeWidth="2"
-									/>
-									<line
-										x1="12"
-										y1="10"
-										x2="18"
-										y2="10"
-										stroke="currentColor"
-										strokeWidth="2"
-									/>
-									<line
-										x1="12"
-										y1="14"
-										x2="16"
-										y2="14"
-										stroke="currentColor"
-										strokeWidth="2"
-									/>
-								</svg>
-
-								<label
-									className="search-results-sort__label"
-									htmlFor="preview-sort-select"
-								>
-									{ __( 'Sort by:', 'wordpress-search' ) }
-								</label>
-
-								<select
-									id="preview-sort-select"
-									className="search-results-sort__sort-select"
-									disabled
-									style={ { opacity: 0.7 } }
-								>
-									<option>
-										{ __(
-											'Title (Alphabetical)',
-											'wordpress-search'
-										) }
-									</option>
-									<option>
-										{ __(
-											'Title (Reverse Alphabetical)',
-											'wordpress-search'
-										) }
-									</option>
-									{ selectedMetaField && (
-										<>
-											<option>
-												{ `${ formatFieldLabel(
-													selectedMetaField
-												) } (${ getSortOrderLabel(
-													sortOrder
-												) })` }
-											</option>
-										</>
+								></span>
+							</button>
+							<div className="search-results-sort__content">
+								<div className="search-results-sort__options">
+									{ previewSortOptions.map(
+										( option, index ) => {
+											const optionId = `preview-sort-option-${ index }`;
+											return (
+												<label
+													key={ option.value }
+													htmlFor={ optionId }
+													className="search-results-sort__option"
+												>
+													<input
+														id={ optionId }
+														type="radio"
+														name="preview-sort-options"
+														className="search-results-sort__option-input"
+														checked={ index === 0 }
+														readOnly
+													/>
+													<span className="search-results-sort__option-label">
+														{ option.label }
+													</span>
+												</label>
+											);
+										}
 									) }
-								</select>
+								</div>
 							</div>
 						</div>
 					</div>
