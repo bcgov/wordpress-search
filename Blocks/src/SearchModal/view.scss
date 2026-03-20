@@ -76,8 +76,9 @@
 .dswp-search-modal__container {
 	width: 100%;
 	max-width: 600px;
-	max-height: 90vh;
+	max-height: 100vh;
 	position: relative;
+	display: flex;
 }
 
 // Modal Content
@@ -85,10 +86,13 @@
 	background: #fff;
 	border-radius: 12px;
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-	max-height: 90vh;
+	width: 100%;
+	height: 100vh;
+	max-height: calc(100vh - 2.5rem);
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
+	min-height: 0;
 
 	// Animation states
 	transform: scale(0.9) translateY(-20px);
@@ -109,6 +113,8 @@
 	align-items: center;
 	justify-content: center;
 	padding: 1.25rem;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 
 	// Hidden by default
 	opacity: 0;
@@ -163,14 +169,19 @@
 	svg {
 		width: 20px;
 		height: 20px;
+		z-index: 99;
+		background: #fff;
 	}
 }
 
 // Modal Body
 .dswp-search-modal__body {
-	padding: 1.5rem;
+	padding: 1.5rem 1.5rem 0;
 	overflow-y: auto;
 	flex-grow: 1;
+	min-height: 0;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
 
 	// Style inner blocks appropriately
 	> * {
@@ -197,6 +208,7 @@
 			margin-bottom: 0;
 		}
 	}
+
 }
 
 // Body modifications when modal is open
@@ -220,6 +232,7 @@ body.dswp-search-modal-open {
 
 	.dswp-search-modal__content {
 		border-radius: 8px;
+		height: min(95vh, calc(100dvh - 1.25rem));
 		max-height: 95vh;
 	}
 
@@ -228,7 +241,7 @@ body.dswp-search-modal-open {
 	}
 
 	.dswp-search-modal__body {
-		padding: 1.25rem;
+		padding: 1.25rem 1.25rem 0;
 	}
 }
 
@@ -239,7 +252,7 @@ body.dswp-search-modal-open {
 	}
 
 	.dswp-search-modal__body {
-		padding: 1rem;
+		padding: 1rem 1rem 0;
 	}
 }
 
