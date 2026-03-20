@@ -177,14 +177,6 @@
 	pointer-events: none;
 }
 
-.dswp-search-modal__title {
-	margin: 0;
-	font-size: 24px;
-	font-weight: 600;
-	color: #333;
-	line-height: 1.2;
-}
-
 .dswp-search-modal__close {
 	position: relative;
 	background: none;
@@ -299,19 +291,6 @@
 	}
 }
 
-// Modal Footer
-.dswp-search-modal__footer {
-	padding: 1rem 1.5rem;
-	border-top: 1px solid #e9ecef;
-	background: #f8f9fa;
-	flex-shrink: 0;
-
-	// Hide if empty
-	&:empty {
-		display: none;
-	}
-}
-
 // Body modifications when modal is open
 body.dswp-search-modal-open {
 	overflow: hidden;
@@ -334,10 +313,6 @@ body.dswp-search-modal-open {
 	.dswp-search-modal__content {
 		border-radius: 8px;
 		max-height: 95vh;
-	}
-
-	.dswp-search-modal__title {
-		font-size: 20px;
 	}
 
 	.dswp-search-modal__body {
@@ -365,23 +340,12 @@ body.dswp-search-modal-open {
 		}
 	}
 
-	.dswp-search-modal__footer {
-		padding: 1rem 1.25rem;
-	}
 }
 
 @media (max-width: 480px) {
 
-	.dswp-search-modal__title {
-		font-size: 18px;
-	}
-
 	.dswp-search-modal__body {
 		padding: 1rem 1.625rem 1rem 1rem;
-	}
-
-	.dswp-search-modal__footer {
-		padding: 0.75rem 1rem;
 	}
 }
 
