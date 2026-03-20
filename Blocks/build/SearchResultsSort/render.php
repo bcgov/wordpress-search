@@ -110,12 +110,12 @@ $sort_options = [];
 
 // Only include relevance option when there's a search keyword.
 if ( $has_keyword ) {
-    $sort_options['relevance'] = __( 'Relevance (Best Match)', 'wordpress-search' );
+    $sort_options['relevance'] = __( 'Best match', 'wordpress-search' );
 }
 
 // Title sorting options are always available.
-$sort_options['title_asc']  = __( 'Title (Alphabetical)', 'wordpress-search' );
-$sort_options['title_desc'] = __( 'Title (Reverse Alphabetical)', 'wordpress-search' );
+$sort_options['title_asc']  = __( 'Alphabetical (A-Z)', 'wordpress-search' );
+$sort_options['title_desc'] = __( 'Alphabetical (Z-A)', 'wordpress-search' );
 
 // Add metadata options if configured.
 if ( $selected_meta_field ) {
@@ -133,40 +133,48 @@ if ( $selected_meta_field ) {
 // Styles are provided via block.json view/style and compiled SCSS. Avoid inline CSS here.
 ?>
 
-<div class="wp-block-wordpress-search-searchresultssort" id="<?php echo esc_attr( $block_id ); ?>" <?php echo $selected_meta_field ? 'data-meta-field="' . esc_attr( $selected_meta_field ) . '"' : ''; ?>>
+<div
+    class="wp-block-wordpress-search-searchresultssort"
+    id="<?php echo esc_attr( $block_id ); ?>"
+    data-current-url="<?php echo esc_url( $current_url ); ?>"
+    <?php echo $selected_meta_field ? 'data-meta-field="' . esc_attr( $selected_meta_field ) . '"' : ''; ?>
+>
     <div class="search-results-sort">
-        <div class="search-results-sort__controls">
-            <div class="search-results-sort__field-group">
-                <svg class="search-results-sort__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Arrow line -->
-                    <line x1="6" y1="4" x2="6" y2="20" stroke="currentColor" stroke-width="2"/>
-                    <!-- Arrow head -->
-                    <polyline points="3,17 6,20 9,17" fill="none" stroke="currentColor" stroke-width="2"/>
-                    
-                    <!-- Horizontal bars (representing sort levels) -->
-                    <line x1="12" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="2"/>
-                    <line x1="12" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="2"/>
-                    <line x1="12" y1="14" x2="16" y2="14" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                
-                <label for="<?php echo esc_attr( $block_id ); ?>-sort-select" class="search-results-sort__label">
-                    <?php echo esc_html__( 'Sort by:', 'wordpress-search' ); ?>
-                </label>
-                
-                <select 
-                    id="<?php echo esc_attr( $block_id ); ?>-sort-select" 
-                    class="search-results-sort__sort-select"
-                    data-current-url="<?php echo esc_url( $current_url ); ?>"
-                >
+        <div class="search-results-sort__accordion">
+            <button
+                type="button"
+                class="search-results-sort__header"
+                aria-expanded="true"
+                aria-controls="<?php echo esc_attr( $block_id ); ?>-sort-options"
+            >
+                <span class="search-results-sort__title">
+                    <?php echo esc_html__( 'Sort by', 'wordpress-search' ); ?>
+                </span>
+                <span class="search-results-sort__toggle" aria-hidden="true"></span>
+            </button>
+
+            <div
+                id="<?php echo esc_attr( $block_id ); ?>-sort-options"
+                class="search-results-sort__content"
+            >
+                <div class="search-results-sort__options" role="radiogroup" aria-label="<?php echo esc_attr__( 'Sort options', 'wordpress-search' ); ?>">
                     <?php foreach ( $sort_options as $value => $label ) : ?>
-                        <option 
-                            value="<?php echo esc_attr( $value ); ?>"
-                            <?php selected( $current_sort, $value ); ?>
-                        >
-                            <?php echo esc_html( $label ); ?>
-                        </option>
+                        <?php $option_id = $block_id . '-sort-option-' . sanitize_html_class( $value ); ?>
+                        <label class="search-results-sort__option" for="<?php echo esc_attr( $option_id ); ?>">
+                            <input
+                                id="<?php echo esc_attr( $option_id ); ?>"
+                                type="radio"
+                                name="<?php echo esc_attr( $block_id ); ?>-sort"
+                                class="search-results-sort__option-input"
+                                value="<?php echo esc_attr( $value ); ?>"
+                                <?php checked( $current_sort, $value ); ?>
+                            />
+                            <span class="search-results-sort__option-label">
+                                <?php echo esc_html( $label ); ?>
+                            </span>
+                        </label>
                     <?php endforeach; ?>
-                </select>
+                </div>
             </div>
         </div>
     </div>
