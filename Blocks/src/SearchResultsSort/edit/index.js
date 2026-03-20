@@ -143,9 +143,9 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	if ( selectedMetaField ) {
 		previewSortOptions.push( {
-			label: `${ formatFieldLabel( selectedMetaField ) } (${ getSortOrderLabel(
-				sortOrder
-			) })`,
+			label: `${ formatFieldLabel(
+				selectedMetaField
+			) } (${ getSortOrderLabel( sortOrder ) })`,
 			value: 'meta_sort',
 		} );
 	}
@@ -264,23 +264,28 @@ export default function Edit( { attributes, setAttributes } ) {
 							<div className="search-results-sort__content">
 								<div className="search-results-sort__options">
 									{ previewSortOptions.map(
-										( option, index ) => (
-											<label
-												key={ option.value }
-												className="search-results-sort__option"
-											>
-												<input
-													type="radio"
-													name="preview-sort-options"
-													className="search-results-sort__option-input"
-													checked={ index === 0 }
-													readOnly
-												/>
-												<span className="search-results-sort__option-label">
-													{ option.label }
-												</span>
-											</label>
-										)
+										( option, index ) => {
+											const optionId = `preview-sort-option-${ index }`;
+											return (
+												<label
+													key={ option.value }
+													htmlFor={ optionId }
+													className="search-results-sort__option"
+												>
+													<input
+														id={ optionId }
+														type="radio"
+														name="preview-sort-options"
+														className="search-results-sort__option-input"
+														checked={ index === 0 }
+														readOnly
+													/>
+													<span className="search-results-sort__option-label">
+														{ option.label }
+													</span>
+												</label>
+											);
+										}
 									) }
 								</div>
 							</div>

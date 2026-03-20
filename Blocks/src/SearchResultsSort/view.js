@@ -16,10 +16,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			header.addEventListener( 'click', function () {
 				const isExpanded =
 					header.getAttribute( 'aria-expanded' ) === 'true';
-				header.setAttribute(
-					'aria-expanded',
-					String( ! isExpanded )
-				);
+				header.setAttribute( 'aria-expanded', String( ! isExpanded ) );
 				content.classList.toggle( 'collapsed', isExpanded );
 				const toggle = header.querySelector(
 					'.search-results-sort__toggle'
@@ -37,7 +34,8 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				}
 
 				const sortValue = this.value;
-				const currentUrl = block.dataset.currentUrl || window.location.href;
+				const currentUrl =
+					block.dataset.currentUrl || window.location.href;
 				const url = new URL( currentUrl, window.location.origin );
 				const searchParams = new URLSearchParams( url.search );
 
@@ -53,7 +51,10 @@ document.addEventListener( 'DOMContentLoaded', function () {
 					searchParams.set( 'meta_sort', direction );
 
 					if ( block.dataset.metaField ) {
-						searchParams.set( 'meta_field', block.dataset.metaField );
+						searchParams.set(
+							'meta_field',
+							block.dataset.metaField
+						);
 					}
 				}
 

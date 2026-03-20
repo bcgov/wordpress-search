@@ -1,10 +1,5 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 
-/**
- *
- * @param root0
- * @param root0.attributes
- */
 export default function Save( { attributes } ) {
 	const {
 		buttonText = 'Open Modal',
