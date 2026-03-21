@@ -111,7 +111,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						}
 						min={ 320 }
 						max={ 1200 }
-						step={ 10 }
+						step={ 1 }
 						help={ __(
 							'Screen width below which mobile behavior applies (button shows, content hidden)',
 							'wordpress-search'
