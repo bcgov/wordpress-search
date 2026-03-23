@@ -97,3 +97,34 @@ function wordpress_search_register_block_category( $categories ) {
 	);
 }
 	add_filter( 'block_categories_all', 'wordpress_search_register_block_category', 10, 1 );
+
+
+// Wordpress-search plugin: use render_block_data to swap template parts when the plugin is active.
+/**
+ * Swaps template parts to the plugin versions when the plugin is active.
+ * - Search bar: slug search-bar → search-bar-with-search-plugin (in header).
+ * - Search content: slug search → search-with-search-plugin (in search-content template).
+ */
+add_filter(
+	'render_block_data',
+	function ( $parsed_block ) {
+		if ( 'core/template-part' !== ( $parsed_block['blockName'] ?? '' ) ) {
+			return $parsed_block;
+		}
+		$attrs = $parsed_block['attrs'] ?? [];
+		$slug  = $attrs['slug'] ?? '';
+		$area  = $attrs['area'] ?? '';
+		if ( 'uncategorized' !== $area ) {
+			return $parsed_block;
+		}
+		if ( 'search-bar' === $slug ) {
+			$parsed_block['attrs']['slug'] = 'search-bar-with-search-plugin';
+		}
+		if ( 'search' === $slug ) {
+			$parsed_block['attrs']['slug'] = 'search-with-search-plugin';
+		}
+		return $parsed_block;
+	},
+	10,
+	1
+);

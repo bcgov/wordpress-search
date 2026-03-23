@@ -1,0 +1,7 @@
+<!-- wp:wordpress-search/search-modal -->
+<div class="wp-block-wordpress-search-search-modal" data-mobile-breakpoint="768" data-button-text="Open Modal" data-button-style="primary" style="--mobile-breakpoint:768px"><div></div></div>
+<!-- /wp:wordpress-search/search-modal -->
+
+<!-- wp:paragraph -->
+<p>Test content inside modal</p>
+<!-- /wp:paragraph -->

@@ -12,7 +12,7 @@ import metadata from './block.json';
 /**
  * Register block type
  */
-registerBlockType(metadata.name, {
+registerBlockType( metadata.name, {
 	...metadata,
 	edit: Edit,
 	// Handle migration from older single-select attribute to new multi-select array
@@ -25,14 +25,14 @@ registerBlockType(metadata.name, {
 				},
 			},
 			save: () => null,
-			migrate: (attributes) => {
+			migrate: ( attributes ) => {
 				const { selectedTaxonomy } = attributes || {};
 				return {
 					selectedTaxonomies: selectedTaxonomy
-						? [selectedTaxonomy]
+						? [ selectedTaxonomy ]
 						: [],
 				};
 			},
 		},
 	],
-});
+} );

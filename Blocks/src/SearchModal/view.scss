@@ -6,11 +6,12 @@
  */
 
 .wp-block-wordpress-search-search-modal {
-	display: inline-block;
+	display: block;
+	width: 100%;
 
 	// Modal Trigger Button
 	.dswp-search-modal__trigger {
-		padding: 12px 24px;
+		padding: 0.75rem 1.5rem;
 		border-radius: 6px;
 		border: none;
 		cursor: pointer;
@@ -28,51 +29,27 @@
 		}
 
 		// Button Style Variations
-		&--primary {
-			background: #007cba;
-			color: #fff;
-
-			&:hover:not(:disabled) {
-				background: #005a87;
-				transform: translateY(-1px);
-				box-shadow: 0 4px 8px rgba(0, 124, 186, 0.3);
-			}
-		}
-
-		&--secondary {
-			background: #f8f9fa;
-			color: #333;
-			border: 1px solid #dee2e6;
-
-			&:hover:not(:disabled) {
-				background: #e9ecef;
-				transform: translateY(-1px);
-				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			}
-		}
-
-		&--outline {
-			background: transparent;
-			color: #007cba;
-			border: 2px solid #007cba;
-
-			&:hover:not(:disabled) {
-				background: #007cba;
-				color: #fff;
-				transform: translateY(-1px);
-			}
-		}
-
-		&--link {
-			background: transparent;
-			color: #007cba;
+		&--primary,
+		&--fill {
+			background-color: var(--dswp-surface-color-primary-button-default);
+			color: var(--dswp-color-text-on-secondary-button, #fff);
 			border: none;
-			text-decoration: underline;
-			padding: 8px 16px;
 
 			&:hover:not(:disabled) {
-				color: #005a87;
-				text-decoration: none;
+				filter: brightness(0.9);
+				transform: translateY(-1px);
+			}
+		}
+
+		&--secondary,
+		&--outline {
+			background-color: var(--dswp-surface-color-secondary-button-default);
+			color: currentcolor;
+			border: 1px solid var(--dswp-surface-color-border-dark);
+
+			&:hover:not(:disabled) {
+				filter: brightness(0.95);
+				transform: translateY(-1px);
 			}
 		}
 
@@ -99,8 +76,9 @@
 .dswp-search-modal__container {
 	width: 100%;
 	max-width: 600px;
-	max-height: 90vh;
+	max-height: 100vh;
 	position: relative;
+	display: flex;
 }
 
 // Modal Content
@@ -108,10 +86,13 @@
 	background: #fff;
 	border-radius: 12px;
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-	max-height: 90vh;
+	width: 100%;
+	height: 100vh;
+	max-height: calc(100vh - 2.5rem);
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
+	min-height: 0;
 
 	// Animation states
 	transform: scale(0.9) translateY(-20px);
@@ -131,7 +112,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 20px;
+	padding: 1.25rem;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 
 	// Hidden by default
 	opacity: 0;
@@ -152,7 +135,7 @@
 
 // Modal Header
 .dswp-search-modal__header {
-	padding: 24px;
+	padding: 1.5rem;
 	border-bottom: 1px solid #e9ecef;
 	display: flex;
 	justify-content: space-between;
@@ -161,19 +144,11 @@
 	flex-shrink: 0;
 }
 
-.dswp-search-modal__title {
-	margin: 0;
-	font-size: 24px;
-	font-weight: 600;
-	color: #333;
-	line-height: 1.2;
-}
-
 .dswp-search-modal__close {
 	background: none;
 	border: none;
 	cursor: pointer;
-	padding: 8px;
+	padding: 0.5rem;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
@@ -194,18 +169,23 @@
 	svg {
 		width: 20px;
 		height: 20px;
+		z-index: 99;
+		background: #fff;
 	}
 }
 
 // Modal Body
 .dswp-search-modal__body {
-	padding: 24px;
+	padding: 1.5rem 1.5rem 0;
 	overflow-y: auto;
 	flex-grow: 1;
+	min-height: 0;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
 
 	// Style inner blocks appropriately
 	> * {
-		margin-bottom: 16px;
+		margin-bottom: 1rem;
 
 		&:last-child {
 			margin-bottom: 0;
@@ -222,25 +202,13 @@
 
 	// Handle WordPress block spacing
 	.wp-block {
-		margin-bottom: 16px;
+		margin-bottom: 1rem;
 
 		&:last-child {
 			margin-bottom: 0;
 		}
 	}
-}
 
-// Modal Footer
-.dswp-search-modal__footer {
-	padding: 16px 24px;
-	border-top: 1px solid #e9ecef;
-	background: #f8f9fa;
-	flex-shrink: 0;
-
-	// Hide if empty
-	&:empty {
-		display: none;
-	}
 }
 
 // Body modifications when modal is open
@@ -251,24 +219,11 @@ body.dswp-search-modal-open {
 	padding-right: var(--scrollbar-width, 0);
 }
 
-// Screen reader only text
-.sr-only {
-	position: absolute !important;
-	width: 1px !important;
-	height: 1px !important;
-	padding: 0 !important;
-	margin: -1px !important;
-	overflow: hidden !important;
-	clip: rect(0, 0, 0, 0) !important;
-	white-space: nowrap !important;
-	border: 0 !important;
-}
-
 // Responsive Design
 @media (max-width: 768px) {
 
 	.dswp-search-modal__overlay {
-		padding: 10px;
+		padding: 0.625rem;
 	}
 
 	.dswp-search-modal__container {
@@ -277,42 +232,27 @@ body.dswp-search-modal-open {
 
 	.dswp-search-modal__content {
 		border-radius: 8px;
+		height: min(95vh, calc(100dvh - 1.25rem));
 		max-height: 95vh;
 	}
 
 	.dswp-search-modal__header {
-		padding: 20px;
-	}
-
-	.dswp-search-modal__title {
-		font-size: 20px;
+		padding: 1.25rem;
 	}
 
 	.dswp-search-modal__body {
-		padding: 20px;
-	}
-
-	.dswp-search-modal__footer {
-		padding: 16px 20px;
+		padding: 1.25rem 1.25rem 0;
 	}
 }
 
 @media (max-width: 480px) {
 
 	.dswp-search-modal__header {
-		padding: 16px;
-	}
-
-	.dswp-search-modal__title {
-		font-size: 18px;
+		padding: 1rem;
 	}
 
 	.dswp-search-modal__body {
-		padding: 16px;
-	}
-
-	.dswp-search-modal__footer {
-		padding: 12px 16px;
+		padding: 1rem 1rem 0;
 	}
 }
 
@@ -327,9 +267,6 @@ body.dswp-search-modal-open {
 		border: 2px solid #000;
 	}
 
-	.dswp-search-modal__trigger--outline {
-		border-width: 3px;
-	}
 }
 
 // Reduced motion support

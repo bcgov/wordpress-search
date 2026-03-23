@@ -12,7 +12,7 @@ import './editor.scss';
 /**
  * Edit component for the Search Result Count block
  *
- * @return {JSX.Element} Element to render.
+ * @return {import('react').ReactElement} Element to render.
  */
 export default function Edit() {
 	return (

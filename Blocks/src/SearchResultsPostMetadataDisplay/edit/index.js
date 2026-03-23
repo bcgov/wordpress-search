@@ -69,12 +69,22 @@ export default function Edit( { attributes, setAttributes } ) {
 					<div className="post-metadata">
 						<div className="metadata-list">
 							<div className="metadata-item">
-								<span className="metadata-label">Example metadata:</span>
-								<span className="metadata-value">Lorem ipsum dolor sit amet, consectetur adipiscing elit</span>
+								<span className="metadata-label">
+									Example metadata:
+								</span>
+								<span className="metadata-value">
+									Lorem ipsum dolor sit amet, consectetur
+									adipiscing elit
+								</span>
 							</div>
 							<div className="metadata-item">
-								<span className="metadata-label">Example taxonomy:</span>
-								<span className="metadata-value">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</span>
+								<span className="metadata-label">
+									Example taxonomy:
+								</span>
+								<span className="metadata-value">
+									Sed do eiusmod tempor incididunt ut labore
+									et dolore magna aliqua
+								</span>
 							</div>
 						</div>
 					</div>

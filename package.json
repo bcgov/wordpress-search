@@ -29,10 +29,10 @@
   "devDependencies": {
     "@bcgov/wordpress-eslint": "git+https://github.com/bcgov/wordpress-eslint.git#semver:1.x",
     "@bcgov/wordpress-stylelintrc": "git+https://github.com/bcgov/wordpress-stylelintrc.git#semver:1.x",
-    "@playwright/test": "1.56.1",
-    "@wordpress/e2e-test-utils-playwright": "^1.35.0",
-    "@wordpress/env": "^10.35.0",
-    "@wordpress/scripts": "^30.17.0",
+    "@playwright/test": "1.57.0",
+    "@wordpress/e2e-test-utils-playwright": "^1.37.0",
+    "@wordpress/env": "^10.37.0",
+    "@wordpress/scripts": "^31.2.0",
     "ajv": "^8.17.1"
   },
   "dependencies": {

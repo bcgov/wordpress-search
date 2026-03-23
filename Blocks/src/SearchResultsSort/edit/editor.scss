@@ -1,85 +1,85 @@
-// Editor-specific overrides for the search results sort block
-// Use the same classes as frontend but with editor-specific styling
-
-// Store arrow SVG as variable to prevent linter from breaking data URI
-$arrow-icon: 'data:image/svg+xml,%3csvg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"%3e%3cpath stroke="%236b7280" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m6 8 4 4 4-4"/%3e%3c/svg%3e';
-
 .wp-block-wordpress-search-searchresultssort {
-	// Minimal styling to fit well in group blocks
 
-	// Make sure we inherit all the frontend styles
 	.search-results-sort {
-		margin: 0; // Reset any default margins
+		--sort-inline-start-padding: 1rem;
 
-		&__controls {
-			display: flex;
-			gap: 1rem;
-			margin-bottom: 0;
-			flex-wrap: wrap;
-
-			// Responsive stacking for smaller editor widths
-			@media (max-width: 37.5rem) {
-				flex-direction: column;
-				gap: 0.75rem;
-			}
-		}
-
-		&__field-group {
-			display: flex;
-			flex-direction: row;
-			align-items: center;
-			gap: 0;
-			min-width: 12.5rem;
-			flex: 1;
-
-			// Responsive stacking for smaller editor widths
-			@media (max-width: 37.5rem) {
-				flex-direction: column;
-				align-items: stretch;
-				gap: 0.375rem;
-			}
-		}
-
-		&__label {
-			font-size: 0.875rem;
-			font-weight: 600;
-			color: #1e1e1e;
-			margin: 0;
-		}
-
-		&__icon {
-			width: 1.25rem;
-			height: 1.25rem;
-			color: #6b7280;
-			margin-right: 0.5rem;
-			flex-shrink: 0;
-		}
-
-		&__sort-select {
-			padding: 0.5rem 0.75rem;
-			border: 0.0625rem solid #e5e7eb;
-			border-radius: 0.5rem;
+		&__accordion {
+			border: 1px solid #dadbdd;
+			border-radius: 0;
 			background: #fff;
+			overflow: hidden;
+		}
+
+		&__header {
+			align-items: center;
+			background: #faf9f8;
+			border: none;
+			display: flex;
+			justify-content: space-between;
+			padding: 0;
+			min-height: 2.69rem;
+			border-bottom: 1px solid #dadbdd;
+			width: 100%;
+		}
+
+		&__title {
+			color: #333;
+			font-size: 1rem;
+			font-weight: 600;
+			line-height: 1.2;
+			margin: 0;
+			padding-inline-start: var(--sort-inline-start-padding);
+			text-align: left;
+		}
+
+		&__toggle {
+			align-items: center;
+			display: flex;
+			height: 2rem;
+			justify-content: center;
+			width: 2rem;
+
+			&::after {
+				border-bottom: 2px solid #666;
+				border-right: 2px solid #666;
+				content: "";
+				height: 0.5rem;
+				transform: rotate(45deg);
+				width: 0.5rem;
+			}
+		}
+
+		&__content {
+			background: #fff;
+		}
+
+		&__options {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+			padding: 1rem 0;
+		}
+
+		&__option {
+			align-items: center;
+			display: flex;
+			gap: 0.75rem;
+			padding: 0;
+			padding-inline-start: var(--sort-inline-start-padding);
+			padding-inline-end: 1rem;
+		}
+
+		&__option-input {
+			accent-color: #2271b1;
+			height: 1.125rem;
+			margin: 0;
+			width: 1.125rem;
+		}
+
+		&__option-label {
+			color: #444;
 			font-size: 0.875rem;
-			line-height: 1.4;
-			color: #6b7280;
-			appearance: none;
-			background-image: url(#{$arrow-icon});
-			background-position: right 8px center;
-			background-repeat: no-repeat;
-			background-size: 1.25rem 1.25rem;
-			padding-right: 2.5rem;
-
-			&:disabled {
-				cursor: not-allowed;
-				color: #9ca3af;
-				opacity: 0.7;
-			}
-
-			option {
-				padding: 0.25rem 0.5rem; // 4px 8px
-				color: #374151;
-			}
+			line-height: 1.3;
 		}
 	}
 }
@@ -89,20 +89,20 @@ $arrow-icon: 'data:image/svg+xml,%3csvg xmlns="http://www.w3.org/2000/svg" fill=
 	font-size: 12px;
 	font-style: italic;
 	color: #757575;
-	margin-bottom: 16px;
+	margin-bottom: 1rem;
 }
 
 .components-radio-control {
-	margin-bottom: 16px;
+	margin-bottom: 1rem;
 }
 
 .components-select-control {
-	margin-bottom: 16px;
+	margin-bottom: 1rem;
 }
 
 .components-notice {
-	margin: 16px 0;
-	padding: 12px;
+	margin: 1rem 0;
+	padding: 0.75rem;
 	border-left: 4px solid #dba617;
 	background: #fff8e5;
 

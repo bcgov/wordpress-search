@@ -18,76 +18,58 @@
 		display: block;
 	}
 
-	.dswp-search-modal__trigger-preview {
+	.dswp-search-modal__trigger {
+		// Match frontend trigger base styles
+		padding: 12px 24px;
+		border-radius: 6px;
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		font-size: 16px;
+		transition: all 0.3s ease;
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		padding: 8px 12px;
-		background: #f6f7f7;
-		border-radius: 2px;
-		border: 1px solid #ddd;
+		text-decoration: none;
 		margin-bottom: 12px;
-		font-size: 12px;
-		color: #666;
 
-
-	}
-
-	.dswp-search-modal__trigger {
-		padding: 6px 12px;
-		border-radius: 2px;
-		border: none;
-		cursor: pointer;
-		font-weight: 400;
-		font-size: 12px;
-		transition: all 0.2s ease;
-
-		&--primary {
-			background: #2271b1;
-			color: #fff;
-
-			&:hover {
-				background: #135e96;
-			}
-		}
-
-		&--secondary {
-			background: #f6f7f7;
-			color: #2c3338;
-			border: 1px solid #8c8f94;
-
-			&:hover {
-				background: #f0f0f1;
-			}
-		}
-
-		&--outline {
-			background: transparent;
-			color: #2271b1;
-			border: 1px solid #2271b1;
-
-			&:hover {
-				background: #2271b1;
-				color: #fff;
-			}
-		}
-
-		&--link {
-			background: transparent;
-			color: #2271b1;
+		&--primary,
+		&--fill {
+			background-color: var(--dswp-surface-color-primary-button-default, #2271b1);
+			color: var(--dswp-color-text-on-secondary-button, #fff);
 			border: none;
-			text-decoration: underline;
-			padding: 2px 4px;
+		}
 
-			&:hover {
-				color: #135e96;
-			}
+		&--secondary,
+		&--outline {
+			background-color: var(--dswp-surface-color-secondary-button-default, #6c757d);
+			color: currentcolor;
+			border: 1px solid var(--dswp-surface-color-border-dark, #6c757d);
+		}
+
+		// Inline-editable label (RichText)
+		span {
+			display: inline-block;
+			min-width: 1em;
 		}
 
 		&:disabled {
 			opacity: 0.6;
 			cursor: not-allowed;
 		}
+	}
+
+	.dswp-search-modal__style-control {
+		margin-bottom: 24px;
+	}
+
+	.dswp-search-modal__style-label {
+		font-size: 11px;
+		font-weight: 500;
+		color: #1e1e1e;
+		margin: 0 0 8px;
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
 	}
 
 	.dswp-search-modal__mobile-note {
@@ -108,10 +90,6 @@
 		display: none; // Hide the modal header in group-style view
 	}
 
-	.dswp-search-modal__title {
-		display: none; // Hide the title in group-style view
-	}
-
 	.dswp-search-modal__instructions {
 		background: #f0f6fc;
 		padding: 8px 12px;
@@ -121,18 +99,6 @@
 		color: #0073aa;
 		border-left: 3px solid #2271b1;
 		font-style: italic;
-	}
-
-	// Mobile-only preview styling
-	&.mobile-only {
-
-		.dswp-search-modal__trigger-preview {
-			opacity: 0.7;
-
-			&::before {
-				content: "📱";
-			}
-		}
 	}
 
 	// InnerBlocks styling in editor - similar to Group block
@@ -179,4 +145,10 @@
 	}
 
 
+}
+
+// InspectorControls lives outside the block wrapper in the editor DOM,
+// so ensure spacing applies in the sidebar too.
+.dswp-search-modal__style-control {
+	margin-bottom: 24px;
 }
