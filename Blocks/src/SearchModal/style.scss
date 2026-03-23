@@ -108,8 +108,9 @@
 .dswp-search-modal__container {
 	width: 100%;
 	max-width: 90vw; // More flexible width
-	max-height: 90vh;
+	max-height: calc(100vh - 2.5rem);
 	position: relative;
+	display: flex;
 }
 
 // Modal Content
@@ -117,9 +118,13 @@
 	background: #fff;
 	border-radius: 12px;
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-	max-height: 90vh;
+	width: 100%;
+	height: min(90vh, calc(100dvh - 2.5rem));
+	max-height: calc(100vh - 2.5rem);
 	overflow: hidden;
-	display: grid;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 
 	// Animation states
 	transform: scale(0.9) translateY(-20px);
@@ -141,6 +146,8 @@
 	align-items: center;
 	justify-content: center;
 	padding: 1.25rem;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 
 	// Hidden by default
 	opacity: 0;
@@ -166,11 +173,14 @@
 
 // Modal Header
 .dswp-search-modal__header {
-	grid-area: 1 / 1;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
 	display: flex;
 	justify-content: flex-end;
 	align-items: flex-start;
-	padding: 1rem 1.625rem 0 1rem;
+	padding: 0 1.625rem 0 1rem;
 	border-bottom: none;
 	background: transparent;
 	flex-shrink: 0;
@@ -206,15 +216,20 @@
 	svg {
 		width: 1.75rem;
 		height: 1.75rem;
+		z-index: 99;
+		background: #fff;
+		padding-top: 1rem;
 	}
 }
 
 // Modal Body
 .dswp-search-modal__body {
-	grid-area: 1 / 1;
-	padding: 3.5rem 1.625rem 1.5rem 1rem; // Extra top padding + visual right-edge compensation
+	padding: 3.5rem 1.625rem 0 1rem; // Keep sticky action flush with modal bottom
 	overflow-y: auto;
 	flex-grow: 1;
+	min-height: 0;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
 
 	// Style inner blocks appropriately
 	> * {
@@ -278,6 +293,7 @@
 		.taxonomy-filter__view-all-link {
 			padding-inline-start: 1rem;
 		}
+
 	}
 
 	// Keep post type filter behavior as previously configured.
@@ -312,11 +328,12 @@ body.dswp-search-modal-open {
 
 	.dswp-search-modal__content {
 		border-radius: 8px;
+		height: min(95vh, calc(100dvh - 1.25rem));
 		max-height: 95vh;
 	}
 
 	.dswp-search-modal__body {
-		padding: 1rem 1.625rem 1rem 1rem;
+		padding: 1rem 1.625rem 0 1rem;
 
 		// On mobile, stack checkboxes vertically for better touch targets
 		.wp-block-wordpress-search-taxonomy-filter {
@@ -345,7 +362,7 @@ body.dswp-search-modal-open {
 @media (max-width: 480px) {
 
 	.dswp-search-modal__body {
-		padding: 1rem 1.625rem 1rem 1rem;
+		padding: 1rem 1.625rem 0 1rem;
 	}
 }
 
