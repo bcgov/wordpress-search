@@ -14,7 +14,7 @@
     },
     "sortOrder": {
       "type": "string",
-      "default": "newest"
+      "default": "asc"
     }
   },
   "editorScript": "file:./index.js",

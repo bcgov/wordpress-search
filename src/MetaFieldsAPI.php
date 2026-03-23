@@ -90,15 +90,15 @@ class MetaFieldsAPI {
                 }
             }
 
-            // Remove duplicates and sort results.
-            $unique_results    = [];
-            $seen_combinations = [];
+            // Remove duplicates using array keys for O(1) lookup performance.
+            $unique_results = [];
+            $seen_keys      = [];
 
             foreach ( $all_results as $row ) {
                 $key = $row->post_type . ':' . $row->meta_key;
-                if ( ! in_array( $key, $seen_combinations, true ) ) {
-                    $seen_combinations[] = $key;
-                    $unique_results[]    = $row;
+                if ( ! isset( $seen_keys[ $key ] ) ) {
+                    $seen_keys[ $key ] = true;
+                    $unique_results[]  = $row;
                 }
             }
 
@@ -111,9 +111,7 @@ class MetaFieldsAPI {
                 }
             );
 
-            $results = $unique_results;
-
-            foreach ( $results as $row ) {
+            foreach ( $unique_results as $row ) {
                 $post_type = $post_types[ $row->post_type ] ?? null;
                 if ( $post_type && ! empty( $row->meta_key ) ) {
                     $meta_fields[] = [
