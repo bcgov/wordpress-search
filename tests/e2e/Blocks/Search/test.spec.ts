@@ -33,7 +33,7 @@ test.describe('Search Block', () => {
 			await expect(clearButton).toBeVisible();
 
 			// Verify submit button is visible
-			const submitButton = block.locator('.dswp-search-bar__button--primary');
+			const submitButton = block.locator('.dswp-search-bar__button--fill');
 			await expect(submitButton).toBeVisible();
 			await expect(submitButton).toHaveText('Search');
 
@@ -143,7 +143,7 @@ test.describe('Search Block', () => {
 			await page.goto(`/?p=${postId}`);
 
 			const searchInput = page.locator('.dswp-search-bar__input');
-			const submitButton = page.locator('.dswp-search-bar__button--primary');
+			const submitButton = page.locator('.dswp-search-bar__button--fill');
 
 			// Type search term
 			const searchTerm = 'test query';
@@ -168,7 +168,7 @@ test.describe('Search Block', () => {
 			await page.goto(`/?p=${postId}`);
 
 			const searchInput = page.locator('.dswp-search-bar__input');
-			const submitButton = page.locator('.dswp-search-bar__button--primary');
+			const submitButton = page.locator('.dswp-search-bar__button--fill');
 
 			const searchTerm = 'wordpress search';
 			await searchInput.fill(searchTerm);
@@ -194,7 +194,7 @@ test.describe('Search Block', () => {
 
 			const form = page.locator('.dswp-search-bar__form');
 			const searchInput = page.locator('.dswp-search-bar__input');
-			const submitButton = page.locator('.dswp-search-bar__button--primary');
+			const submitButton = page.locator('.dswp-search-bar__button--fill');
 
 			// Wait for form to be visible
 			await form.waitFor({ state: 'visible' });
@@ -296,7 +296,7 @@ test.describe('Search Block', () => {
 			await page.goto(`/?p=${postId}`);
 
 			const searchInput = page.locator('.dswp-search-bar__input');
-			const submitButton = page.locator('.dswp-search-bar__button--primary');
+			const submitButton = page.locator('.dswp-search-bar__button--fill');
 			const searchTerm = 'button click test';
 
 			// Type search term
@@ -331,7 +331,7 @@ test.describe('Search Block', () => {
 			await expect(searchInput).toHaveAttribute('name', 's');
 
 			// Verify submit button has proper type
-			const submitButton = page.locator('.dswp-search-bar__button--primary');
+			const submitButton = page.locator('.dswp-search-bar__button--fill');
 			await expect(submitButton).toHaveAttribute('type', 'submit');
 		});
 	});

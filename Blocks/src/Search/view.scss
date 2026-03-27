@@ -120,56 +120,32 @@
 
 	/**
      * search-bar Button
-     * Styles for the submit button with variants
+     * Submit: layout only for fill (globals via .wp-element-button). Outline uses BEM modifier on .dswp-search-bar__button — nest under that block, not under .wp-element-button, or SCSS turns &--outline into .wp-element-button--outline (wrong).
      */
 	.dswp-search-bar__button {
-		padding: 12px 24px;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 16px;
-		font-weight: 500;
-		transition: all 0.2s ease;
-		white-space: nowrap;
+		&.wp-element-button {
+			padding: 12px 24px;
+			cursor: pointer;
+			font-weight: 500;
+			transition: all 0.2s ease;
+			white-space: nowrap;
+		}
 
-		/**
-         * Primary Button Style
-         * Main action button with hover state
-         */
-		&--primary {
-			background-color: #036;
-			color: #fff;
+		&--outline.wp-element-button {
+			background-color: var(--wp--custom--dswp--surface-color-secondary-button-default, #fff);
+			color: var(--wp--custom--dswp--typography-color-button-secondary-default, #036);
+			border: 1px solid var(--wp--custom--dswp--surface-color-border-dark, #ddd);
 
 			&:hover {
-				background-color: #002952;
+				background-color: var(--wp--custom--dswp--surface-color-secondary-button-hover, #edebf9);
+				color: var(--wp--custom--dswp--typography-color-button-secondary-hover, #036);
 			}
 		}
 
-		/**
-         * Secondary Button Style
-         * Alternative button style for secondary actions
-         */
-		&--secondary {
-			background-color: #6c757d;
-			color: #fff;
-
-			&:hover {
-				background-color: #545b62;
-			}
-		}
-
-		/**
-         * Right Alignment Modifier
-         * Pushes button to the right of its container
-         */
 		&--right {
 			margin-left: auto;
 		}
 
-		/**
-         * Full-width Modifier
-         * Makes button span full width of container
-         */
 		&--below {
 			width: 100%;
 			margin-top: 10px;

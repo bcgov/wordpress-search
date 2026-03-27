@@ -154,7 +154,7 @@ class SearchBlockFunctionalityTest extends WP_UnitTestCase {
         $output = $this->render_search_block( array() );
 
         // Should have proper search role.
-        $this->assertStringContainsString( 'role="search-bar"', $output, 'Should have search role for screen readers' );
+        $this->assertStringContainsString( 'role="search"', $output, 'Should have search landmark role for screen readers' );
 
         // Should use semantic HTML5 search input.
         $this->assertStringContainsString( 'type="search"', $output, 'Should use search input type for better accessibility' );

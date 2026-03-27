@@ -7,6 +7,17 @@
   "category": "search",
   "icon": "search",
   "description": "A modular search-bar block that connects to the search-bar page template",
+  "styles": [
+    {
+      "name": "fill",
+      "label": "Fill",
+      "isDefault": true
+    },
+    {
+      "name": "outline",
+      "label": "Outline"
+    }
+  ],
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "viewStyle": "file:./view.css",
