@@ -4,6 +4,7 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
 import { useBlockProps } from '@wordpress/block-editor';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal Style Dependencies
@@ -15,14 +16,17 @@ import '../editor.scss';
  * Search Block Edit Component
  *
  * Renders the search-bar block interface in the WordPress block editor.
- * This is a static preview of how the search-bar block will appear on the frontend.
- * The form elements are intentionally disabled as they are for display purposes only.
+ * Fill vs outline follows core Button: block.json `styles` → `is-style-*` on the block wrapper.
  *
  * @return {import('react').ReactElement} The editor interface for the search-bar block
  */
 export default function Edit() {
-	// Get the block props which include the necessary editor attributes and classes
 	const blockProps = useBlockProps();
+	const blockClassName = blockProps.className ?? '';
+	const isOutline = /\bis-style-outline\b/.test( blockClassName );
+	const buttonModifierClass = isOutline
+		? 'dswp-search-bar__button--outline is-style-outline'
+		: 'dswp-search-bar__button--fill';
 
 	return (
 		<div { ...blockProps }>
@@ -65,6 +69,10 @@ export default function Edit() {
 							<button
 								type="button"
 								className="dswp-search-bar__clear-button"
+								aria-label={ __(
+									'Clear search',
+									'wordpress-search'
+								) }
 							>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -84,10 +92,10 @@ export default function Edit() {
 						</div>
 						<button
 							type="submit"
-							className="dswp-search-bar__button dswp-search-bar__button--primary"
+							className={ `dswp-search-bar__button wp-element-button wp-block-button__link ${ buttonModifierClass }` }
 							disabled
 						>
-							Search
+							{ __( 'Search', 'wordpress-search' ) }
 						</button>
 					</div>
 				</form>
