@@ -119,29 +119,10 @@
 	}
 
 	/**
-     * search-bar Button
-     * Submit: layout only for fill (globals via .wp-element-button). Outline uses BEM modifier on .dswp-search-bar__button — nest under that block, not under .wp-element-button, or SCSS turns &--outline into .wp-element-button--outline (wrong).
+     * search-bar Button alignment modifiers only.
+     * Visual styles come from WordPress global button classes.
      */
 	.dswp-search-bar__button {
-		&.wp-element-button {
-			padding: 12px 24px;
-			cursor: pointer;
-			font-weight: 500;
-			transition: all 0.2s ease;
-			white-space: nowrap;
-		}
-
-		&--outline.wp-element-button {
-			background-color: var(--wp--custom--dswp--surface-color-secondary-button-default, #fff);
-			color: var(--wp--custom--dswp--typography-color-button-secondary-default, #036);
-			border: 1px solid var(--wp--custom--dswp--surface-color-border-dark, #ddd);
-
-			&:hover {
-				background-color: var(--wp--custom--dswp--surface-color-secondary-button-hover, #edebf9);
-				color: var(--wp--custom--dswp--typography-color-button-secondary-hover, #036);
-			}
-		}
-
 		&--right {
 			margin-left: auto;
 		}

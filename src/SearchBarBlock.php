@@ -27,40 +27,22 @@ final class SearchBarBlock {
 	}
 
 	/**
-	 * Outline style from block.json `styles` (`is-style-outline` on className) or legacy `buttonStyle`.
+	 * Submit button classes.
 	 *
-	 * @param array $attributes Normalized attributes (see `normalized_attributes()`).
-	 */
-	private static function is_outline( array $attributes ): bool {
-		$class = isset( $attributes['className'] ) ? (string) $attributes['className'] : '';
-		if ( '' !== $class && 1 === preg_match( '/\bis-style-outline\b/', $class ) ) {
-			return true;
-		}
-
-		return isset( $attributes['buttonStyle'] ) && 'outline' === $attributes['buttonStyle'];
-	}
-
-	/**
-	 * Submit button `class` value: align with core Button / Search patterns — `wp-block-button__link`,
-	 * `wp-element-button` (global `styles.elements.button`), BEM modifiers, optional `is-style-outline`.
+	 * Keep this aligned with core Button/Search classes so theme.json global styles
+	 * apply naturally.
 	 *
-	 * @param array $attributes Normalized attributes.
+	 * @param array $attributes Normalized attributes (unused; retained for call compatibility).
 	 */
 	public static function submit_button_class( array $attributes ): string {
-		$outline = self::is_outline( $attributes );
-		$extra   = $outline
-			? array( 'dswp-search-bar__button--outline', 'is-style-outline' )
-			: array( 'dswp-search-bar__button--fill' );
+		unset( $attributes );
 
 		return implode(
 			' ',
-			array_merge(
-				array(
-					'dswp-search-bar__button',
-					'wp-element-button',
-					'wp-block-button__link',
-				),
-				$extra
+			array(
+				'dswp-search-bar__button',
+				'wp-element-button',
+				'wp-block-button__link',
 			)
 		);
 	}

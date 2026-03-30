@@ -215,30 +215,8 @@ class SearchBlockRenderingTest extends WP_UnitTestCase {
         $this->assertStringContainsString( 'dswp-search-bar__button', $output, 'Should have button class' );
         $this->assertStringContainsString( 'wp-element-button', $output, 'Submit button should use wp-element-button for global styles.elements.button' );
         $this->assertStringContainsString( 'wp-block-button__link', $output, 'Submit button should include wp-block-button__link for block theme compatibility' );
-        $this->assertStringContainsString( 'dswp-search-bar__button--fill', $output, 'Should have fill (primary) button modifier class' );
-        $this->assertDoesNotMatchRegularExpression(
-            '/<button[^>]*type="submit"[^>]*class="[^"]*\bis-style-outline\b/',
-            $output,
-            'Fill submit should not use is-style-outline (only outline variation)'
-        );
         $this->assertStringContainsString( 'dswp-search-bar__clear-button', $output, 'Should have clear button class' );
         $this->assertStringContainsString( 'dswp-search-bar__search-icon', $output, 'Should have search icon class' );
-    }
-
-    /**
-     * Block style `outline` adds is-style-outline to className (core pattern).
-     */
-    public function test_search_block_outline_block_style_sets_button_modifier() {
-        $output = $this->render_search_block( array( 'className' => 'is-style-outline' ) );
-
-        $this->assertStringContainsString( 'is-style-outline', $output, 'Wrapper should include block style class' );
-        $this->assertStringContainsString( 'dswp-search-bar__button--outline', $output, 'Submit button should use outline modifier' );
-        $this->assertMatchesRegularExpression(
-            '/<button[^>]*type="submit"[^>]*class="[^"]*\bis-style-outline\b/',
-            $output,
-            'Submit button should repeat is-style-outline for theme selectors'
-        );
-        $this->assertStringNotContainsString( 'dswp-search-bar__button--fill', $output, 'Submit button should not use fill when outline is selected' );
     }
 
     /**

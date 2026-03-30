@@ -16,17 +16,11 @@ import '../editor.scss';
  * Search Block Edit Component
  *
  * Renders the search-bar block interface in the WordPress block editor.
- * Fill vs outline follows core Button: block.json `styles` → `is-style-*` on the block wrapper.
  *
  * @return {import('react').ReactElement} The editor interface for the search-bar block
  */
 export default function Edit() {
 	const blockProps = useBlockProps();
-	const blockClassName = blockProps.className ?? '';
-	const isOutline = /\bis-style-outline\b/.test( blockClassName );
-	const buttonModifierClass = isOutline
-		? 'dswp-search-bar__button--outline is-style-outline'
-		: 'dswp-search-bar__button--fill';
 
 	return (
 		<div { ...blockProps }>
@@ -92,7 +86,7 @@ export default function Edit() {
 						</div>
 						<button
 							type="submit"
-							className={ `dswp-search-bar__button wp-element-button wp-block-button__link ${ buttonModifierClass }` }
+							className="dswp-search-bar__button wp-element-button wp-block-button__link"
 							disabled
 						>
 							{ __( 'Search', 'wordpress-search' ) }
