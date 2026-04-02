@@ -78,22 +78,9 @@ $hidden_params = array_filter(
     ARRAY_FILTER_USE_KEY
 );
 
-if ( isset( $block ) && $block instanceof \WP_Block ) {
-	$wrapper_attributes = get_block_wrapper_attributes(
-		array(
-			'class' => 'wp-block-wordpress-search-taxonomy-filter',
-		),
-		$block
-	);
-} else {
-	$class_name         = isset( $attributes['className'] ) ? (string) $attributes['className'] : '';
-	$wrapper_classes    = trim( 'wp-block-wordpress-search-search-taxonomy-filter wp-block-wordpress-search-taxonomy-filter ' . $class_name );
-	$wrapper_attributes = 'class="' . esc_attr( preg_replace( '/\s+/', ' ', $wrapper_classes ) ) . '"';
-}
-
 ?>
 
-<div <?php echo wp_kses_post( $wrapper_attributes ); ?>>
+<div class="wp-block-wordpress-search-taxonomy-filter">
 <form class="taxonomy-filter-form" method="get">
     <div class="search-taxonomy-filter__container">
         <?php foreach ( $selected_taxonomies as $selected_taxonomy ) : ?>
