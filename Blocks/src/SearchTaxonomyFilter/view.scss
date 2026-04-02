@@ -10,8 +10,6 @@
 	}
 
 	.taxonomy-filter {
-		border: 1px solid #dadbdd;
-		border-radius: 0;
 		background: #fff;
 		overflow: hidden;
 		min-width: 11.875rem;
@@ -30,12 +28,15 @@
 		margin-bottom: 0;
 		padding-block: 0;
 		min-height: 2.69rem;
-		border-bottom: 1px solid #dadbdd;
-		border-radius: 0;
 
 		&:hover {
 			background: #f5f4f3;
 		}
+	}
+
+	// Prevent double border at section seams: only first header keeps top border.
+	.taxonomy-filter-section + .taxonomy-filter-section .dswp-border-frame {
+		border-top: 0;
 	}
 
 	.taxonomy-filter__label {
