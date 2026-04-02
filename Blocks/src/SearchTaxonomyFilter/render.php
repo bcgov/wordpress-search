@@ -141,9 +141,9 @@ $hidden_params = array_filter(
                     <?php echo esc_html__( 'No terms available in this taxonomy.', 'wordpress-search' ); ?>
                 </div>
             <?php else : ?>
-                <div class="taxonomy-filter-section" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
-                    <fieldset class="taxonomy-filter dswp-border-frame">
-                        <div class="taxonomy-filter__header dswp-border-divider" onclick="toggleTaxonomyFilter(this)">
+                <div class="taxonomy-filter-section dswp-border-frame" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
+                    <fieldset class="taxonomy-filter">
+                        <div class="taxonomy-filter__header" onclick="toggleTaxonomyFilter(this)">
                             <legend class="taxonomy-filter__label"><?php echo esc_html( $taxonomy_label ); ?></legend>
                             <div class="taxonomy-filter__toggle"></div>
                         </div>
