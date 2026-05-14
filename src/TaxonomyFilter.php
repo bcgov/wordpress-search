@@ -67,8 +67,7 @@ class TaxonomyFilter {
         $query_vars = $query->query_vars;
 
         // Get URL parameters safely using filter_input.
-        $post_type_param = filter_input( INPUT_GET, 'post_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-        $get_params      = filter_input_array( INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+        $get_params = filter_input_array( INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
         // Fallback for test environments where filter_input_array returns null.
         // Extract parameters from query_vars which WordPress populates from URL parameters.
@@ -76,28 +75,45 @@ class TaxonomyFilter {
             $get_params = $this->extract_params_from_query_vars( $query_vars );
         }
 
-        // Fallback for post_type in test environments.
-        if ( null === $post_type_param && isset( $query_vars['post_type'] ) ) {
-            $post_type_param = sanitize_text_field( $query_vars['post_type'] );
+        // post_type may be a string or array (e.g. post_type[]=page&post_type[]=post). Prefer query_vars.
+        $raw_post_type = $query->get( 'post_type' );
+        if ( ( null === $raw_post_type || '' === $raw_post_type ) && isset( $query_vars['post_type'] ) ) {
+            $raw_post_type = $query_vars['post_type'];
         }
 
-        // Handle post_type parameter from URL (takes priority over taxonomy-based post type detection).
-        if ( ! empty( $post_type_param ) ) {
-            $post_type_param = sanitize_key( $post_type_param );
-            // Validate that the post type exists and is public.
-            if ( post_type_exists( $post_type_param ) ) {
-                $post_type_obj = get_post_type_object( $post_type_param );
-                if ( $post_type_obj && $post_type_obj->public ) {
-                    // Set the post type filter - this ensures only the specified post type is shown.
-                    // When "page" is selected, only pages are shown (not documents).
-                    // When "document" is selected, only documents are shown (not pages).
-                    $query->set( 'post_type', $post_type_param );
-                }
-            }
-        }
+        $url_post_types = $this->validate_public_post_types_from_query( $raw_post_type );
 
         // Build taxonomy query from URL parameters.
         $tax_query = $this->process_taxonomy_parameters( $get_params ? $get_params : array(), array() );
+
+        $inferred_from_taxonomy = null;
+        if ( empty( $url_post_types ) && ! empty( $tax_query ) ) {
+            $current_post_type = $query->get( 'post_type' );
+            if ( empty( $current_post_type ) || 'post' === $current_post_type ) {
+                $inferred_from_taxonomy = $this->get_post_type_from_taxonomy_filters( $tax_query );
+            }
+        }
+
+        $effective_post_types = ! empty( $url_post_types )
+            ? $url_post_types
+            : ( $inferred_from_taxonomy ? array( $inferred_from_taxonomy ) : array() );
+
+        $allow = wordpress_search_restricted_post_types_from_search_template();
+        if ( $allow ) {
+            if ( empty( $effective_post_types ) ) {
+                $effective_post_types = $allow;
+            } else {
+                $isect                = array_values( array_intersect( $effective_post_types, $allow ) );
+                $effective_post_types = $isect ? $isect : $allow;
+            }
+        }
+
+        if ( ! empty( $effective_post_types ) ) {
+            $query->set(
+                'post_type',
+                count( $effective_post_types ) === 1 ? $effective_post_types[0] : $effective_post_types
+            );
+        }
 
         // If we have taxonomy filters, add them to the query.
         if ( ! empty( $tax_query ) ) {
@@ -112,21 +128,40 @@ class TaxonomyFilter {
             }
 
             $query->set( 'tax_query', $tax_query );
+        }
+    }
 
-            // Only determine post type from taxonomy if no explicit post_type parameter was set.
-            if ( empty( $post_type_param ) ) {
-                // Determine and set the correct post type based on the taxonomies being filtered.
-                $current_post_type = $query->get( 'post_type' );
-
-                if ( empty( $current_post_type ) || 'post' === $current_post_type ) {
-                    // Determine post type from the taxonomy.
-                    $target_post_type = $this->get_post_type_from_taxonomy_filters( $tax_query );
-                    if ( $target_post_type ) {
-                        $query->set( 'post_type', $target_post_type );
-                    }
+    /**
+     * Normalize and validate post_type query input (string or array) to public post types.
+     *
+     * @param mixed $raw Raw post_type from WP_Query (string, array, or empty).
+     * @return string[] List of valid public post type slugs.
+     */
+    private function validate_public_post_types_from_query( $raw ) {
+        $candidates = array();
+        if ( is_array( $raw ) ) {
+            foreach ( $raw as $slug ) {
+                $slug = sanitize_key( sanitize_text_field( (string) $slug ) );
+                if ( '' !== $slug ) {
+                    $candidates[] = $slug;
                 }
             }
+        } elseif ( is_string( $raw ) && '' !== $raw ) {
+            $candidates[] = sanitize_key( sanitize_text_field( $raw ) );
         }
+
+        $validated = array();
+        foreach ( $candidates as $slug ) {
+            if ( ! post_type_exists( $slug ) ) {
+                continue;
+            }
+            $post_type_obj = get_post_type_object( $slug );
+            if ( $post_type_obj && $post_type_obj->public ) {
+                $validated[] = $slug;
+            }
+        }
+
+        return array_values( array_unique( $validated ) );
     }
 
     /**
@@ -282,6 +317,7 @@ class TaxonomyFilter {
 
         return null;
     }
+
     /**
      * Extract URL parameters from query_vars for test environment compatibility.
      *
@@ -310,7 +346,12 @@ class TaxonomyFilter {
 
         // Extract post_type parameter.
         if ( isset( $query_vars['post_type'] ) ) {
-            $params['post_type'] = sanitize_text_field( $query_vars['post_type'] );
+            $pt = $query_vars['post_type'];
+            if ( is_array( $pt ) ) {
+                $params['post_type'] = array_map( 'sanitize_text_field', $pt );
+            } else {
+                $params['post_type'] = sanitize_text_field( (string) $pt );
+            }
         }
 
         return $params;
