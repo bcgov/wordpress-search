@@ -100,7 +100,7 @@ $all_active = empty( $req );
 			$all_class .= ' dswp-search-post-type-filter__button--active';
 		}
 		?>
-		<a href="<?php echo esc_url( $base ); ?>" class="<?php echo esc_attr( $all_class ); ?>">
+				<a href="<?php echo esc_url( $base ); ?>" class="<?php echo esc_attr( $all_class ); ?>">
 			<span class="dswp-search-post-type-filter__text"><?php echo esc_html( __( 'All', 'wordpress-search' ) ); ?></span>
 		</a>
 		<?php
@@ -112,9 +112,9 @@ $all_active = empty( $req );
 			}
 			$href = $is_active ? $base : add_query_arg( 'post_type', $post_type_item->name, $base );
 			?>
-			<a href="<?php echo esc_url( $href ); ?>" class="<?php echo esc_attr( $button_class ); ?>">
+					<a href="<?php echo esc_url( $href ); ?>" class="<?php echo esc_attr( $button_class ); ?>">
 				<span class="dswp-search-post-type-filter__text"><?php echo esc_html( $post_type_item->labels->name ); ?></span>
 			</a>
 		<?php endforeach; ?>
-	</div>
+			</div>
 </div>
