@@ -19,7 +19,121 @@
 
 // Ensure WordPress is loaded.
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
+}
+
+/**
+ * Resolve core template-part slug to plugin template part (matches render_block_data swap).
+ *
+ * @param string $slug Template part slug attribute.
+ * @param string $area Template part area attribute.
+ * @return string
+ */
+function wordpress_search_resolve_plugin_template_part_slug( $slug, $area ) {
+	$slug = (string) $slug;
+	$area = (string) $area;
+	if ( 'uncategorized' === $area ) {
+		if ( 'search-bar' === $slug ) {
+			return 'search-bar-with-search-plugin';
+		}
+		if ( 'search' === $slug ) {
+			return 'search-with-search-plugin';
+		}
+	}
+	return $slug;
+}
+
+/**
+ * Public post types restricted by Search Post Type Filter blocks in the search template (intersection if several).
+ *
+ * Themes/plugins may short-circuit parsing via {@see 'wordpress_search_restricted_post_types'} returning a non-empty array of slugs.
+ *
+ * @return string[]|null
+ */
+function wordpress_search_restricted_post_types_from_search_template() {
+	static $memo = false;
+	if ( false !== $memo ) {
+		return $memo;
+	}
+	$memo = null;
+
+	$forced = apply_filters( 'wordpress_search_restricted_post_types', null );
+	if ( is_array( $forced ) && $forced ) {
+		$out = array();
+		foreach ( $forced as $slug ) {
+			$slug = sanitize_key( (string) $slug );
+			$obj  = ( $slug && post_type_exists( $slug ) ) ? get_post_type_object( $slug ) : null;
+			if ( $obj && $obj->public ) {
+				$out[] = $slug;
+			}
+		}
+		if ( $out ) {
+			$memo = array_values( array_unique( $out ) );
+			return $memo;
+		}
+	}
+
+	if ( ! function_exists( 'get_block_template' ) || ! function_exists( 'parse_blocks' ) ) {
+		return $memo;
+	}
+
+	$stylesheet = get_stylesheet();
+	$template   = get_block_template( $stylesheet . '//search', 'wp_template' );
+	if ( ! $template || empty( $template->content ) ) {
+		return $memo;
+	}
+
+	$lists = array();
+	$walk  = function ( $blocks, $theme ) use ( &$walk, &$lists ) {
+		foreach ( $blocks as $b ) {
+			$n = $b['blockName'] ?? '';
+			if ( 'wordpress-search/search-post-type-filter' === $n ) {
+				$sel = $b['attrs']['selectedPostTypes'] ?? array();
+				if ( is_array( $sel ) && $sel ) {
+					$ok = array();
+					foreach ( $sel as $slug ) {
+						$slug = sanitize_key( (string) $slug );
+						$obj  = ( $slug && post_type_exists( $slug ) ) ? get_post_type_object( $slug ) : null;
+						if ( $obj && $obj->public ) {
+							$ok[] = $slug;
+						}
+					}
+					if ( $ok ) {
+						$lists[] = $ok;
+					}
+				}
+			} elseif ( 'core/template-part' === $n ) {
+				$slug = wordpress_search_resolve_plugin_template_part_slug(
+					(string) ( $b['attrs']['slug'] ?? '' ),
+					(string) ( $b['attrs']['area'] ?? '' )
+				);
+				$th   = (string) ( $b['attrs']['theme'] ?? $theme );
+				if ( $slug ) {
+					$part = get_block_template( $th . '//' . $slug, 'wp_template_part' );
+					if ( $part && ! empty( $part->content ) ) {
+						$walk( parse_blocks( $part->content ), $th );
+					}
+				}
+			}
+			if ( ! empty( $b['innerBlocks'] ) && is_array( $b['innerBlocks'] ) ) {
+				$walk( $b['innerBlocks'], $theme );
+			}
+		}
+	};
+	$walk( parse_blocks( $template->content ), $stylesheet );
+
+	if ( ! $lists ) {
+		return $memo;
+	}
+	$acc = array_shift( $lists );
+	foreach ( $lists as $next ) {
+		$acc = array_values( array_intersect( $acc, $next ) );
+		if ( ! $acc ) {
+			return $memo;
+		}
+	}
+	$memo = array_values( array_unique( $acc ) );
+	return $memo;
 }
 
 // Autoload classes using Composer.
@@ -111,17 +225,12 @@ add_filter(
 		if ( 'core/template-part' !== ( $parsed_block['blockName'] ?? '' ) ) {
 			return $parsed_block;
 		}
-		$attrs = $parsed_block['attrs'] ?? [];
+		$attrs = $parsed_block['attrs'] ?? array();
 		$slug  = $attrs['slug'] ?? '';
 		$area  = $attrs['area'] ?? '';
-		if ( 'uncategorized' !== $area ) {
-			return $parsed_block;
-		}
-		if ( 'search-bar' === $slug ) {
-			$parsed_block['attrs']['slug'] = 'search-bar-with-search-plugin';
-		}
-		if ( 'search' === $slug ) {
-			$parsed_block['attrs']['slug'] = 'search-with-search-plugin';
+		$new   = wordpress_search_resolve_plugin_template_part_slug( $slug, $area );
+		if ( $new !== (string) $slug ) {
+			$parsed_block['attrs']['slug'] = $new;
 		}
 		return $parsed_block;
 	},

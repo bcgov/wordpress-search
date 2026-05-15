@@ -45,6 +45,20 @@ abstract class BlockUnitTestCase extends \WP_UnitTestCase {
     }
 
     /**
+     * Strip leading tabs/spaces per line so snapshot tests ignore formatter-driven indent drift.
+     *
+     * @param string $html Markup string.
+     * @return string
+     */
+    protected function normalize_block_snapshot_markup( string $html ): string {
+        $lines = explode( "\n", $html );
+        foreach ( $lines as $i => $line ) {
+            $lines[ $i ] = ltrim( $line, " \t" );
+        }
+        return trim( implode( "\n", $lines ), "\n" );
+    }
+
+    /**
      * Asserts that the HTML output of a block render function and a given snapshot are equal.
      *
      * @param string $expected_snapshot_filename The filename of a file in the Block's __snapshots__ directory.
@@ -54,6 +68,9 @@ abstract class BlockUnitTestCase extends \WP_UnitTestCase {
     public function assert_equals_snapshot( string $expected_snapshot_filename, string $actual ) {
         // phpcs:ignore
         $expected = file_get_contents( dirname( __DIR__, 2 ) . '/tests/php/Blocks/' . $this->block_class . '/__snapshots__/' . $expected_snapshot_filename );
-        $this->assertEquals( $expected, $actual );
+        $this->assertEquals(
+            $this->normalize_block_snapshot_markup( $expected ),
+            $this->normalize_block_snapshot_markup( $actual )
+        );
     }
 }

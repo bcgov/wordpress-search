@@ -382,6 +382,31 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
     }
 
     /**
+     * Test post_type from URL is applied when WP_Query has no post_type (common on search).
+     */
+    public function test_post_type_from_get_parameter_on_search() {
+        $_GET['post_type'] = 'page';
+
+        global $wp_query;
+        $original_wp_query = $wp_query;
+
+        $query = new WP_Query();
+        $query->init();
+        $wp_query             = $query;
+        $query->is_admin      = false;
+        $query->is_main_query = true;
+        $query->is_search     = true;
+        $query->set( 's', '' );
+
+        $this->taxonomy_filter->handle_taxonomy_filtering( $query );
+
+        $this->assertEquals( 'page', $query->get( 'post_type' ), 'post_type=page in the URL should limit search to pages' );
+
+        unset( $_GET['post_type'] );
+        $wp_query = $original_wp_query;
+    }
+
+    /**
      * Test post type determination from taxonomy filters
      *
      * What this tests:
