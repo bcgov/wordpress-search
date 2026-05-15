@@ -76,20 +76,14 @@ foreach ( $all_post_types_raw as $post_type_slug => $post_type_data ) {
 
 /**
  * Filter post types based on block settings.
- * If no post types are selected, show all available post types.
+ * When none are selected, do not render the block on the frontend.
  *
  * @var WP_Post_Type[] Array of post type objects to display.
  */
 $post_types = [];
-if ( empty( $selected_post_types ) ) {
-    // If no post types are selected, show all public post types.
-    $post_types = $all_post_types;
-} else {
-    // Filter to only include selected post types.
-    foreach ( $selected_post_types as $selected_slug ) {
-        if ( isset( $all_post_types[ $selected_slug ] ) ) {
-            $post_types[ $selected_slug ] = $all_post_types[ $selected_slug ];
-        }
+foreach ( $selected_post_types as $selected_slug ) {
+    if ( isset( $all_post_types[ $selected_slug ] ) ) {
+        $post_types[ $selected_slug ] = $all_post_types[ $selected_slug ];
     }
 }
 
