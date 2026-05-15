@@ -75,13 +75,8 @@ class TaxonomyFilter {
             $get_params = $this->extract_params_from_query_vars( $query_vars );
         }
 
-        // post_type may be a string or array (e.g. post_type[]=page&post_type[]=post). Prefer query_vars.
-        $raw_post_type = $query->get( 'post_type' );
-        if ( ( null === $raw_post_type || '' === $raw_post_type ) && isset( $query_vars['post_type'] ) ) {
-            $raw_post_type = $query_vars['post_type'];
-        }
-
-        $url_post_types = $this->validate_public_post_types_from_query( $raw_post_type );
+        // post_type from the URL (?post_type=page). WP_Query often omits this on search, so read $_GET first.
+        $url_post_types = $this->get_post_types_from_request( $query, $get_params ? $get_params : array() );
 
         // Build taxonomy query from URL parameters.
         $tax_query = $this->process_taxonomy_parameters( $get_params ? $get_params : array(), array() );
@@ -129,6 +124,37 @@ class TaxonomyFilter {
 
             $query->set( 'tax_query', $tax_query );
         }
+    }
+
+    /**
+     * Resolve post_type slugs from the request (URL) and query vars.
+     *
+     * Search queries do not always copy ?post_type= into WP_Query; the filter block uses that param.
+     *
+     * @param \WP_Query $query      The WordPress query object.
+     * @param array     $get_params Sanitized GET params from filter_input_array, or extracted query_vars.
+     * @return string[] List of valid public post type slugs.
+     */
+    private function get_post_types_from_request( $query, array $get_params ) {
+        $raw = null;
+        if ( isset( $get_params['post_type'] ) && '' !== $get_params['post_type'] ) {
+            $raw = $get_params['post_type'];
+        } elseif ( isset( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $raw = wp_unslash( $_GET['post_type'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        }
+
+        $from_url = $this->validate_public_post_types_from_query( $raw );
+        if ( ! empty( $from_url ) ) {
+            return $from_url;
+        }
+
+        $query_vars    = $query->query_vars;
+        $raw_post_type = $query->get( 'post_type' );
+        if ( ( null === $raw_post_type || '' === $raw_post_type ) && isset( $query_vars['post_type'] ) ) {
+            $raw_post_type = $query_vars['post_type'];
+        }
+
+        return $this->validate_public_post_types_from_query( $raw_post_type );
     }
 
     /**
