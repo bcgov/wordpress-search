@@ -407,6 +407,31 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
     }
 
     /**
+     * Query blocks that do not inherit the main query must receive URL post_type filters.
+     */
+    public function test_query_loop_block_query_vars_post_type_from_url() {
+        $_GET['post_type'] = 'page';
+        $_GET['s']          = 'test';
+
+        global $wp_query;
+        $wp_query->is_search = true;
+
+        $query = array(
+            'perPage'  => 10,
+            'postType' => 'post',
+            'inherit'  => false,
+        );
+
+        $filtered = $this->taxonomy_filter->filter_query_loop_block_query_vars( $query, null, 1 );
+
+        $this->assertSame( 'page', $filtered['post_type'] );
+        $this->assertArrayNotHasKey( 'postType', $filtered );
+
+        unset( $_GET['post_type'], $_GET['s'] );
+        $wp_query->is_search = false;
+    }
+
+    /**
      * Test post type determination from taxonomy filters
      *
      * What this tests:
