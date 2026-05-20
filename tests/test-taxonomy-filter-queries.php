@@ -411,7 +411,7 @@ class TaxonomyQueryFilteringTest extends WP_UnitTestCase {
      */
     public function test_query_loop_block_query_vars_post_type_from_url() {
         $_GET['post_type'] = 'page';
-        $_GET['s']          = 'test';
+        $_GET['s']         = 'test';
 
         global $wp_query;
         $wp_query->is_search = true;

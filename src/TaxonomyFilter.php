@@ -87,9 +87,9 @@ class TaxonomyFilter {
      * Block themes often use a Query block with postType "post" while the result count block
      * reads the main query (which pre_get_posts already filtered). This keeps them in sync.
      *
-     * @param array    $query Query vars for the Query block.
+     * @param array     $query Query vars for the Query block.
      * @param \WP_Block $block Block instance.
-     * @param int      $page  Current page.
+     * @param int       $page  Current page.
      * @return array Modified query vars.
      */
     public function filter_query_loop_block_query_vars( $query, $block, $page ) {
