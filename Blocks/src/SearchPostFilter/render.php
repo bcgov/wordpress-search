@@ -36,13 +36,9 @@ foreach ( get_post_types( array(), 'objects' ) as $slug => $obj ) {
 }
 
 $post_types = array();
-if ( empty( $selected_post_types ) ) {
-	$post_types = $all_post_types;
-} else {
-	foreach ( $selected_post_types as $slug ) {
-		if ( isset( $all_post_types[ $slug ] ) ) {
-			$post_types[ $slug ] = $all_post_types[ $slug ];
-		}
+foreach ( $selected_post_types as $slug ) {
+	if ( isset( $all_post_types[ $slug ] ) ) {
+		$post_types[ $slug ] = $all_post_types[ $slug ];
 	}
 }
 

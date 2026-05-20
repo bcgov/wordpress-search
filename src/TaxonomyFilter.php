@@ -24,6 +24,7 @@ class TaxonomyFilter {
     public function init() {
         add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
         add_action( 'pre_get_posts', array( $this, 'handle_taxonomy_filtering' ) );
+        add_filter( 'query_loop_block_query_vars', array( $this, 'filter_query_loop_block_query_vars' ), 10, 3 );
     }
 
     /**
@@ -63,28 +64,100 @@ class TaxonomyFilter {
             return;
         }
 
-        // Get all query variables.
         $query_vars = $query->query_vars;
 
-        // Get URL parameters safely using filter_input.
         $get_params = filter_input_array( INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
-        // Fallback for test environments where filter_input_array returns null.
-        // Extract parameters from query_vars which WordPress populates from URL parameters.
         if ( null === $get_params ) {
             $get_params = $this->extract_params_from_query_vars( $query_vars );
         }
 
-        // post_type from the URL (?post_type=page). WP_Query often omits this on search, so read $_GET first.
-        $url_post_types = $this->get_post_types_from_request( $query, $get_params ? $get_params : array() );
+        $filters = $this->resolve_search_query_filters(
+            $get_params ? $get_params : array(),
+            $query_vars,
+            $query->get( 'post_type' )
+        );
 
-        // Build taxonomy query from URL parameters.
-        $tax_query = $this->process_taxonomy_parameters( $get_params ? $get_params : array(), array() );
+        $this->apply_search_filters_to_wp_query( $query, $filters );
+    }
+
+    /**
+     * Apply search URL filters to core/query blocks that do not inherit the main query.
+     *
+     * Block themes often use a Query block with postType "post" while the result count block
+     * reads the main query (which pre_get_posts already filtered). This keeps them in sync.
+     *
+     * @param array     $query Query vars for the Query block.
+     * @param \WP_Block $block Block instance.
+     * @param int       $page  Current page.
+     * @return array Modified query vars.
+     */
+    public function filter_query_loop_block_query_vars( $query, $block, $page ) {
+        unset( $block, $page );
+
+        if ( is_admin() || ! is_search() ) {
+            return $query;
+        }
+
+        if ( ! empty( $query['inherit'] ) ) {
+            return $query;
+        }
+
+        $get_params = filter_input_array( INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+        if ( null === $get_params ) {
+            $get_params = array();
+        }
+
+        $filters = $this->resolve_search_query_filters(
+            $get_params,
+            $query,
+            isset( $query['postType'] ) ? $query['postType'] : null
+        );
+
+        if ( ! empty( $filters['post_type'] ) ) {
+            $query['post_type'] = $filters['post_type'];
+            unset( $query['postType'] );
+        }
+
+        if ( ! empty( $filters['tax_query'] ) ) {
+            $existing = isset( $query['tax_query'] ) && is_array( $query['tax_query'] ) ? $query['tax_query'] : array();
+            if ( ! empty( $existing ) ) {
+                $query['tax_query'] = array_merge(
+                    array( 'relation' => 'AND' ),
+                    $existing,
+                    $filters['tax_query']
+                );
+            } else {
+                $query['tax_query'] = $filters['tax_query'];
+            }
+        }
+
+        if ( empty( $query['s'] ) ) {
+            $search_query = get_search_query( false );
+            if ( $search_query ) {
+                $query['s'] = $search_query;
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Resolve post_type and tax_query for the current search request.
+     *
+     * @param array      $get_params          Sanitized request parameters.
+     * @param array      $context_query_vars  Query vars from WP_Query or the Query block.
+     * @param mixed|null $context_post_type   post_type from the query context.
+     * @return array{post_type: string|string[]|null, tax_query: array}
+     */
+    private function resolve_search_query_filters( array $get_params, array $context_query_vars, $context_post_type = null ) {
+        $url_post_types = $this->get_post_types_from_request_data( $get_params, $context_post_type, $context_query_vars );
+
+        $tax_query = $this->process_taxonomy_parameters( $get_params, array() );
 
         $inferred_from_taxonomy = null;
         if ( empty( $url_post_types ) && ! empty( $tax_query ) ) {
-            $current_post_type = $query->get( 'post_type' );
-            if ( empty( $current_post_type ) || 'post' === $current_post_type ) {
+            if ( empty( $context_post_type ) || 'post' === $context_post_type ) {
                 $inferred_from_taxonomy = $this->get_post_type_from_taxonomy_filters( $tax_query );
             }
         }
@@ -98,32 +171,50 @@ class TaxonomyFilter {
             if ( empty( $effective_post_types ) ) {
                 $effective_post_types = $allow;
             } else {
-                $isect                = array_values( array_intersect( $effective_post_types, $allow ) );
-                $effective_post_types = $isect ? $isect : $allow;
+                $effective_post_types = array_values( array_intersect( $effective_post_types, $allow ) );
+                if ( empty( $effective_post_types ) ) {
+                    $effective_post_types = $allow;
+                }
             }
         }
 
+        $post_type = null;
         if ( ! empty( $effective_post_types ) ) {
-            $query->set(
-                'post_type',
-                count( $effective_post_types ) === 1 ? $effective_post_types[0] : $effective_post_types
+            $post_type = count( $effective_post_types ) === 1 ? $effective_post_types[0] : $effective_post_types;
+        }
+
+        return array(
+            'post_type' => $post_type,
+            'tax_query' => $tax_query,
+        );
+    }
+
+    /**
+     * Apply resolved filters to a WP_Query instance.
+     *
+     * @param \WP_Query $query   Query object.
+     * @param array     $filters Filters from resolve_search_query_filters().
+     */
+    private function apply_search_filters_to_wp_query( $query, array $filters ) {
+        if ( ! empty( $filters['post_type'] ) ) {
+            $query->set( 'post_type', $filters['post_type'] );
+        }
+
+        if ( empty( $filters['tax_query'] ) ) {
+            return;
+        }
+
+        $tax_query = $filters['tax_query'];
+        $existing  = $query->get( 'tax_query' );
+        if ( ! empty( $existing ) ) {
+            $tax_query = array_merge(
+                array( 'relation' => 'AND' ),
+                $existing,
+                $tax_query
             );
         }
 
-        // If we have taxonomy filters, add them to the query.
-        if ( ! empty( $tax_query ) ) {
-            // If there's an existing tax query, merge with it.
-            $existing_tax_query = $query->get( 'tax_query' );
-            if ( ! empty( $existing_tax_query ) ) {
-                $tax_query = array_merge(
-                    array( 'relation' => 'AND' ),
-                    $existing_tax_query,
-                    $tax_query
-                );
-            }
-
-            $query->set( 'tax_query', $tax_query );
-        }
+        $query->set( 'tax_query', $tax_query );
     }
 
     /**
@@ -136,6 +227,24 @@ class TaxonomyFilter {
      * @return string[] List of valid public post type slugs.
      */
     private function get_post_types_from_request( $query, array $get_params ) {
+        $query_vars    = $query->query_vars;
+        $raw_post_type = $query->get( 'post_type' );
+        if ( ( null === $raw_post_type || '' === $raw_post_type ) && isset( $query_vars['post_type'] ) ) {
+            $raw_post_type = $query_vars['post_type'];
+        }
+
+        return $this->get_post_types_from_request_data( $get_params, $raw_post_type, $query_vars );
+    }
+
+    /**
+     * Resolve post_type slugs from the request and optional query context.
+     *
+     * @param array      $get_params          Sanitized GET params.
+     * @param mixed|null $context_post_type   post_type from WP_Query or Query block context.
+     * @param array      $context_query_vars  Additional query vars for fallback.
+     * @return string[] List of valid public post type slugs.
+     */
+    private function get_post_types_from_request_data( array $get_params, $context_post_type = null, array $context_query_vars = array() ) {
         $raw = null;
         if ( isset( $get_params['post_type'] ) && '' !== $get_params['post_type'] ) {
             $raw = $get_params['post_type'];
@@ -148,13 +257,11 @@ class TaxonomyFilter {
             return $from_url;
         }
 
-        $query_vars    = $query->query_vars;
-        $raw_post_type = $query->get( 'post_type' );
-        if ( ( null === $raw_post_type || '' === $raw_post_type ) && isset( $query_vars['post_type'] ) ) {
-            $raw_post_type = $query_vars['post_type'];
+        if ( ( null === $context_post_type || '' === $context_post_type ) && isset( $context_query_vars['post_type'] ) ) {
+            $context_post_type = $context_query_vars['post_type'];
         }
 
-        return $this->validate_public_post_types_from_query( $raw_post_type );
+        return $this->validate_public_post_types_from_query( $context_post_type );
     }
 
     /**

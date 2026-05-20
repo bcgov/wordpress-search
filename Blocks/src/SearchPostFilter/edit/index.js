@@ -9,7 +9,7 @@ import {
 import { useSelect } from '@wordpress/data';
 import { PanelBody, CheckboxControl, Placeholder } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import '../editor.scss';
 
 /**
@@ -73,19 +73,24 @@ export default function Edit( { attributes, setAttributes } ) {
 	}, [] );
 
 	/**
-	 * Set all available post types as selected by default when the block is first inserted
-	 * This ensures the UI accurately reflects the frontend behavior where all post types are shown
-	 * when none are explicitly selected
+	 * Select all post types once when the block is first inserted.
+	 * Do not re-select when the editor intentionally clears every checkbox.
 	 */
+	const didInitializeDefaults = useRef( false );
+
 	useEffect( () => {
-		// Only set default values if no post types are currently selected
-		// and we have available post types to select from
-		if ( selectedPostTypes.length === 0 && postTypes.length > 0 ) {
+		if ( didInitializeDefaults.current || postTypes.length === 0 ) {
+			return;
+		}
+
+		if ( selectedPostTypes.length === 0 ) {
 			const allPostTypeSlugs = postTypes.map(
 				( postType ) => postType.slug
 			);
 			setAttributes( { selectedPostTypes: allPostTypeSlugs } );
 		}
+
+		didInitializeDefaults.current = true;
 	}, [ postTypes, selectedPostTypes.length, setAttributes ] );
 
 	/**
@@ -110,21 +115,9 @@ export default function Edit( { attributes, setAttributes } ) {
 		setAttributes( { selectedPostTypes: updatedPostTypes } );
 	};
 
-	/**
-	 * Get filtered post types based on selection
-	 * If no post types are selected, show all available post types
-	 */
-	const getDisplayedPostTypes = () => {
-		if ( selectedPostTypes.length === 0 ) {
-			return postTypes;
-		}
-
-		return postTypes.filter( ( postType ) =>
-			selectedPostTypes.includes( postType.slug )
-		);
-	};
-
-	const displayedPostTypes = getDisplayedPostTypes();
+	const displayedPostTypes = postTypes.filter( ( postType ) =>
+		selectedPostTypes.includes( postType.slug )
+	);
 
 	return (
 		<>
@@ -138,7 +131,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				>
 					<p>
 						{ __(
-							'Select which post types to show in the filter. All post types are selected by default.',
+							'Select which post types to show in the filter. If none are selected, the filter is hidden on the frontend.',
 							'wordpress-search'
 						) }
 					</p>
@@ -238,7 +231,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						>
 							{ selectedPostTypes.length === 0
 								? __(
-										'Select post types in the block settings sidebar →',
+										'No post types selected. This filter will not appear on the frontend.',
 										'wordpress-search'
 								  )
 								: __(
