@@ -1,8 +1,11 @@
 .wp-block-wordpress-search-taxonomy-filter {
 	padding: 1rem;
-	background: #fff;
-	border: 1px solid #ddd;
-	border-radius: 6px;
+	background-color:
+ var(--wp--custom--dswp--surface-color-background-teritiary, var(--wp--custom--bcew--surface--color--background--primary));
+	border:
+ 1px solid var(--wp--custom--dswp--surface--color--border--default, var(--wp--custom--bcew--surface--color--border--default));
+	border-radius:
+ var(--wp--custom--bcew--layout--border-radius--default, 6px);
 }
 
 .taxonomy-filter-preview {
@@ -15,23 +18,28 @@
 			margin: 0 0 0.5rem 0;
 			font-size: 16px;
 			font-weight: 600;
-			color: #1e1e1e;
+			color:
+ var(--wp--custom--dswp--typography-color-primary, var(--wp--custom--bcew--typography--color--primary));
 		}
 	}
 
 	&__description {
 		margin: 0;
 		font-size: 14px;
-		color: #757575;
+		color:
+ var(--wp--custom--dswp--typography-color-secondary, var(--wp--custom--bcew--typography--color--secondary));
 		font-style: italic;
 	}
 
 	&__content {
 		margin-top: 1rem;
 		padding: 1rem;
-		background: #f8f9fa;
-		border: 1px dashed #c3c4c7;
-		border-radius: 4px;
+		background-color:
+ var(--wp--custom--dswp--surface-color-background-primary, var(--wp--custom--bcew--surface--color--background--secondary));
+		border:
+ 1px dashed var(--wp--custom--dswp--surface-color-border-medium, var(--wp--custom--bcew--surface--color--border--medium));
+		border-radius:
+ var(--wp--custom--bcew--layout--border-radius--default, 4px);
 	}
 
 	&__placeholder {
@@ -39,13 +47,13 @@
 
 		p {
 			margin: 0;
-			color: #757575;
+			color:
+ var(--wp--custom--dswp--typography-color-secondary, var(--wp--custom--bcew--typography--color--secondary));
 			font-size: 14px;
 		}
 	}
 }
 
-// Style the InspectorControls panel
 .block-editor-block-inspector {
 
 	.components-panel__body-title {
@@ -56,6 +64,7 @@
 		margin-top: 8px;
 		font-size: 12px;
 		font-style: italic;
-		color: #757575;
+		color:
+ var(--wp--custom--dswp--typography-color-secondary, var(--wp--custom--bcew--typography--color--secondary));
 	}
 }
