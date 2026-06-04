@@ -47,10 +47,10 @@
       "vendor/bin/phpcs -ps --standard=./vendor/bcgov/wordpress-utils/wordpress.xml  --exclude=Generic.Commenting.Todo --colors --ignore=**/build/** ./"
     ]
   },
-  "platform": {
+  "config": {
+    "platform": {
       "php": "7.4"
     },
-  "config": {
     "allow-plugins": {
       "composer/installers": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
