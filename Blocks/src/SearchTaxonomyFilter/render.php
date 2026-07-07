@@ -80,8 +80,8 @@ $hidden_params = array_filter(
 
 ?>
 
-<form class="taxonomy-filter-form" method="get">
 <div class="wp-block-wordpress-search-taxonomy-filter">
+<form class="taxonomy-filter-form" method="get">
     <div class="search-taxonomy-filter__container">
         <?php foreach ( $selected_taxonomies as $selected_taxonomy ) : ?>
             <?php
@@ -141,7 +141,7 @@ $hidden_params = array_filter(
                     <?php echo esc_html__( 'No terms available in this taxonomy.', 'wordpress-search' ); ?>
                 </div>
             <?php else : ?>
-                <div class="taxonomy-filter-section" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
+                <div class="taxonomy-filter-section dswp-border-frame" data-taxonomy="<?php echo esc_attr( $actual_taxonomy ); ?>">
                     <fieldset class="taxonomy-filter">
                         <div class="taxonomy-filter__header" onclick="toggleTaxonomyFilter(this)">
                             <legend class="taxonomy-filter__label"><?php echo esc_html( $taxonomy_label ); ?></legend>
@@ -209,5 +209,5 @@ $hidden_params = array_filter(
             </button>
         </div>
     </div>
+</form>
 </div>
-</form> 

@@ -69,7 +69,7 @@ class SearchBlockRenderingTest extends WP_UnitTestCase {
         $this->assertStringContainsString( 'dswp-search-bar__container', $output, 'Should contain search bar container' );
 
         // Should contain form element with proper attributes.
-        $this->assertStringContainsString( '<form role="search-bar" method="get"', $output, 'Should contain form element with GET method' );
+        $this->assertStringContainsString( '<form role="search" method="get"', $output, 'Should contain form element with GET method' );
         $this->assertStringContainsString( 'class="dswp-search-bar__form"', $output, 'Should contain form class' );
 
         // Should contain input field with proper attributes.
@@ -85,6 +85,7 @@ class SearchBlockRenderingTest extends WP_UnitTestCase {
 
         // Should contain clear button.
         $this->assertStringContainsString( 'dswp-search-bar__clear-button', $output, 'Should contain clear button' );
+        $this->assertStringContainsString( 'aria-label=', $output, 'Clear control should have an accessible name' );
 
         // Should contain search icon.
         $this->assertStringContainsString( 'dswp-search-bar__search-icon', $output, 'Should contain search icon' );
@@ -181,7 +182,7 @@ class SearchBlockRenderingTest extends WP_UnitTestCase {
         $output = $this->render_search_block( array() );
 
         // Should contain proper ARIA role.
-        $this->assertStringContainsString( 'role="search-bar"', $output, 'Should contain search role for accessibility' );
+        $this->assertStringContainsString( 'role="search"', $output, 'Form should use the search landmark role' );
 
         // Should contain proper input attributes.
         $this->assertStringContainsString( 'type="search"', $output, 'Should use search input type for better accessibility' );
@@ -212,7 +213,8 @@ class SearchBlockRenderingTest extends WP_UnitTestCase {
         $this->assertStringContainsString( 'dswp-search-bar__input-wrapper', $output, 'Should have input wrapper class' );
         $this->assertStringContainsString( 'dswp-search-bar__input', $output, 'Should have input class' );
         $this->assertStringContainsString( 'dswp-search-bar__button', $output, 'Should have button class' );
-        $this->assertStringContainsString( 'dswp-search-bar__button--primary', $output, 'Should have primary button modifier class' );
+        $this->assertStringContainsString( 'wp-element-button', $output, 'Submit button should use wp-element-button for global styles.elements.button' );
+        $this->assertStringContainsString( 'wp-block-button__link', $output, 'Submit button should include wp-block-button__link for block theme compatibility' );
         $this->assertStringContainsString( 'dswp-search-bar__clear-button', $output, 'Should have clear button class' );
         $this->assertStringContainsString( 'dswp-search-bar__search-icon', $output, 'Should have search icon class' );
     }
